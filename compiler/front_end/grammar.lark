@@ -9,7 +9,8 @@
 # TOP-LEVEL STRUCTURES
 
 translation_unit:           // entire source file
-declaration:                // top-level decleration (var, fun, class)
+declaration:         IDENTIFIER EQUAL statement SEMICOLON // top-level decleration (var, fun, class)
+           |        TYPE IDENTIFIER LPAREN expression RPAREN SEMICOLON
 function_definition         // a complete fuction
 external_definition         // either a declaration or function def
 
@@ -56,12 +57,11 @@ labeled_statement           // label: stmt;
 
 # IDENTIFIERS & LITERALS
 #############################
-IDENTIFIER:     /[a-zA-Z0-9_]*/
-INT_LITERAL:    /\d+/
-STRING_LITERAL: /"[a-zA-Z0-9_]*"/
-BOOL_LITERAL:   "TRUE"
-            |   "FALSE"
-NULLPTR:        "NULL"
+IDENTIFIER:     /[a-zA-Z_][a-zA-Z0-9_]*/
+INT_LITERAL:    /0|[1-9][0-9]*/
+STRING_LITERAL: /(\\.|[^"\\]*)"/
+BOOL_LITERAL:   "TRUE" | "FALSE"
+NULLPTR:        "nullptr"
 
 # KEYWORDS (CONTROL-FLOW)
 ##############################
@@ -140,11 +140,11 @@ NEQ:        "!="
 AND:        "&&"
 OR:         "||"
 NOT:        "!"
-BIT_AND:    ""
-BIT_OR:     ""
-BIT_NOT:    ""
-SHL:        ""
-SHR:        ""
+BIT_AND:    "&"
+BIT_OR:     "|"
+BIT_NOT:    "~"
+SHL:        "<<"
+SHR:        ">>"
 
 INCREMENT:  "++"
 DECREMENT:  "--"
