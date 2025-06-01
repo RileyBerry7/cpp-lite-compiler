@@ -56,120 +56,122 @@ labeled_statement           // label: stmt;
 
 # IDENTIFIERS & LITERALS
 #############################
-IDENTIFIER: /[a-zA-Z0-9_]*/
-INT_LITERAL: /\d+/
-STRING_LITERAL:
-BOOL_LITERAL:
-NULLPTR:
+IDENTIFIER:     /[a-zA-Z0-9_]*/
+INT_LITERAL:    /\d+/
+STRING_LITERAL: /"[a-zA-Z0-9_]*"/
+BOOL_LITERAL:   "TRUE"
+            |   "FALSE"
+NULLPTR:        "NULL"
 
 # KEYWORDS (CONTROL-FLOW)
 ##############################
-IF:
-ELSE:
-SWITCH:
-CASE:
-DEFAULT:
-FOR:
-WHILE:
-DO:
-BREAK:
-CONTINUE:
-RETURN:
-GOTO:
+IF:         "if"
+ELSE:       "else"
+SWITCH:     "switch"
+CASE:       "case"
+DEFAULT:    "default"
+FOR:        "for"
+WHILE:      "while"
+DO:         "do"
+BREAK:      "break"
+CONTINUE:   "continue"
+RETURN:     "return"
+GOTO:       "goto"
 
 # KEYWORDS (TYPES)
 ######################
-INT:
-FLOAT:
-DOUBLE:
-CHAR:
-VOID:
-BOOL:
-AUTO:
-SIGNED:
-UNSIGNED:
-SHORT:
-LONG:
-CONST:
-VOLATILE:
-STATIC:
-EXTERN:
-MUTABLE:
-REGISTER:
-INLINE:
-VIRTUAL:
-EXPLICIT:
+INT:        "int"
+FLOAT:      "float"
+DOUBLE:     "double"
+CHAR:       "char"
+VOID:       "void"
+BOOL:       "bool"
+AUTO:       "auto"
+SIGNED:     "signed"
+UNSIGNED:   "unsigned"
+SHORT:      "short"
+LONG:       "long"
+CONST:      "const"
+VOLATILE:   "volatile"
+STATIC:     "static"
+EXTERN:     "extern"
+MUTABLE:    "mutable"
+REGISTER:   "register"
+INLINE:     "inline"
+VIRTUAL:    "virtual"
+EXPLICIT:   "explicit"
 
 # KEYWORDS (CLASS, STRUCT, NAMESPACE)
 #########################################
-CLASS:
-STRUCT:
-UNION:
-ENUM:
-NAMESPACE:
-TEMPLATE:
-TYPEDEF:
-USING:
-FRIEND;
-PUBLIC:
-PRIVATE:
-PROTECTED:
+CLASS:      "class"
+STRUCT:     "struct"
+UNION:      "untion"
+ENUM:       "enum"
+NAMESPACE:  "namespace"
+TEMPLATE:   "template"
+TYPEDEF:    "tyepdef"
+USING:      "using"
+FRIEND;     "freind"
+PUBLIC:     "public"
+PRIVATE:    "private"
+PROTECTED:  "protected"
 
 # OPERATORS
 ###############
-PLUS:
-MINUS:
-STAR:
-SLASH:
-PERCENT:
-EQUAL:
-PLUS_EQUAL:
-MINUS_EQUAL:
-STAR_EQUAL:
-SLASH_EQUAL:
-PERCENT_EQUAL:
+PLUS:       "+"
+MINUS:      "-"
+STAR:       "*"
+SLASH:      "/"
+PERCENT:    "%"
+EQUAL:      "="
+PLUS_EQUAL:    "+="
+MINUS_EQUAL:   "-="
+STAR_EQUAL:    "*="
+SLASH_EQUAL:   "/="
+PERCENT_EQUAL: "%="
 
-LT:
-GT:
-LE:
-EQ:
-NEQ:
+LT:         "<"
+GT:         ">"
+LE:         "<="
+GE:         ">+"
+EQ:         "=="
+NEQ:        "!="
 
-AND:
-OR:
-NOT:
-BIT_AND:
-BIT_OR:
-BIT_NOT:
-SHL:
-SHR:
+AND:        "&&"
+OR:         "||"
+NOT:        "!"
+BIT_AND:    ""
+BIT_OR:     ""
+BIT_NOT:    ""
+SHL:        ""
+SHR:        ""
 
-INCREMENT:
-DECREMENT:
-ARROW:
-DOT:
-TERNARY:
-COLON:
+INCREMENT:  "++"
+DECREMENT:  "--"
+ARROW:      "->"
+DOT:        "."
+TERNARY:    "?"
+COLON:      ":"
 
 # PUCTUATION
 ###############
-LPAREN:
-RPAREN:
-LBRACE:
-RBRACE:
-LBRACKET:
-RBRACKET:
-SEMICOLON:
-COMMA:
-DOT:
-ELLIPSIS:
+LPAREN:     "("
+RPAREN:     ")"
+LBRACE:     "{"
+RBRACE:     "}"
+LBRACKET:   "["
+RBRACKET:   "]"
+SEMICOLON:  ";"
+COMMA:      ","
+DOT:        "."
+ELLIPSIS:   "~"
 
 # MISCELLANEOUS
 ##################
-HASH:
-INCLUDE:
-DEFINE:
-USING_NAMESPACE
+HASH:            "#"
+INCLUDE:         "include"
+DEFINE:          "define"
+USING_NAMESPACE: "using"
 
 ##########################################################################################################
 # RULESET
