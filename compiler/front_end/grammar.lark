@@ -1,0 +1,64 @@
+# grammar.lark
+
+# ENTRY POINT
+?start: translation_unit
+
+
+##########################################################################################################
+# TOP-LEVEL STRUCTURES
+
+translation_unit:
+declaration:
+function_definition
+external_definition
+
+##########################################################################################################
+# DECLARATIONS & TYPES
+
+declaration_specifiers
+typer_specifiers
+init_declarator
+parameter_declaration
+declarator
+initializer
+
+##########################################################################################################
+# EXPRESSIONS
+
+primary_expression
+postfix_expression
+unary_expression
+multiplicative_expression
+additive_expression
+relational_expression
+equality_expression
+logical_and_expression
+logical_or_expression
+assignment_expression
+expression
+conditional_expression
+
+##########################################################################################################
+# STATEMENTS
+
+statement
+compound_statement
+expression_statement
+declaration_statement
+selection_statement
+interation_statement
+jump_statement
+labeled_statement
+
+##########################################################################################################
+# TERMINALS
+
+IDENTIFIER: /[a-zA-Z0-9_]*/
+INT: /\d+/
+
+##########################################################################################################
+# RULESET
+%ignore /\s+/
+%import common.NUMBER
+%import common.WS
+%ignore WS
