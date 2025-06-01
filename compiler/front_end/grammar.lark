@@ -1,60 +1,175 @@
-# grammar.lark
+// grammar.lark
 
-# ENTRY POINT
+#################
+#  ENTRY POINT  #
 ?start: translation_unit
 
 
 ##########################################################################################################
 # TOP-LEVEL STRUCTURES
 
-translation_unit:
-declaration:
-function_definition
-external_definition
+translation_unit:           // entire source file
+declaration:                // top-level decleration (var, fun, class)
+function_definition         // a complete fuction
+external_definition         // either a declaration or function def
 
 ##########################################################################################################
 # DECLARATIONS & TYPES
 
-declaration_specifiers
-typer_specifiers
-init_declarator
-parameter_declaration
-declarator
-initializer
+declaration_specifiers      // types & storage qualifiers (int, static)
+type_specifiers             // (int, float, char... etc])
+init_declarator             // (x, x = 5, arr[10], *ptr)
+parameter_declaration       // parameter in fuction declaration
+declarator                  // variable or fuction declaration
+initializer                 // the "= value" or "{...}" part
 
 ##########################################################################################################
 # EXPRESSIONS
 
-primary_expression
-postfix_expression
-unary_expression
-multiplicative_expression
-additive_expression
-relational_expression
-equality_expression
-logical_and_expression
-logical_or_expression
-assignment_expression
-expression
-conditional_expression
+primary_expression          // identifiers, literals, grouped expression
+postfix_expression          // calls, array access, x++, x.y
+unary_expression            // -x, *p, &x, !x
+multiplicative_expression   // x * y, x / y
+additive_expression         // x + y, x - y
+relational_expression       // x < y, x >= y
+equality_expression         // x == y, x != y
+logical_and_expression      // x && y
+logical_or_expression       // 'x
+assignment_expression       // x = y + 1, x += 1
+expression                  // one or more comma-seperatied expressions
+conditional_expression      // ternary: cond ? x : y
 
 ##########################################################################################################
 # STATEMENTS
 
-statement
-compound_statement
-expression_statement
-declaration_statement
-selection_statement
-interation_statement
-jump_statement
-labeled_statement
+statement                   // generic statement
+compound_statement          //  "{ stmt; stmt; }" block
+expression_statement        // expr;
+declaration_statement       // int x = 0;
+selection_statement         // if, if-else, switch
+interation_statement        // for, while, do-while
+jump_statement              // return, break, continue, goto
+labeled_statement           // label: stmt;
 
 ##########################################################################################################
 # TERMINALS
 
+# IDENTIFIERS & LITERALS
+#############################
 IDENTIFIER: /[a-zA-Z0-9_]*/
-INT: /\d+/
+INT_LITERAL: /\d+/
+STRING_LITERAL:
+BOOL_LITERAL:
+NULLPTR:
+
+# KEYWORDS (CONTROL-FLOW)
+##############################
+IF:
+ELSE:
+SWITCH:
+CASE:
+DEFAULT:
+FOR:
+WHILE:
+DO:
+BREAK:
+CONTINUE:
+RETURN:
+GOTO:
+
+# KEYWORDS (TYPES)
+######################
+INT:
+FLOAT:
+DOUBLE:
+CHAR:
+VOID:
+BOOL:
+AUTO:
+SIGNED:
+UNSIGNED:
+SHORT:
+LONG:
+CONST:
+VOLATILE:
+STATIC:
+EXTERN:
+MUTABLE:
+REGISTER:
+INLINE:
+VIRTUAL:
+EXPLICIT:
+
+# KEYWORDS (CLASS, STRUCT, NAMESPACE)
+#########################################
+CLASS:
+STRUCT:
+UNION:
+ENUM:
+NAMESPACE:
+TEMPLATE:
+TYPEDEF:
+USING:
+FRIEND;
+PUBLIC:
+PRIVATE:
+PROTECTED:
+
+# OPERATORS
+###############
+PLUS:
+MINUS:
+STAR:
+SLASH:
+PERCENT:
+EQUAL:
+PLUS_EQUAL:
+MINUS_EQUAL:
+STAR_EQUAL:
+SLASH_EQUAL:
+PERCENT_EQUAL:
+
+LT:
+GT:
+LE:
+EQ:
+NEQ:
+
+AND:
+OR:
+NOT:
+BIT_AND:
+BIT_OR:
+BIT_NOT:
+SHL:
+SHR:
+
+INCREMENT:
+DECREMENT:
+ARROW:
+DOT:
+TERNARY:
+COLON:
+
+# PUCTUATION
+###############
+LPAREN:
+RPAREN:
+LBRACE:
+RBRACE:
+LBRACKET:
+RBRACKET:
+SEMICOLON:
+COMMA:
+DOT:
+ELLIPSIS:
+
+# MISCELLANEOUS
+##################
+HASH:
+INCLUDE:
+DEFINE:
+USING_NAMESPACE
 
 ##########################################################################################################
 # RULESET
