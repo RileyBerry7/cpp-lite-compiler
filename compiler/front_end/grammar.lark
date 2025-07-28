@@ -19,50 +19,42 @@ expression: INT_LITERAL
 
 
 ##########################################################################################################
-# TOP-LEVEL STRUCTURES
-
-translation_unit:           // entire source file
-declaration:         IDENTIFIER EQUAL statement SEMICOLON // top-level decleration (var, fun, class)
-           |        TYPE IDENTIFIER LPAREN expression RPAREN SEMICOLON
-function_definition         // a complete fuction
-
-##########################################################################################################
 # DECLARATIONS & TYPES
 
-declaration_specifiers      // types & storage qualifiers (int, static)
-type_specifiers             // (int, float, char... etc])
-init_declarator             // (x, x = 5, arr[10], *ptr)
-parameter_declaration       // parameter in fuction declaration
-declarator                  // variable or fuction declaration
-initializer                 // the "= value" or "{...}" part
+//declaration_specifiers      // types & storage qualifiers (int, static)
+//type_specifiers             // (int, float, char... etc])
+//init_declarator             // (x, x = 5, arr[10], *ptr)
+//parameter_declaration       // parameter in fuction declaration
+//declarator                  // variable or fuction declaration
+//initializer                 // the "= value" or "{...}" part
 
 ##########################################################################################################
 # EXPRESSIONS
 
-primary_expression          // identifiers, literals, grouped expression
-postfix_expression          // calls, array access, x++, x.y
-unary_expression            // -x, *p, &x, !x
-multiplicative_expression   // x * y, x / y
-additive_expression         // x + y, x - y
-relational_expression       // x < y, x >= y
-equality_expression         // x == y, x != y
-logical_and_expression      // x && y
-logical_or_expression       // 'x
-assignment_expression       // x = y + 1, x += 1
-expression                  // one or more comma-seperatied expressions
-conditional_expression      // ternary: cond ? x : y
+//primary_expression          // identifiers, literals, grouped expression
+//postfix_expression          // calls, array access, x++, x.y
+//unary_expression            // -x, *p, &x, !x
+//multiplicative_expression   // x * y, x / y
+//additive_expression         // x + y, x - y
+//relational_expression       // x < y, x >= y
+//equality_expression         // x == y, x != y
+//logical_and_expression      // x && y
+//logical_or_expression       // 'x
+//assignment_expression       // x = y + 1, x += 1
+//expression                  // one or more comma-seperatied expressions
+//conditional_expression      // ternary: cond ? x : y
 
 ##########################################################################################################
 # STATEMENTS
 
-statement                   // generic statement
-compound_statement          //  "{ stmt; stmt; }" block
-expression_statement        // expr;
-declaration       // int x = 0;
-selection_statement         // if, if-else, switch
-interation_statement        // for, while, do-while
-jump_statement              // return, break, continue, goto
-labeled_statement           // label: stmt;
+//statement                   // generic statement
+//compound_statement          //  "{ stmt; stmt; }" block
+//expression_statement        // expr;
+//declaration                 // int x = 0;
+//selection_statement         // if, if-else, switch
+//interation_statement        // for, while, do-while
+//jump_statement              // return, break, continue, goto
+//labeled_statement           // label: stmt;
 
 ##########################################################################################################
 # TERMINALS
@@ -117,13 +109,13 @@ EXPLICIT:   "explicit"
 #########################################
 CLASS:      "class"
 STRUCT:     "struct"
-UNION:      "untion"
+UNION:      "union"
 ENUM:       "enum"
 NAMESPACE:  "namespace"
 TEMPLATE:   "template"
 TYPEDEF:    "tyepdef"
 USING:      "using"
-FRIEND;     "freind"
+FRIEND:     "friend"
 PUBLIC:     "public"
 PRIVATE:    "private"
 PROTECTED:  "protected"
@@ -161,7 +153,6 @@ SHR:        ">>"
 INCREMENT:  "++"
 DECREMENT:  "--"
 ARROW:      "->"
-DOT:        "."
 TERNARY:    "?"
 COLON:      ":"
 
@@ -187,7 +178,5 @@ USING_NAMESPACE: "using"
 
 ##########################################################################################################
 # RULESET
-%ignore /\s+/
-%import common.NUMBER
-%import common.WS
 %ignore WS
+%import common.WS
