@@ -4,6 +4,19 @@
 #  ENTRY POINT  #
 ?start: translation_unit
 
+translation_unit: function_definition
+function_definition: type_specifier declarator compound_statement
+
+type_specifier: INT | VOID
+
+declarator: IDENTIFIER parameter_list
+parameter_list: LPAREN RPAREN
+
+compound_statement: LBRACE statement* RBRACE
+statement: jump_statement
+jump_statement: RETURN expression SEMICOLON
+expression: INT_LITERAL
+
 
 ##########################################################################################################
 # TOP-LEVEL STRUCTURES
@@ -12,7 +25,6 @@ translation_unit:           // entire source file
 declaration:         IDENTIFIER EQUAL statement SEMICOLON // top-level decleration (var, fun, class)
            |        TYPE IDENTIFIER LPAREN expression RPAREN SEMICOLON
 function_definition         // a complete fuction
-external_definition         // either a declaration or function def
 
 ##########################################################################################################
 # DECLARATIONS & TYPES
@@ -46,7 +58,7 @@ conditional_expression      // ternary: cond ? x : y
 statement                   // generic statement
 compound_statement          //  "{ stmt; stmt; }" block
 expression_statement        // expr;
-declaration_statement       // int x = 0;
+declaration       // int x = 0;
 selection_statement         // if, if-else, switch
 interation_statement        // for, while, do-while
 jump_statement              // return, break, continue, goto
