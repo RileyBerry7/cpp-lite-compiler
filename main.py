@@ -15,9 +15,13 @@ def main():
     # Create Parser
     parser = Lark(grammar, start="start")
 
-    code = "int main() {return 0;}"
+    # Create CST with Test Code
+    code = "int main(int var1, char var2) {return 0;}"
     tree = parser.parse(code)
     print(tree.pretty())
+
+
+
 
 if __name__ == '__main__':
     main()

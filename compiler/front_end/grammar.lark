@@ -7,10 +7,11 @@
 translation_unit: function_definition
 function_definition: type_specifier declarator compound_statement
 
-type_specifier: INT | VOID
+type_specifier: INT | VOID | FLOAT | BOOL | CHAR
 
 declarator: IDENTIFIER parameter_list
-parameter_list: LPAREN RPAREN
+parameter_list: LPAREN [parameter(COMMA parameter)*] RPAREN
+parameter: type_specifier IDENTIFIER
 
 compound_statement: LBRACE statement* RBRACE
 statement: jump_statement
