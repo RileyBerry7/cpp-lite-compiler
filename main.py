@@ -2,6 +2,8 @@
 from lark import Lark
 from pathlib import Path
 
+from compiler.front_end import cst_to_ast
+
 GRAMMAR_PATH = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
 
 def main():
