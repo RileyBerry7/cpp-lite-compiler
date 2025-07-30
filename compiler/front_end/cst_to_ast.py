@@ -6,9 +6,11 @@ from lark import Lark, Transformer, Tree
 
 def dfs(node: Union[Token, Tree]):
     """"  """
+
     if isinstance(node, Token):
         print("Token:", node.id)
         return
+
     elif isinstance(node, Tree):
         print("Node:", node.data)
         for child in node.children:
@@ -20,6 +22,7 @@ def transform(cst: Tree) -> Tree:
     dfs(cst)
     print("\033[91mRecursive_DFS: Finished\033[0m")
     return cst
+
 
     # Transformers work bottom-up (or
     # depth-first), starting with visiting the leaves and working
@@ -51,4 +54,39 @@ def transform(cst: Tree) -> Tree:
     # Transformer - Recursively transforms the tree. This is the one you probably want.
     # Transformer_InPlace - Non-recursive. Changes the tree in-place instead of returning new instances
     # Transformer_InPlaceRecursive - Recursive. Changes the tree in-place instead of returning new instances
+
+class CSTtoAST(Transformer):
+    """
+    A Transformer that converts a CST to an AST.
+    """
+
+    def __default__(self, data, children, meta):
+        """
+        Default method for nodes that do not have a specific transformation defined.
+        """
+        return Tree(data, children, meta)
+
+    def translation_unit(self, children):
+        return Tree("program", children)
+
+    def function_definition(self, children):
+
+        new_children = list()
+        new_children.append(children[0]) # return_type
+        new_children.append(children[1].children[0]) # function_name
+        new_children.append(children[1].children[1]) # function_parameters
+        new_children.append(children[2])             # function_body
+
+        return Tree("func_def", new_children)
+
+    def type_specifier(self, children):
+        return children[0]
+
+    # def declarator(self, children):
+    #     return children
+
+    # def parameter_list(self, children):
+    #     return Tree("params", [c for c in children if isinstance(c, Tree) and c.data == "parameter"])
+    #
+
 

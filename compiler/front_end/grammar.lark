@@ -10,12 +10,12 @@ function_definition: type_specifier declarator compound_statement
 type_specifier: INT | VOID | FLOAT | BOOL | CHAR
 
 declarator: IDENTIFIER parameter_list
-parameter_list: LPAREN [parameter(COMMA parameter)*] RPAREN
+parameter_list: _LPAREN [parameter(_COMMA parameter)*] _RPAREN
 parameter: type_specifier IDENTIFIER
 
-compound_statement: LBRACE statement* RBRACE
+compound_statement: _LBRACE statement* _RBRACE
 statement: jump_statement
-jump_statement: RETURN expression SEMICOLON
+jump_statement: RETURN expression _SEMICOLON
 expression: INT_LITERAL
 
 
@@ -159,16 +159,16 @@ COLON:      ":"
 
 # PUCTUATION
 ###############
-LPAREN:     "("
-RPAREN:     ")"
-LBRACE:     "{"
-RBRACE:     "}"
-LBRACKET:   "["
-RBRACKET:   "]"
-SEMICOLON:  ";"
-COMMA:      ","
-DOT:        "."
-ELLIPSIS:   "~"
+_LPAREN:     "("
+_RPAREN:     ")"
+_LBRACE:     "{"
+_RBRACE:     "}"
+_LBRACKET:   "["
+_RBRACKET:   "]"
+_SEMICOLON:  ";"
+_COMMA:      ","
+_DOT:        "."
+_ELLIPSIS:   "~"
 
 # MISCELLANEOUS
 ##################
