@@ -1,13 +1,25 @@
 # cst_to_ast.py
-import lark
+from multiprocessing.managers import Token
+from typing import Union
 
-def transform(cst: lark.Tree) -> lark.Tree:
+from lark import Lark, Transformer, Tree
+
+def dfs(node: Union[Token, Tree]):
+    """"  """
+    if isinstance(node, Token):
+        print("Token:", node.id)
+        return
+    elif isinstance(node, Tree):
+        print("Node:", node.data)
+        for child in node.children:
+            dfs(child)
+
+def transform(cst: Tree) -> Tree:
 
     # Use Recursion to traverse the list
-    start = cst
-    while cst.children is None:
-
-        lark.Transformer
+    dfs(cst)
+    print("\033[91mRecursive_DFS: Finished\033[0m")
+    return cst
 
     # Transformers work bottom-up (or
     # depth-first), starting with visiting the leaves and working

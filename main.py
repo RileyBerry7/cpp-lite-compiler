@@ -22,6 +22,8 @@ def main():
     tree = parser.parse(code)
     print(tree.pretty())
 
+    tree = cst_to_ast.transform(tree)
+
 
 
 
