@@ -1,28 +1,8 @@
 # cst_to_ast.py
+
 from multiprocessing.managers import Token
 from typing import Union
-
 from lark import Lark, Transformer, Tree
-
-def dfs(node: Union[Token, Tree]):
-    """"  """
-
-    if isinstance(node, Token):
-        print("Token:", node.id)
-        return
-
-    elif isinstance(node, Tree):
-        print("Node:", node.data)
-        for child in node.children:
-            dfs(child)
-
-def transform(cst: Tree) -> Tree:
-
-    # Use Recursion to traverse the list
-    dfs(cst)
-    print("\033[91mRecursive_DFS: Finished\033[0m")
-    return cst
-
 
     # Transformers work bottom-up (or
     # depth-first), starting with visiting the leaves and working
@@ -55,6 +35,7 @@ def transform(cst: Tree) -> Tree:
     # Transformer_InPlace - Non-recursive. Changes the tree in-place instead of returning new instances
     # Transformer_InPlaceRecursive - Recursive. Changes the tree in-place instead of returning new instances
 
+########################################################################################################################
 class CSTtoAST(Transformer):
     """
     A Transformer that converts a CST to an AST.
@@ -66,9 +47,11 @@ class CSTtoAST(Transformer):
         """
         return Tree(data, children, meta)
 
+    ####################################################################################################################
     def translation_unit(self, children):
         return Tree("program", children)
 
+    ####################################################################################################################
     def function_definition(self, children):
 
         new_children = list()
@@ -79,6 +62,7 @@ class CSTtoAST(Transformer):
 
         return Tree("func_def", new_children)
 
+    ####################################################################################################################
     def type_specifier(self, children):
         return children[0]
 
