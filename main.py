@@ -3,6 +3,7 @@
 from lark import Lark
 from pathlib import Path
 from compiler.front_end.cst_to_ast import CSTtoAST
+from compiler.front_end.ast_to_dast import ASTtoDAST
 
 ####################
 # GlOBAL CONSTANTS #
@@ -40,11 +41,13 @@ def main():
     # Decorate -> D-AST
     print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
     print('\n')
+    decorator = ASTtoDAST()
+    dast = decorator.decorate(ast)
 
     ####################################################################################################################
     # Generate -> LLVM IR
     print("\033[34;51m[Generating...]\n[Displaying LLVM IR]\033[0m")
-
+    print(dast.pretty())
 
 ########################################################################################################################
 

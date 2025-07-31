@@ -19,6 +19,25 @@ class DecNode:
         # Semantic Details (for LLVM IR)
         self.decorations = {}
 
+    ####################################################################################################################
+    def pretty(self):
+        """ Returns a string visualizing the subtree rooted at this node."""
+
+        text_tree  = self.name + "\n"
+        text_tree += self.walk(self)
+
+        return text_tree
+
+    def walk(self, node):
+        if node.children:
+            for child in node.children:
+                text_tree  = self.name + "\n"
+                text_tree += self.walk(child)
+        else:
+            text_tree = ""
+
+        return text_tree
+
 ########################################################################################################################
 class ASTtoDAST:
     """
@@ -30,20 +49,23 @@ class ASTtoDAST:
         print()
 
     ####################################################################################################################
-    def decorate(self, cst: Tree) -> DecNode\
+    def decorate(self, ast: Tree) -> DecNode:
 
         # Create: D-AST Root
-        dast_root = DecNode(cst.data)
+        dast_root = DecNode(ast.data)
 
         # DFS Traversal
-        dfs(cst)
+        dast_root.children = self.dfs(ast)
 
         # Return: D-AST Root
         return  dast_root
 
 
     ####################################################################################################################
-    def dfs(self, node):
+    def dfs(self, node) -> [DecNode]:
+
+        # Initialize: Return Variable
+        decorated_children = []
 
         # Check If Token
         if isinstance(node, Token):
@@ -51,10 +73,19 @@ class ASTtoDAST:
 
         # Check If Lark Tree Node
         elif isinstance(node, Tree):
-
             # Loop through all children
             for child in node.children:
-                if isinstance(child, Tree) and child.data = "func_def":
+                if isinstance(child, Tree) and child.data == "func_def":
+
+                    # Build Child Node
+                    temp_node = DecNode(child.data)
+                    temp_node.children = self.dfs(child)
+
+                    # Push Child to List
+                    decorated_children.append(temp_node)
+
+        # Return: List of Decorated Nodes
+        return decorated_children
 
 # END: class ASTtoDAST:
 ########################################################################################################################
