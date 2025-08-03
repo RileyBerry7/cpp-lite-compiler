@@ -20,7 +20,7 @@ class IRGenerator:
     def generate_llvm_ir(self, decorated_ast: DecNode)
         """
         Starts the LLVM IR generation process. Uses recursively called IR generating methods to traverse the decorated 
-        AST using depth-first search (DFS), and emits the corresponding LLVM IR code as it goes.
+        AST using depth-first search (DFS), and emits the corresponding LLVM IR code as it goes.z
         """
 
         # Create: IR Module

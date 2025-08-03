@@ -24,17 +24,19 @@ class DecNode:
         """ Returns a string visualizing the subtree rooted at this node."""
 
         text_tree  = self.name + "\n"
-        text_tree += self.walk(self)
+        text_tree += self.walk(self, 1)
 
         return text_tree
 
-    def walk(self, node):
+    def walk(self, node, curr_indent):
+        text_tree = ""
+
         if node.children:
             for child in node.children:
-                text_tree  = self.name + "\n"
-                text_tree += self.walk(child)
-        else:
-            text_tree = ""
+                text_tree += curr_indent*"  " + child.name + "\n"
+                text_tree += self.walk(child, curr_indent+1)
+        # else:
+            # text_tree = (curr_indent+1)*"  " + "[No children]\n"
 
         return text_tree
 

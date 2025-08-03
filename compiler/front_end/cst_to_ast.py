@@ -4,6 +4,27 @@ from multiprocessing.managers import Token
 from typing import Union
 from lark import Lark, Transformer, Tree
 
+class node(name):
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+
+class func_def(node):
+class type_specifier(node):
+class param_list(node):
+class param(node):
+class stmt(node):
+class expr(node):
+
+class assign_stmt(stmt):
+class return_stmt(stmt):
+
+
+class literal_expr(expr):
+class id_expr(expr):
+class bin_expr(expr):
+class un_expr(expr):
+
     # Transformers work bottom-up (or
     # depth-first), starting with visiting the leaves and working
     # their way up until ending at the root of the tree
