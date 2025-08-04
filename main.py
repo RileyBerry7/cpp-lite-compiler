@@ -21,7 +21,12 @@ def main():
         grammar = f.read()
 
     # Test Code
-    code = "int main(char param1) {return 0;}"
+    code = ("int main(char param1){"
+            "if (1 < 2 )"
+            "{ int a = 10;"
+            "}"
+            "return 0;"
+            "}")
 
     ####################################################################################################################
     # Parse -> CST

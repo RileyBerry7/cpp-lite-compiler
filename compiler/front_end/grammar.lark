@@ -5,18 +5,32 @@
 ?start: translation_unit
 
 translation_unit: function_definition
-function_definition: type_specifier declarator compound_statement
+function_definition: type_specifier function_declarator compound_statement
 
 type_specifier: INT | VOID | FLOAT | BOOL | CHAR
 
-declarator: IDENTIFIER parameter_list
+declarator: function_declarator
+          | variable_declarator
+
+function_declarator: IDENTIFIER parameter_list
+variable_declarator: IDENTIFIER [EQUAL expression]
+
 parameter_list: _LPAREN [parameter(_COMMA parameter)*] _RPAREN
 parameter: type_specifier IDENTIFIER
 
 compound_statement: _LBRACE statement* _RBRACE
-statement: jump_statement
-jump_statement: RETURN expression _SEMICOLON
-expression: INT_LITERAL
+
+//statement: jump_statement
+//jump_statement: RETURN expression _SEMICOLON
+
+expression: literal_expression | relational_expression
+literal_expression: INT_LITERAL
+relational_expression: expression LT expression
+                      | expression GT expression
+                      | expression LE expression
+                      | expression GE expression
+                      | expression EQ expression
+                      | expression NEQ expression
 
 
 ##########################################################################################################
@@ -49,12 +63,32 @@ expression: INT_LITERAL
 # STATEMENTS
 
 //statement                   // generic statement
+statement: jump_statement | selection_statement | interaction_statement | variable_declaration
+
 //compound_statement          //  "{ stmt; stmt; }" block
 //expression_statement        // expr;
+
 //declaration                 // int x = 0;
+variable_declaration: type_specifier variable_declarator _SEMICOLON
+
 //selection_statement         // if, if-else, switch
+
+selection_statement: if_statement
+
+if_statement: IF _LPAREN expression _RPAREN compound_statement
+            | IF _LPAREN expression _RPAREN compound_statement ELSE compound_statement
+            | IF _LPAREN expression _RPAREN compound_statement ELSE if_statement compound_statement
+
 //interation_statement        // for, while, do-while
+interaction_statement: FOR _LPAREN expression _SEMICOLON expression _SEMICOLON expression _RPAREN compound_statement
+
+
+
+
 //jump_statement              // return, break, continue, goto
+jump_statement: return_statement
+return_statement: RETURN expression _SEMICOLON
+
 //labeled_statement           // label: stmt;
 
 ##########################################################################################################
