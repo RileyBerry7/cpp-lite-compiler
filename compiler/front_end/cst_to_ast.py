@@ -4,11 +4,54 @@ from multiprocessing.managers import Token
 from typing import Union
 from lark import Lark, Transformer, Tree
 
-# class node(name):
-#     def __init__(self, name):
-#         self.name = name
-#         self.children = []
-#
+########################################################################################################################
+class ASTNode:
+    """ Represents a node in the Abstract Syntax Tree (AST)."""
+
+    def __init__(self, node_name=None, children=None):
+
+        # Abstract Node Details
+        self.name = node_name
+        self.children = children if children is not None else []
+
+    ####################################################################################################################
+    def pretty(self):
+        """ Returns a string visualizing the subtree rooted at this node."""
+
+        text_tree  = self.name + "\n"
+        text_tree += self.walk(self, 1)
+
+        return text_tree
+
+    def walk(self, node, curr_indent):
+        text_tree = ""
+
+        if node.children:
+            for child in node.children:
+                text_tree += curr_indent*"  " + child.name + "\n"
+                text_tree += self.walk(child, curr_indent+1)
+        # else:
+            # text_tree = (curr_indent+1)*"  " + "[No children]\n"
+
+        return text_tree
+
+########################################################################################################################
+
+    # def IDENTIFIER(self, token):
+    #     return str(token)  # or just token.value
+
+# class external_declaration(ASTNode):
+#     def __init__(self, node_name="external_declaration"):
+#         super().__init__(node_name=node_name)
+
+
+class parameter(ASTNode):
+    def __init__(self, param_type, param_name):
+        super().__init__(node_name="parameter")
+        self.param_type = param_type
+        self.param_name = param_name
+
+
 # class func_def(node):
 # class type_specifier(node):
 # class param_list(node):
@@ -63,14 +106,24 @@ class CSTtoAST(Transformer):
     """
 
     def __default__(self, data, children, meta):
-        """
-        Default method for nodes that do not have a specific transformation defined.
-        """
-        return Tree(data, children, meta)
+        abstract_node = ASTNode(data, children)
+        return abstract_node
+
+    def __default_token__(self, token):
+        return ASTNode(token.value)
+    ####################################################################################################################
+    # def external_declaration(self, children):
+    #     extern_dec_node = external_declaration()
+    #     extern_dec_node.children = children
+    #     return extern_dec_node
+
+    def parameter(self, children):
+        parameter_node = parameter(children[0], children[1])
+        return parameter_node
 
     ####################################################################################################################
-    def translation_unit(self, children):
-        return Tree("program", children)
+    # def translation_unit(self, children):
+    #     return Tree("program", children)
 
     ####################################################################################################################
     # def function_definition(self, children):
@@ -84,8 +137,8 @@ class CSTtoAST(Transformer):
     #     return Tree("func_def", new_children)
 
     ####################################################################################################################
-    def type_specifier(self, children):
-        return children[0]
+    # def type_specifier(self, children):
+    #     return children[0]
 
     # def declarator(self, children):
     #     return children

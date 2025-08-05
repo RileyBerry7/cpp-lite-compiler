@@ -4,7 +4,7 @@
 #  ENTRY POINT  #
 ?start: translation_unit
 
-translation_unit: external_declaration*
+?translation_unit: external_declaration*
 
 external_declaration: function_definition
                     | function_declaration
@@ -34,7 +34,7 @@ function_definition:  declaration_specifier_list declarator compound_statement
 init_declarator:  declarator
                |  declarator EQUAL initializer
 
-initializer: expression
+?initializer: expression
 
 declarator: pointer? direct_declarator
 
@@ -42,7 +42,7 @@ pointer: STAR pointer? | BIT_AND | BIT_AND BIT_AND
 
 direct_declarator: IDENTIFIER declarator_suffix*
 
-declarator_suffix: array_suffix
+?declarator_suffix: array_suffix
                  | function_suffix
 
 array_suffix:    _LBRACKET constant_expression _RBRACKET
@@ -56,9 +56,9 @@ function_suffix: _LPAREN parameter_list _RPAREN
 parameter:  type_specifier IDENTIFIER
          |  ELLIPSIS
 
-declaration_specifier_list: declaration_specifiers+
+?declaration_specifier_list: declaration_specifiers+
 
-declaration_specifiers: storage_class_specifier
+?declaration_specifiers: storage_class_specifier
                       | type_specifier
                       | type_qualifier
                       | function_specifier
@@ -72,8 +72,8 @@ storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
 type_qualifier: CONST | VOLATILE | RESTRICT
 
 
-type_specifier: simple_type_specifier
-              | elaborated_type_specifier
+?type_specifier: simple_type_specifier
+               | elaborated_type_specifier
 
 simple_type_specifier:     VOID | CHAR | INT | FLOAT | DOUBLE | BOOL | IDENTIFIER
 elaborated_type_specifier: CLASS IDENTIFIER | STRUCT IDENTIFIER | ENUM IDENTIFIER
@@ -144,7 +144,7 @@ compound_assignment_expression: identifier_expression PLUS_EQUAL    expression _
 
 compound_statement: _LBRACE statement* _RBRACE
 
-statement: jump_statement | selection_statement | iteration_statement | variable_declaration
+?statement: jump_statement | selection_statement | iteration_statement | variable_declaration
 
 expression_statement: expression _SEMICOLON
 
@@ -157,7 +157,7 @@ if_statement: IF _LPAREN expression _RPAREN compound_statement
 
 iteration_statement: FOR _LPAREN expression _SEMICOLON expression _SEMICOLON expression _RPAREN compound_statement
 
-jump_statement: return_statement | break_statement | continue_statement | goto_statement
+?jump_statement: return_statement | break_statement | continue_statement | goto_statement
 return_statement: RETURN expression _SEMICOLON
 break_statement: BREAK _SEMICOLON
 continue_statement: CONTINUE _SEMICOLON
