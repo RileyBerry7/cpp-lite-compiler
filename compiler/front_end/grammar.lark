@@ -4,33 +4,25 @@
 #  ENTRY POINT  #
 ?start: translation_unit
 
-?translation_unit: external_declaration*
+translation_unit: external_declaration*
 
 external_declaration: function_definition
-                    | function_declaration
-                    | variable_declaration
-//                    | type_declaration
-//                    | template_declaration
-//                    | static_assert_declaration
+                    | declaration
 
-//type_declaration: class_definition
-//                | struct_definition
-//                | enum_definition
-//                | typedef_declaration
-//                | using_declaration
-//
-
-##########################################################################################################
-# FUNCTIONS
-
-function_declaration: declaration_specifier_list declarator _SEMICOLON
-function_definition:  declaration_specifier_list declarator compound_statement
-
-// class_definition: CLASS IDENTIFIER [_COLON ]
+//                    | linkage_specification
+//                    | namespace_definition
+//                    | empty_declaration
+//                    | attribute_declaration
 
 ########################################################################################################################
 # DECLARATORS
 
+function_definition:  declaration_specifier_list declarator compound_statement
+
+declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
+
+
+initializer_declarator_list: init_declarator ( _COMMA init_declarator )* _COMMA?
 init_declarator:  declarator
                |  declarator EQUAL initializer
 
@@ -40,9 +32,12 @@ declarator: pointer? direct_declarator
 
 pointer: STAR pointer? | BIT_AND | BIT_AND BIT_AND
 
-direct_declarator: IDENTIFIER declarator_suffix*
+direct_declarator: IDENTIFIER
+                 | _LPAREN declarator _RPAREN              // parentheses for grouping
+                 | direct_declarator array_suffix
+                 | direct_declarator function_suffix
 
-?declarator_suffix: array_suffix
+declarator_suffix: array_suffix
                  | function_suffix
 
 array_suffix:    _LBRACKET constant_expression _RBRACKET
@@ -51,21 +46,21 @@ function_suffix: _LPAREN parameter_list _RPAREN
 ########################################################################################################################
 # DECLARATOR SPECIFIERS
 
-?parameter_list: (parameter (_COMMA parameter)*)?
+parameter_list: (parameter (_COMMA parameter)*)?
 
 parameter:  type_specifier IDENTIFIER
          |  ELLIPSIS
 
-?declaration_specifier_list: declaration_specifiers+
+declaration_specifier_list: declaration_specifiers+
 
 ?declaration_specifiers: storage_class_specifier
-                      | type_specifier
-                      | type_qualifier
-                      | function_specifier
-                      | FRIEND
-                      | TYPEDEF
-                      | INLINE
-                      | CONSTEXPR
+                       | type_specifier
+                       | type_qualifier
+                       | function_specifier
+                       | FRIEND
+                       | TYPEDEF
+                       | INLINE
+                       | CONSTEXPR
 
 storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
 
@@ -80,22 +75,9 @@ elaborated_type_specifier: CLASS IDENTIFIER | STRUCT IDENTIFIER | ENUM IDENTIFIE
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT
 
-########################################################################################################################
-# DECLARATIONS
-
-variable_declaration: declaration
-
-declaration: declaration_specifier_list init_declarator_list _SEMICOLON
-
-init_declarator_list:   init_declarator
-                    |   init_declarator _COMMA init_declarator
-
 ##########################################################################################################
 # EXPRESSIONS
 
-constant_expression: expression
-
-?expression: literal_expression | identifier_expression | binary_expression | compound_assignment_expression
 
 //postfix_expression          // calls, array access, x++, x.y
 //unary_expression            // -x, *p, &x, !x
@@ -104,54 +86,71 @@ constant_expression: expression
 //expression                  // one or more comma-seperatied expressions
 //conditional_expression      // ternary: cond ? x : y
 
+constant_expression: expression
 
-literal_expression: INT_LITERAL
-                  | FLOAT_LITERAL
-                  | CHAR_LITERAL
-                  | BOOL_LITERAL
-                  | STRING_LITERAL
+########################################################################################################################
 
-identifier_expression: IDENTIFIER
-
-binary_expression: additive_expression | multiplicative_expression | relational_expression | equality_expression
-
-additive_expression: expression PLUS expression
-                   | expression MINUS expression
-
-multiplicative_expression: expression STAR expression
-                         | expression SLASH expression
-                         | expression PERCENT expression
-
-equality_expression: expression EQ expression
-                   | expression NEQ expression
-
-relational_expression: expression LT expression
-                      | expression GT expression
-                      | expression LE expression
-                      | expression GE expression
-                      | expression EQ expression
-                      | expression NEQ expression
+# top-level expressions
+#####################################################################
+?expression: logic_or
+           | IDENTIFIER assign_op expression   -> assignment
 
 
-compound_assignment_expression: identifier_expression PLUS_EQUAL    expression _SEMICOLON
-                              | identifier_expression MINUS_EQUAL   expression _SEMICOLON
-                              | identifier_expression STAR_EQUAL    expression _SEMICOLON
-                              | identifier_expression SLASH_EQUAL   expression _SEMICOLON
-                              | identifier_expression PERCENT_EQUAL expression _SEMICOLON
+# All the boolean/arithmetic precedence levels:
+###############################################
+
+?logic_or: logic_or OR logic_and      -> or
+         | logic_and
+
+?logic_and: logic_and AND equality     -> and
+          | equality
+
+?equality: equality (EQ | NEQ) relational  -> eq
+         | relational
+
+?relational: relational (LT | GT | LE | GE) sum  -> rel_expr
+           | sum
+
+?sum: sum (PLUS | MINUS) product         -> add
+    | product
+
+?product: product (STAR | SLASH | PERCENT) atom
+        | atom
+
+?atom: IDENTIFIER
+     | literal
+     | _LPAREN expression _RPAREN
+
+# Helper for all the assignment operators
+###########################################
+assign_op: EQUAL
+         | PLUS_EQUAL
+         | MINUS_EQUAL
+         | STAR_EQUAL
+         | SLASH_EQUAL
+         | PERCENT_EQUAL
+
+literal: INT_LITERAL
+       | FLOAT_LITERAL
+       | CHAR_LITERAL
+       | STRING_LITERAL
+       | BOOL_LITERAL
+       | NULLPTR
+
 
 ##########################################################################################################
 # STATEMENTS
 
 compound_statement: _LBRACE statement* _RBRACE
 
-?statement: jump_statement | selection_statement | iteration_statement | variable_declaration
+?statement: jump_statement | selection_statement | iteration_statement | declaration
 
 expression_statement: expression _SEMICOLON
 
 
 selection_statement: if_statement
 
-if_statement: IF _LPAREN expression _RPAREN compound_statement
+?if_statement: IF _LPAREN expression _RPAREN compound_statement
             | IF _LPAREN expression _RPAREN compound_statement ELSE compound_statement
             | IF _LPAREN expression _RPAREN compound_statement ELSE if_statement compound_statement
 
@@ -174,7 +173,7 @@ IDENTIFIER:     /[a-zA-Z_][a-zA-Z0-9_]*/
 INT_LITERAL:    /0|[1-9][0-9]*/
 FLOAT_LITERAL:  /[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?/
 CHAR_LITERAL:   /'([^'\\]|\\.)'/
-STRING_LITERAL: /(\\.|[^"\\]*)"/
+STRING_LITERAL: /"(\\"|[^"\\])*"/
 BOOL_LITERAL:   "TRUE" | "FALSE"
 NULLPTR:        "nullptr"
 
@@ -251,7 +250,7 @@ PERCENT_EQUAL: "%="
 LT:         "<"
 GT:         ">"
 LE:         "<="
-GE:         ">+"
+GE:         ">="
 EQ:         "=="
 NEQ:        "!="
 
@@ -270,7 +269,7 @@ ARROW:      "->"
 TERNARY:    "?"
 COLON:      ":"
 
-# PUCTUATION
+# PUNCTUATION
 ###############
 _LPAREN:     "("
 _RPAREN:     ")"
@@ -292,5 +291,5 @@ USING_NAMESPACE: "using"
 
 ##########################################################################################################
 # RULESET
-%ignore WS
 %import common.WS
+%ignore WS
