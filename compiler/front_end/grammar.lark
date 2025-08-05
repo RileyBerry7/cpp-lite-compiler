@@ -95,7 +95,7 @@ init_declarator_list:   init_declarator
 
 constant_expression: expression
 
-expression: literal_expression | identifier_expression | binary_expression | compound_assignment_expression
+?expression: literal_expression | identifier_expression | binary_expression | compound_assignment_expression
 
 //postfix_expression          // calls, array access, x++, x.y
 //unary_expression            // -x, *p, &x, !x
