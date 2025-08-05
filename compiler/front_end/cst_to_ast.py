@@ -73,15 +73,15 @@ class CSTtoAST(Transformer):
         return Tree("program", children)
 
     ####################################################################################################################
-    def function_definition(self, children):
-
-        new_children = list()
-        new_children.append(children[0]) # return_type
-        new_children.append(children[1].children[0]) # function_name
-        new_children.append(children[1].children[1]) # function_parameters
-        new_children.append(children[2])             # function_body
-
-        return Tree("func_def", new_children)
+    # def function_definition(self, children):
+    #
+    #     new_children = list()
+    #     new_children.append(children[0]) # return_type
+    #     new_children.append(children[1].children[0]) # function_name
+    #     new_children.append(children[1].children[1]) # function_parameters
+    #     new_children.append(children[2])             # function_body
+    #
+    #     return Tree("func_def", new_children)
 
     ####################################################################################################################
     def type_specifier(self, children):

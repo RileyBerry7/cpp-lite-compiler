@@ -4,27 +4,127 @@
 #  ENTRY POINT  #
 ?start: translation_unit
 
-translation_unit: function_definition
-function_definition: type_specifier function_declarator compound_statement
+translation_unit: external_declaration*
 
-type_specifier: INT | VOID | FLOAT | BOOL | CHAR
+external_declaration: function_definition
+                    | function_declaration
+                    | variable_declaration
+//                    | type_declaration
+//                    | template_declaration
+//                    | static_assert_declaration
 
-declarator: function_declarator
-          | variable_declarator
+//type_declaration: class_definition
+//                | struct_definition
+//                | enum_definition
+//                | typedef_declaration
+//                | using_declaration
+//
 
-function_declarator: IDENTIFIER parameter_list
-variable_declarator: IDENTIFIER [EQUAL expression]
+##########################################################################################################
+# FUNCTIONS
 
-parameter_list: _LPAREN [parameter(_COMMA parameter)*] _RPAREN
-parameter: type_specifier IDENTIFIER
+function_declaration: declaration_specifier_list declarator _SEMICOLON
+function_definition:  declaration_specifier_list declarator compound_statement
 
-compound_statement: _LBRACE statement* _RBRACE
+// class_definition: CLASS IDENTIFIER [_COLON ]
 
-//statement: jump_statement
-//jump_statement: RETURN expression _SEMICOLON
+########################################################################################################################
+# DECLARATORS
 
-expression: literal_expression | relational_expression
+init_declarator:  declarator
+               |  declarator EQUAL initializer
+
+initializer: expression
+
+declarator: pointer? direct_declarator
+
+pointer: STAR pointer? | BIT_AND | BIT_AND BIT_AND
+
+direct_declarator: IDENTIFIER declarator_suffix*
+
+declarator_suffix: array_suffix
+                 | function_suffix
+
+array_suffix:    _LBRACKET constant_expression _RBRACKET
+function_suffix: _LPAREN parameter_list _RPAREN
+
+########################################################################################################################
+# DECLARATOR SPECIFIERS
+
+?parameter_list: (parameter (_COMMA parameter)*)?
+
+parameter:  type_specifier IDENTIFIER
+         |  ELLIPSIS
+
+declaration_specifier_list: declaration_specifiers+
+
+declaration_specifiers: storage_class_specifier
+                      | type_specifier
+                      | type_qualifier
+                      | function_specifier
+                      | FRIEND
+                      | TYPEDEF
+                      | INLINE
+                      | CONSTEXPR
+
+storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
+
+type_qualifier: CONST | VOLATILE | RESTRICT
+
+
+type_specifier: simple_type_specifier
+              | elaborated_type_specifier
+
+simple_type_specifier:     VOID | CHAR | INT | FLOAT | DOUBLE | BOOL | IDENTIFIER
+elaborated_type_specifier: CLASS IDENTIFIER | STRUCT IDENTIFIER | ENUM IDENTIFIER
+
+function_specifier: INLINE | VIRTUAL | EXPLICIT
+
+########################################################################################################################
+# DECLARATIONS
+
+variable_declaration: declaration
+
+declaration: declaration_specifier_list init_declarator_list _SEMICOLON
+
+init_declarator_list:   init_declarator
+                    |   init_declarator _COMMA init_declarator
+
+##########################################################################################################
+# EXPRESSIONS
+
+constant_expression: expression
+
+expression: literal_expression | identifier_expression | binary_expression | compound_assignment_expression
+
+//postfix_expression          // calls, array access, x++, x.y
+//unary_expression            // -x, *p, &x, !x
+//logical_and_expression      // x && y
+//logical_or_expression       // 'x
+//expression                  // one or more comma-seperatied expressions
+//conditional_expression      // ternary: cond ? x : y
+
+
 literal_expression: INT_LITERAL
+                  | FLOAT_LITERAL
+                  | CHAR_LITERAL
+                  | BOOL_LITERAL
+                  | STRING_LITERAL
+
+identifier_expression: IDENTIFIER
+
+binary_expression: additive_expression | multiplicative_expression | relational_expression | equality_expression
+
+additive_expression: expression PLUS expression
+                   | expression MINUS expression
+
+multiplicative_expression: expression STAR expression
+                         | expression SLASH expression
+                         | expression PERCENT expression
+
+equality_expression: expression EQ expression
+                   | expression NEQ expression
+
 relational_expression: expression LT expression
                       | expression GT expression
                       | expression LE expression
@@ -33,45 +133,21 @@ relational_expression: expression LT expression
                       | expression NEQ expression
 
 
-##########################################################################################################
-# DECLARATIONS & TYPES
-
-//declaration_specifiers      // types & storage qualifiers (int, static)
-//type_specifiers             // (int, float, char... etc])
-//init_declarator             // (x, x = 5, arr[10], *ptr)
-//parameter_declaration       // parameter in fuction declaration
-//declarator                  // variable or fuction declaration
-//initializer                 // the "= value" or "{...}" part
-
-##########################################################################################################
-# EXPRESSIONS
-
-//primary_expression          // identifiers, literals, grouped expression
-//postfix_expression          // calls, array access, x++, x.y
-//unary_expression            // -x, *p, &x, !x
-//multiplicative_expression   // x * y, x / y
-//additive_expression         // x + y, x - y
-//relational_expression       // x < y, x >= y
-//equality_expression         // x == y, x != y
-//logical_and_expression      // x && y
-//logical_or_expression       // 'x
-//assignment_expression       // x = y + 1, x += 1
-//expression                  // one or more comma-seperatied expressions
-//conditional_expression      // ternary: cond ? x : y
+compound_assignment_expression: identifier_expression PLUS_EQUAL    expression _SEMICOLON
+                              | identifier_expression MINUS_EQUAL   expression _SEMICOLON
+                              | identifier_expression STAR_EQUAL    expression _SEMICOLON
+                              | identifier_expression SLASH_EQUAL   expression _SEMICOLON
+                              | identifier_expression PERCENT_EQUAL expression _SEMICOLON
 
 ##########################################################################################################
 # STATEMENTS
 
-//statement                   // generic statement
-statement: jump_statement | selection_statement | interaction_statement | variable_declaration
+compound_statement: _LBRACE statement* _RBRACE
 
-//compound_statement          //  "{ stmt; stmt; }" block
-//expression_statement        // expr;
+statement: jump_statement | selection_statement | iteration_statement | variable_declaration
 
-//declaration                 // int x = 0;
-variable_declaration: type_specifier variable_declarator _SEMICOLON
+expression_statement: expression _SEMICOLON
 
-//selection_statement         // if, if-else, switch
 
 selection_statement: if_statement
 
@@ -79,17 +155,15 @@ if_statement: IF _LPAREN expression _RPAREN compound_statement
             | IF _LPAREN expression _RPAREN compound_statement ELSE compound_statement
             | IF _LPAREN expression _RPAREN compound_statement ELSE if_statement compound_statement
 
-//interation_statement        // for, while, do-while
-interaction_statement: FOR _LPAREN expression _SEMICOLON expression _SEMICOLON expression _RPAREN compound_statement
+iteration_statement: FOR _LPAREN expression _SEMICOLON expression _SEMICOLON expression _RPAREN compound_statement
 
-
-
-
-//jump_statement              // return, break, continue, goto
-jump_statement: return_statement
+jump_statement: return_statement | break_statement | continue_statement | goto_statement
 return_statement: RETURN expression _SEMICOLON
+break_statement: BREAK _SEMICOLON
+continue_statement: CONTINUE _SEMICOLON
+goto_statement: GOTO IDENTIFIER _SEMICOLON
 
-//labeled_statement           // label: stmt;
+labeled_statement: IDENTIFIER COLON statement _SEMICOLON
 
 ##########################################################################################################
 # TERMINALS
@@ -98,6 +172,8 @@ return_statement: RETURN expression _SEMICOLON
 #############################
 IDENTIFIER:     /[a-zA-Z_][a-zA-Z0-9_]*/
 INT_LITERAL:    /0|[1-9][0-9]*/
+FLOAT_LITERAL:  /[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?/
+CHAR_LITERAL:   /'([^'\\]|\\.)'/
 STRING_LITERAL: /(\\.|[^"\\]*)"/
 BOOL_LITERAL:   "TRUE" | "FALSE"
 NULLPTR:        "nullptr"
@@ -131,11 +207,13 @@ UNSIGNED:   "unsigned"
 SHORT:      "short"
 LONG:       "long"
 CONST:      "const"
+CONSTEXPR:  "constexpr"
 VOLATILE:   "volatile"
 STATIC:     "static"
 EXTERN:     "extern"
 MUTABLE:    "mutable"
 REGISTER:   "register"
+RESTRICT:   "restrict"
 INLINE:     "inline"
 VIRTUAL:    "virtual"
 EXPLICIT:   "explicit"
@@ -163,6 +241,7 @@ STAR:       "*"
 SLASH:      "/"
 PERCENT:    "%"
 EQUAL:      "="
+ELLIPSIS:    "..."
 PLUS_EQUAL:    "+="
 MINUS_EQUAL:   "-="
 STAR_EQUAL:    "*="
