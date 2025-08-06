@@ -9,18 +9,17 @@
 translation_unit: external_declaration*
 
 external_declaration: function_definition
+                    | function_declaration
                     | declaration
 
-//                    | linkage_specification
-//                    | namespace_definition
-//                    | empty_declaration
-//                    | attribute_declaration
 
 ########################################################################################################################
 #  DECLARATORS  #
 #################
 
 function_definition:  declaration_specifier_list declarator compound_statement
+
+function_declaration: declaration_specifier_list declarator _SEMICOLON
 
 declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
 
@@ -182,31 +181,42 @@ assign_op: EQUAL
          | STAR_EQUAL
          | SLASH_EQUAL
          | PERCENT_EQUAL
+         | SHL_EQUAL
+         | SHR_EQUAL
+         | BIT_AND_EQUAL
+         | BIT_OR_EQUAL
+         | BIT_XOR_EQUAL
+
 
 
 ########################################################################################################################
 #  STATEMENTS  #
 ################
 
+?statement: jump_statement
+          | selection_statement
+          | iteration_statement
+          | expression_statement
+          | labeled_statement
+          | compound_statement
+          | declaration
+
 compound_statement: _LBRACE statement* _RBRACE
 
-?statement: jump_statement | selection_statement | iteration_statement | declaration
-
-expression_statement: expression _SEMICOLON
+expression_statement: [expression] _SEMICOLON
 
 
 selection_statement: if_statement
                    | switch_statement
 
-?if_statement: _IF _LPAREN expression _RPAREN compound_statement
-            | _IF _LPAREN expression _RPAREN compound_statement ELSE compound_statement
-            | _IF _LPAREN expression _RPAREN compound_statement ELSE if_statement compound_statement
+if_statement: _IF _LPAREN expression _RPAREN statement
+            | _IF _LPAREN expression _RPAREN statement ELSE statement
 
-switch_statement: SWITCH _LPAREN expression _RPAREN compound_statement
+switch_statement: SWITCH _LPAREN expression _RPAREN statement
 
-iteration_statement: FOR _LPAREN for_init? expression? _SEMICOLON expression? _RPAREN compound_statement
-                   | WHILE _LPAREN expression _RPAREN compound_statement
-                   | DO compound_statement WHILE _LPAREN expression _RPAREN _SEMICOLON
+iteration_statement: FOR _LPAREN for_init? expression? _SEMICOLON expression? _RPAREN statement
+                   | WHILE _LPAREN expression _RPAREN statement
+                   | DO statement WHILE _LPAREN expression _RPAREN _SEMICOLON
 
 for_init: declaration
         | expression_statement
@@ -216,13 +226,14 @@ for_init: declaration
                | continue_statement
                | goto_statement
 
-return_statement: RETURN expression _SEMICOLON
+return_statement: RETURN [expression] _SEMICOLON
 break_statement: BREAK _SEMICOLON
 continue_statement: CONTINUE _SEMICOLON
 goto_statement: GOTO IDENTIFIER _SEMICOLON
 
-labeled_statement: IDENTIFIER COLON statement _SEMICOLON
-
+labeled_statement: IDENTIFIER COLON statement
+                 | CASE constant_expression COLON statement
+                 | DEFAULT COLON statement
 
 
 ########################################################################################################################
@@ -314,6 +325,12 @@ MINUS_EQUAL:   "-="
 STAR_EQUAL:    "*="
 SLASH_EQUAL:   "/="
 PERCENT_EQUAL: "%="
+SHL_EQUAL: "<<="
+SHR_EQUAL: ">>="
+BIT_AND_EQUAL: "&="
+BIT_OR_EQUAL: "|="
+BIT_XOR_EQUAL: "^="
+
 
 LT:         "<"
 GT:         ">"
@@ -351,7 +368,6 @@ _RBRACKET:   "]"
 _SEMICOLON:  ";"
 _COMMA:      ","
 _DOT:        "."
-_TILDA:   "~"
 
 ###################
 #  MISCELLANEOUS  #
