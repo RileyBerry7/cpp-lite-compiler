@@ -1,7 +1,9 @@
 // grammar.lark
 
-#################
-#  ENTRY POINT  #
+########################################################################################################################
+#   ENTRY POINT  #
+##################
+
 ?start: translation_unit
 
 translation_unit: external_declaration*
@@ -15,7 +17,8 @@ external_declaration: function_definition
 //                    | attribute_declaration
 
 ########################################################################################################################
-# DECLARATORS
+#  DECLARATORS  #
+#################
 
 function_definition:  declaration_specifier_list declarator compound_statement
 
@@ -30,9 +33,13 @@ init_declarator:  declarator
 
 declarator: ptr_operator* direct_declarator
 
-ptr_operator: STAR cv_qualifier_seq?
-            | BIT_AND
-            | BIT_AND BIT_AND
+ptr_operator: (qualified_type_name SCOPE)? STAR cv_qualifier_seq?  -> ptr_to_member_or_ptr
+            | BIT_AND                                              -> lvalue_ref
+            | AND                                                  -> rvalue_ref
+
+qualified_type_name: IDENTIFIER (SCOPE IDENTIFIER)*
+
+nested_name_specifier: (IDENTIFIER SCOPE)* IDENTIFIER SCOPE
 
 cv_qualifier_seq: type_qualifier+
 
@@ -54,8 +61,10 @@ direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
                           | direct_abstract_declarator array_suffix
                           | direct_abstract_declarator function_suffix
 
+
 ########################################################################################################################
-# DECLARATOR SPECIFIERS
+# DECLARATOR SPECIFIERS  #
+##########################
 
 parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
               | ELLIPSIS        // "..."
@@ -90,30 +99,20 @@ elaborated_type_specifier: CLASS IDENTIFIER | STRUCT IDENTIFIER | ENUM IDENTIFIE
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT
 
-##########################################################################################################
-# EXPRESSIONS
 
-
-//postfix_expression          // calls, array access, x++, x.y
-//unary_expression            // -x, *p, &x, !x
-//logical_and_expression      // x && y
-//logical_or_expression       // 'x
-//expression                  // one or more comma-seperatied expressions
-//conditional_expression      // ternary: cond ? x : y
+########################################################################################################################
+#  EXPRESSIONS  #
+#################
 
 constant_expression: expression
 
-########################################################################################################################
-
-# top-level expressions
-#####################################################################
 ?expression: logic_or
            | IDENTIFIER assign_op expression   -> assignment
 
 
-# All the boolean/arithmetic precedence levels:
-###############################################
-# PRECEDENCE ORDER:
+######################
+#  PRECEDENCE ORDER  #  All the boolean/arithmetic precedence levels.
+######################
 
 ?logic_or: logic_or OR logic_and      -> or
          | logic_and
@@ -127,36 +126,21 @@ constant_expression: expression
 ?relational: relational (LT | GT | LE | GE) sum  -> rel_expr
            | sum
 
-?product: product (STAR | SLASH | PERCENT) unary -> mul
-        | unary
-
 ?sum: sum (PLUS | MINUS) product   -> add
      | product
 
-# Helper for all the assignment operators
-###########################################
-assign_op: EQUAL
-         | PLUS_EQUAL
-         | MINUS_EQUAL
-         | STAR_EQUAL
-         | SLASH_EQUAL
-         | PERCENT_EQUAL
+?product: product (STAR | SLASH | PERCENT) unary -> mul
+        | unary
 
-literal: INT_LITERAL
-       | FLOAT_LITERAL
-       | CHAR_LITERAL
-       | STRING_LITERAL
-       | BOOL_LITERAL
-       | NULLPTR
+unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary
+     | postfix
 
-##########################################################################################################
-# Post-Fix Expressions
+postfix: primary post_op*
+
 
 ?primary: IDENTIFIER
         | literal
         | _LPAREN expression _RPAREN
-
-argument_list: expression ( _COMMA expression )*
 
 post_op: _LPAREN argument_list? _RPAREN
        | _LBRACKET expression _RBRACKET
@@ -165,14 +149,29 @@ post_op: _LPAREN argument_list? _RPAREN
        | INCREMENT
        | DECREMENT
 
-postfix: primary post_op*
+argument_list: expression ( _COMMA expression )*
 
-# Prefix unary ops bind tighter than * / %
-unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary
-     | postfix
+literal: INT_LITERAL
+       | FLOAT_LITERAL
+       | CHAR_LITERAL
+       | STRING_LITERAL
+       | BOOL_LITERAL
+       | NULLPTR
 
-##########################################################################################################
-# STATEMENTS
+
+###########################################
+# Helper for all the assignment operators
+assign_op: EQUAL
+         | PLUS_EQUAL
+         | MINUS_EQUAL
+         | STAR_EQUAL
+         | SLASH_EQUAL
+         | PERCENT_EQUAL
+
+
+########################################################################################################################
+#  STATEMENTS  #
+################
 
 compound_statement: _LBRACE statement* _RBRACE
 
@@ -197,7 +196,11 @@ iteration_statement: FOR _LPAREN for_init? expression? _SEMICOLON expression? _R
 for_init: declaration
         | expression_statement
 
-?jump_statement: return_statement | break_statement | continue_statement | goto_statement
+?jump_statement: return_statement
+               | break_statement
+               | continue_statement
+               | goto_statement
+
 return_statement: RETURN expression _SEMICOLON
 break_statement: BREAK _SEMICOLON
 continue_statement: CONTINUE _SEMICOLON
@@ -205,20 +208,26 @@ goto_statement: GOTO IDENTIFIER _SEMICOLON
 
 labeled_statement: IDENTIFIER COLON statement _SEMICOLON
 
-##########################################################################################################
-# TERMINALS
 
-# IDENTIFIERS & LITERALS
-#############################
-IDENTIFIER:     /[a-zA-Z_][a-zA-Z0-9_]*/
-INT_LITERAL:    /0|[1-9][0-9]*/
-FLOAT_LITERAL:  /[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?/
+
+########################################################################################################################
+#  TERMINALS (TOKENS)  #
+########################
+
+############################
+#  IDENTIFIERS & LITERALS  #
+############################
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+INT_LITERAL: /0|[1-9][0-9]*/
+FLOAT_LITERAL: /([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?/
 CHAR_LITERAL:   /'([^'\\]|\\.)'/
 STRING_LITERAL: /"(\\"|[^"\\])*"/
-BOOL_LITERAL:   "TRUE" | "FALSE"
+BOOL_LITERAL:   "true" | "false"
 NULLPTR:        "nullptr"
 
-# KEYWORDS (CONTROL-FLOW)
+##############################
+#   KEYWORDS (CONTROL-FLOW)  #
 ##############################
 _IF:         "if"
 ELSE:       "else"
@@ -233,7 +242,8 @@ CONTINUE:   "continue"
 RETURN:     "return"
 GOTO:       "goto"
 
-# KEYWORDS (TYPES)
+######################
+#  KEYWORDS (TYPES)  #
 ######################
 INT:        "int"
 FLOAT:      "float"
@@ -258,8 +268,9 @@ INLINE:     "inline"
 VIRTUAL:    "virtual"
 EXPLICIT:   "explicit"
 
-# KEYWORDS (CLASS, STRUCT, NAMESPACE)
-#########################################
+##################
+#    KEYWORDS    #
+##################
 CLASS:      "class"
 STRUCT:     "struct"
 UNION:      "union"
@@ -273,8 +284,9 @@ PUBLIC:     "public"
 PRIVATE:    "private"
 PROTECTED:  "protected"
 
-# OPERATORS
-###############
+#################
+#   OPERATORS   #
+#################
 PLUS:       "+"
 MINUS:      "-"
 STAR:       "*"
@@ -301,6 +313,7 @@ NOT:        "!"
 BIT_AND:    "&"
 BIT_OR:     "|"
 BIT_NOT:    "~"
+BIT_XOR:    "^"
 SHL:        "<<"
 SHR:        ">>"
 
@@ -308,10 +321,12 @@ INCREMENT:  "++"
 DECREMENT:  "--"
 ARROW:      "->"
 TERNARY:    "?"
+SCOPE: "::"
 COLON:      ":"
 
-# PUNCTUATION
-###############
+##################
+#   PUNCTUATION  #
+##################
 _LPAREN:     "("
 _RPAREN:     ")"
 _LBRACE:     "{"
@@ -323,14 +338,18 @@ _COMMA:      ","
 _DOT:        "."
 _ELLIPSIS:   "~"
 
-# MISCELLANEOUS
-##################
+###################
+#  MISCELLANEOUS  #
+###################
 HASH:            "#"
 INCLUDE:         "include"
 DEFINE:          "define"
 USING_NAMESPACE: "using"
 
-##########################################################################################################
-# RULESET
+
+########################################################################################################################
+#  RULESET  #
+#############
+
 %import common.WS
 %ignore WS
