@@ -24,14 +24,22 @@ function_definition:  declaration_specifier_list declarator compound_statement
 
 declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
 
-
 initializer_declarator_list: init_declarator ( _COMMA init_declarator )* _COMMA?
+
 init_declarator:  declarator
                |  declarator EQUAL initializer
 
 ?initializer: expression
+            | _LBRACE initializer_list? _RBRACE
 
-declarator: ptr_operator* direct_declarator
+initializer_list: initializer ( _COMMA initializer )* _COMMA?
+
+############################################
+# MUTUALLY EXCLUSIVE DECLARATOR STRUCTURE  #
+############################################
+
+declarator: ptr_operator declarator
+          | direct_declarator
 
 ptr_operator: (qualified_type_name SCOPE)? STAR cv_qualifier_seq?  -> ptr_to_member_or_ptr
             | BIT_AND                                              -> lvalue_ref
@@ -43,34 +51,33 @@ nested_name_specifier: (IDENTIFIER SCOPE)* IDENTIFIER SCOPE
 
 cv_qualifier_seq: type_qualifier+
 
-direct_declarator: declarator_prefix declarator_suffix*
-declarator_prefix: IDENTIFIER
-                 | _LPAREN declarator _RPAREN      // parentheses for grouping
-
-declarator_suffix: array_suffix
-                 | function_suffix
+direct_declarator: IDENTIFIER
+                 | _LPAREN declarator _RPAREN
+                 | direct_declarator array_suffix
+                 | direct_declarator function_suffix
 
 array_suffix:    _LBRACKET constant_expression _RBRACKET
 function_suffix: _LPAREN parameter_list _RPAREN
 
-# Declarator Alternative - Unnamed Declarators
-abstract_declarator: ptr_operator? direct_abstract_declarator
-                   | ptr_operator
-
-direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
-                          | direct_abstract_declarator array_suffix
-                          | direct_abstract_declarator function_suffix
-
+# MAY IMPLEMENT LATER
+//abstract_declarator: ptr_operator? direct_abstract_declarator
+//                   | ptr_operator
+//
+//direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
+//                          | direct_abstract_declarator array_suffix
+//                          | direct_abstract_declarator function_suffix
 
 ########################################################################################################################
 # DECLARATOR SPECIFIERS  #
 ##########################
 
 parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
-              | ELLIPSIS        // "..."
+              | ELLIPSIS                     // "..."
 
-parameter: declaration_specifier_list declarator              // named
-         | declaration_specifier_list abstract_declarator?    // unnamed
+parameter: declaration_specifier_list declarator default_arg?   // named + default arguments
+//       | declaration_specifier_list abstract_declarator? // unnamed
+
+default_arg: EQUAL initializer
 
 declaration_specifier_list: declaration_specifier+
 
@@ -100,47 +107,56 @@ elaborated_type_specifier: CLASS IDENTIFIER | STRUCT IDENTIFIER | ENUM IDENTIFIE
 function_specifier: INLINE | VIRTUAL | EXPLICIT
 
 
+
 ########################################################################################################################
 #  EXPRESSIONS  #
 #################
 
-constant_expression: expression
-
-?expression: logic_or
-           | IDENTIFIER assign_op expression   -> assignment
-
+# Used For Array Sizes
+constant_expression: conditional_expression
 
 ######################
 #  PRECEDENCE ORDER  #  All the boolean/arithmetic precedence levels.
 ######################
 
-?logic_or: logic_or OR logic_and      -> or
-         | logic_and
+# Lowest precedence (comma operator), left-associative
+expression: assignment_expression (_COMMA assignment_expression)*
 
-?logic_and: logic_and AND equality     -> and
-          | equality
+# Assignment: right-associative; allow any unary lhs (covers *p = x, a[i] = x, ++x = y is still rejected later)
+assignment_expression: conditional_expression
+                     | unary assign_op assignment_expression          -> assignment
 
-?equality: equality (EQ | NEQ) relational  -> eq
-         | relational
+# Ternary sits between assignment and ||; middle uses full expression, right side is conditional_expression
+conditional_expression: logic_or ( TERNARY expression COLON conditional_expression )?
 
-?relational: relational (LT | GT | LE | GE) sum  -> rel_expr
-           | sum
+# || down to unary — same as you had, but now fed by conditional_expression above
+logic_or: logic_or OR logic_and                          -> or
+        | logic_and
 
-?sum: sum (PLUS | MINUS) product   -> add
-     | product
+logic_and: logic_and AND equality                         -> and
+         | equality
 
-?product: product (STAR | SLASH | PERCENT) unary -> mul
-        | unary
+equality: equality (EQ | NEQ) relational                 -> eq
+        | relational
+
+relational: relational (LT | GT | LE | GE) sum             -> rel_expr
+          | sum
+
+sum: sum (PLUS | MINUS) product                     -> add
+   | product
+
+product: product (STAR | SLASH | PERCENT) unary         -> mul
+       | unary
 
 unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary
      | postfix
 
+# Open-ended chaining of calls, indexing, member access, ++/--
 postfix: primary post_op*
 
-
-?primary: IDENTIFIER
-        | literal
-        | _LPAREN expression _RPAREN
+primary: IDENTIFIER
+       | literal
+       | _LPAREN expression _RPAREN
 
 post_op: _LPAREN argument_list? _RPAREN
        | _LBRACKET expression _RBRACKET
@@ -157,7 +173,6 @@ literal: INT_LITERAL
        | STRING_LITERAL
        | BOOL_LITERAL
        | NULLPTR
-
 
 ###########################################
 # Helper for all the assignment operators
@@ -336,7 +351,7 @@ _RBRACKET:   "]"
 _SEMICOLON:  ";"
 _COMMA:      ","
 _DOT:        "."
-_ELLIPSIS:   "~"
+_TILDA:   "~"
 
 ###################
 #  MISCELLANEOUS  #
