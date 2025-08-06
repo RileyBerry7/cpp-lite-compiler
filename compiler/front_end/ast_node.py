@@ -32,21 +32,22 @@ class ASTNode:
         return text_tree
 
 ########################################################################################################################
+# Inheritor Nodes
 
-    # def IDENTIFIER(self, token):
-    #     return str(token)  # or just token.value
-
-# class external_declaration(ASTNode):
-#     def __init__(self, node_name="external_declaration"):
-#         super().__init__(node_name=node_name)
-
-########################################################################################################################
-
-class parameter(ASTNode):
+class Parameter(ASTNode):
     def __init__(self, param_type, param_name):
         super().__init__(node_name="parameter")
         self.param_type = param_type
         self.param_name = param_name
+
+########################################################################################################################
+class Declarator(ASTNode):
+    def __init__(self):
+        self.specifiers = []
+        self.return_type = None
+        self.identifier_name = None
+        self.type_expression = None
+
 ########################################################################################################################
 # class parameter_list(ASTNode):
 #     def __init__(self, children=None, params=None):

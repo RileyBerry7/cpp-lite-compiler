@@ -43,13 +43,22 @@ declarator_suffix: array_suffix
 array_suffix:    _LBRACKET constant_expression _RBRACKET
 function_suffix: _LPAREN parameter_list _RPAREN
 
+# Declarator Alternative - Unnamed Declarators
+abstract_declarator: pointer? direct_abstract_declarator
+                   | pointer
+
+direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
+                          | direct_abstract_declarator array_suffix
+                          | direct_abstract_declarator function_suffix
+
 ########################################################################################################################
 # DECLARATOR SPECIFIERS
 
 parameter_list: (parameter (_COMMA parameter)*)?
 
-parameter:  type_specifier IDENTIFIER
-         |  ELLIPSIS
+parameter: declaration_specifier_list declarator              // named
+         | declaration_specifier_list abstract_declarator?    // unnamed
+         |  ELLIPSIS                                          // "..."
 
 declaration_specifier_list: declaration_specifiers+
 

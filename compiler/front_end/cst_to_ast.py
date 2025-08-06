@@ -18,16 +18,18 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     def parameter(self, children):
-        parameter_node = parameter(children[0], children[1])
+        parameter_node = Parameter(children[0], children[1])
         return parameter_node
 
     ####################################################################################################################
-    def function_suffix(self, children):
-        params = []
+    # def function_suffix(self, children):
+    #     params = []
+    #
+    #     # Gather children
+    #     # for child in children:
+    #     #     params.append(child)
+    #     # param_list_node = parameter_list(children, params)
+    #
+    #     return ASTNode("parameter_list", children)
 
-        # Gather children
-        # for child in children:
-        #     params.append(child)
-        # param_list_node = parameter_list(children, params)
-
-        return ASTNode("parameter_list", children)
+    ####################################################################################################################
