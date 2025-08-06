@@ -1,5 +1,7 @@
 # ast_node.py
 
+from enum import Enum
+
 ########################################################################################################################
 class ASTNode:
     """ Represents a node in the Abstract Syntax Tree (AST)."""
@@ -41,12 +43,27 @@ class Parameter(ASTNode):
         self.param_name = param_name
 
 ########################################################################################################################
-class Declarator(ASTNode):
-    def __init__(self):
-        self.specifiers = []
-        self.return_type = None
-        self.identifier_name = None
-        self.type_expression = None
+class Specifiers(ASTNode):
+    def __init__(self, base_type=None, qualifiers=None, storage_class=None):
+        super().__init__(node_name="specifiers")
+        self.base_type = base_type
+        self.qualifiers = qualifiers if qualifiers is not None else []
+        self.storage_class = storage_class
+        self.function_specifiers = []
+########################################################################################################################
+class ReferenceType(str, Enum):
+    REFERENCE = "&"
+    DOUBLE_REFERENCE = "&&"
+    DEREFERENCE = "&" "*"
+
+class PointerChain(ASTNode):
+    def __init__(self, character: ReferenceType, qualifiers=None):
+        super().__init__("pointer_chain") # think something like: "int * * const & *function_name();"
+        qualifiers = qualifiers if qualifiers is not None else []
+        self.pointer_chain = [(character, qualifiers)]
+
+    def append_chain(self, child_chain):
+        self.pointer_chain.append(child_chain)
 
 ########################################################################################################################
 # class parameter_list(ASTNode):
