@@ -9,7 +9,7 @@
 translation_unit: external_declaration*
 
 external_declaration: function_definition
-                    | function_declaration
+# AMBIGUITY         | function_declaration
                     | declaration
 
 
@@ -19,7 +19,8 @@ external_declaration: function_definition
 
 function_definition:  declaration_specifier_list declarator compound_statement
 
-function_declaration: declaration_specifier_list declarator _SEMICOLON
+# REMOVE AMBIGUITY
+#function_declaration: declaration_specifier_list declarator _SEMICOLON
 
 declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
 
