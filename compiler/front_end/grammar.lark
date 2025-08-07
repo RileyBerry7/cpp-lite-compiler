@@ -26,13 +26,13 @@ declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
 
 initializer_declarator_list: init_declarator ( _COMMA init_declarator )* _COMMA?
 
-init_declarator:  declarator
-               |  declarator EQUAL initializer
+init_declarator:  declarator init_suffix?
 
-?initializer: expression
-            | _LBRACE initializer_list? _RBRACE
+init_suffix: EQUAL expression
+           | EQUAL _LBRACE initializer_list? _RBRACE
 
-initializer_list: initializer ( _COMMA initializer )* _COMMA?
+initializer_list: expression (_COMMA expression)*
+
 
 ############################################
 # MUTUALLY EXCLUSIVE DECLARATOR STRUCTURE  #
@@ -77,7 +77,7 @@ parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
 parameter: declaration_specifier_list declarator default_arg?   // named + default arguments
 //       | declaration_specifier_list abstract_declarator? // unnamed
 
-default_arg: EQUAL initializer
+default_arg: EQUAL expression
 
 declaration_specifier_list: declaration_specifier+
 
