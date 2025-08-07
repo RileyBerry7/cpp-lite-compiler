@@ -1,4 +1,4 @@
-// grammar.lark
+# grammar.lark
 
 ########################################################################################################################
 #   ENTRY POINT  #
@@ -8,34 +8,34 @@
 
 translation_unit: external_declaration*
 
-external_declaration: function_definition
-# AMBIGUITY         | function_declaration
-                    | declaration
+external_declaration: declaration
+                    | function_definition
+# AMBIGUITY        | function_declaration
 
 
 ########################################################################################################################
 #  DECLARATORS  #
 #################
 
-function_definition:  declaration_specifier_list declarator compound_statement
-
 # REMOVE AMBIGUITY
 #function_declaration: declaration_specifier_list declarator _SEMICOLON
 
-declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
+function_definition: declaration_specifier_list declarator compound_statement
 
-initializer_declarator_list: init_declarator ( _COMMA init_declarator )*
+declaration: declaration_specifier_list init_declarator_list? _SEMICOLON
+
+init_declarator_list: init_declarator ( _COMMA init_declarator )*
 
 init_declarator:  declarator init_suffix?
 
 init_suffix: EQUAL initializer
 
-initializer_list: initializer (_COMMA initializer)*
+init_list: initializer (_COMMA initializer)*
 
 initializer: expression
-           | _LBRACE initializer_list? _RBRACE
+           | _LBRACE init_list? _RBRACE
 
-# REMOVED AMBIGUITY - PLEASE DISAMBIGUATE
+# REMOVED AMBIGUITY - PLEASE DISAMBIGUATE LATER
 
 ############################################
 # MUTUALLY EXCLUSIVE DECLARATOR STRUCTURE  #
@@ -63,12 +63,12 @@ array_suffix:    _LBRACKET constant_expression _RBRACKET
 function_suffix: _LPAREN parameter_list _RPAREN
 
 # MAY IMPLEMENT LATER
-//abstract_declarator: ptr_operator? direct_abstract_declarator
-//                   | ptr_operator
-//
-//direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
-//                          | direct_abstract_declarator array_suffix
-//                          | direct_abstract_declarator function_suffix
+#abstract_declarator: ptr_operator? direct_abstract_declarator
+#                   | ptr_operator
+#
+#direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
+#                          | direct_abstract_declarator array_suffix
+#                          | direct_abstract_declarator function_suffix
 
 ########################################################################################################################
 # DECLARATOR SPECIFIERS  #
@@ -78,9 +78,9 @@ parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
               | ELLIPSIS                     // "..."
 
 parameter: declaration_specifier_list declarator default_arg?   // named + default arguments
-//       | declaration_specifier_list abstract_declarator? // unnamed
+#       | declaration_specifier_list abstract_declarator? // unnamed
 
-default_arg: EQUAL expression
+default_arg: EQUAL initializer
 
 declaration_specifier_list: declaration_specifier+
 

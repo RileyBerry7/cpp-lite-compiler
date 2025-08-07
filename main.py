@@ -23,8 +23,8 @@ def main():
     ####################################################################################################################
     # Test Code
     print("\033[33;51m[Reading...]\n[Displaying Source Code]\033[0m")
-    code = ("int main(char param1){"
-            "\n if (1 < 2 )"
+    code = ("static const int* &&main(int* param1, char(cast_var), float param2){"
+            "\n if (1 < 2 + 1 - 1 / 1)"
             "\n { int a = 10;"
             "\n }"
             "\n return 0;"
@@ -66,9 +66,9 @@ def main():
     ####################################################################################################################
     # Transform -> AST
     print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
-    # transformer = CSTtoAST()
-    # ast = transformer.transform(cst)
-    # print(ast.pretty())
+    transformer = CSTtoAST()
+    ast = transformer.transform(cst)
+    print(ast.pretty())
 
     ####################################################################################################################
     # Decorate -> D-AST

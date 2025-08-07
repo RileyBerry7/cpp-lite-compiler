@@ -43,13 +43,20 @@ class Parameter(ASTNode):
         self.param_name = param_name
 
 ########################################################################################################################
-class Specifiers(ASTNode):
-    def __init__(self, base_type=None, qualifiers=None, storage_class=None):
-        super().__init__(node_name="specifiers")
-        self.base_type = base_type
-        self.qualifiers = qualifiers if qualifiers is not None else []
-        self.storage_class = storage_class
-        self.function_specifiers = []
+class DeclSpec(ASTNode):
+    def __init__(self,
+                 base_type           =None,
+                 type_modifier       =None,
+                 qualifier           =None,
+                 storage_class       =None,
+                 function_specifiers =None ):
+
+        super().__init__(node_name="decl_specs")
+        self.base_type       = base_type           # Required
+        self.type_modifier   = type_modifier       # Optional
+        self.qualifier       = qualifier           # Optional
+        self.storage_class   = storage_class       # Optional
+        self.func_specifiers = function_specifiers # Optional
 ########################################################################################################################
 class ReferenceType(str, Enum):
     REFERENCE = "&"
@@ -72,7 +79,12 @@ class PointerChain(ASTNode):
 #         self.param_list = []
 
 ########################################################################################################################
+# ERRORS
 
+class Error(ASTNode):
+    def __init__(self, error_type):
+        super().__init__(node_name="ERROR: " + error_type)
+        self.message = ""
 
 # class func_def(node):
 # class type_specifier(node):
