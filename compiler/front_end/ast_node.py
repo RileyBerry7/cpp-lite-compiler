@@ -43,20 +43,32 @@ class Parameter(ASTNode):
         self.param_name = param_name
 
 ########################################################################################################################
+class Type(ASTNode):
+    def __init__(self, full_type:str, base_type:str, size:int, signed: bool=True):
+        super().__init__(node_name=full_type)
+        self.type_name  = base_type
+        self.size       = size
+        self.signed     = signed
+
+########################################################################################################################
 class DeclSpec(ASTNode):
     def __init__(self,
-                 base_type           =None,
+                 type_node:Type      =None,
                  type_modifier       =None,
                  qualifier           =None,
                  storage_class       =None,
                  function_specifiers =None ):
-
-        super().__init__(node_name="decl_specs")
-        self.base_type       = base_type           # Required
-        self.type_modifier   = type_modifier       # Optional
+        super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
+        self.type_node       = type_node           # Required
         self.qualifier       = qualifier           # Optional
         self.storage_class   = storage_class       # Optional
         self.func_specifiers = function_specifiers # Optional
+
+        self.children = [type_node]
+
+    # def __str__(self):
+    #     return f"{self.type_name} {' '.join(self.qualifiers)}"
+
 ########################################################################################################################
 class ReferenceType(str, Enum):
     REFERENCE = "&"
@@ -83,7 +95,8 @@ class PointerChain(ASTNode):
 
 class Error(ASTNode):
     def __init__(self, error_type):
-        super().__init__(node_name="ERROR: " + error_type)
+        super().__init__(node_name="\033[1;31mERROR: " + error_type +"\033[0m")
+
         self.message = ""
 
 # class func_def(node):

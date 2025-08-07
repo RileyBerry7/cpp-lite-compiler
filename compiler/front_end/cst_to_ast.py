@@ -3,6 +3,40 @@
 from lark import Lark, Transformer, Tree
 from compiler.front_end.ast_node import *
 
+VALID_TYPE_SETS = {
+        frozenset(['void']),
+        frozenset(['bool']),
+        frozenset(['char']),
+        frozenset(['signed']),
+        frozenset(['signed', 'char']),
+        frozenset(['unsigned']),
+        frozenset(['unsigned', 'char']),
+        frozenset(['int']),
+        frozenset(['signed', 'int']),
+        frozenset(['unsigned', 'int']),
+        frozenset(['short']),
+        frozenset(['short', 'int']),
+        frozenset(['signed', 'short']),
+        frozenset(['signed', 'short', 'int']),
+        frozenset(['unsigned', 'short']),
+        frozenset(['unsigned', 'short', 'int']),
+        frozenset(['long']),
+        frozenset(['long', 'int']),
+        frozenset(['long', 'long']),
+        frozenset(['long', 'long', 'int']),
+        frozenset(['signed', 'long']),
+        frozenset(['signed', 'long', 'int']),
+        frozenset(['signed', 'long', 'long']),
+        frozenset(['signed', 'long', 'long', 'int']),
+        frozenset(['unsigned', 'long']),
+        frozenset(['unsigned', 'long', 'int']),
+        frozenset(['unsigned', 'long', 'long']),
+        frozenset(['unsigned', 'long', 'long', 'int']),
+        frozenset(['float']),
+        frozenset(['double']),
+        frozenset(['long', 'double']),
+    }
+
 ########################################################################################################################
 class CSTtoAST(Transformer):
     """
@@ -23,7 +57,7 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     def declaration_specifier_list(self, children):
-        base_type     = []
+        simple_types  = []
         qualifiers    = []
         storage_class = []
 
@@ -31,33 +65,42 @@ class CSTtoAST(Transformer):
         if children:
             for child in children:
                 if isinstance(child, ASTNode):
-                    if child.name == "type_specifier":
-                        base_type.append(child.children[0])
+                    if child.name == "simple_type_specifier":
+                        simple_types.append(child.children[0].name)
+                        print("############################################################### Found Simple Type Secifier ####################")
                     elif child.name == "type_qualifier":
-                        qualifiers.append(child.children[0])
+                        qualifiers.append(child.children[0].name)
                     elif child.name == "storage_class_specifier":
-                        storage_class.append(child.children[0])
+                        storage_class.append(child.children[0].name)
+                elif isinstance(child, Tree):
+                    if child.name == "simple_type_specifier":
+                        simple_types.append(child.children[0].value)
 
 
         # ERROR CHECKING
-        if len(base_type) > 2: # Too many base_types
-            print("\033[91mError: Multiple base types found.\033[0m")
-            return Error("Type Error")
+        types_found = frozenset(simple_types)
+        if types_found in VALID_TYPE_SETS:
+            # Grab Base Type
+            base_type = "int"
 
-        elif len(base_type) == 2: # base_type + modifier
-            print()
+            # Check If Unsigned
+            is_signed = True
 
-        elif len(base_type) == 1: # Single base_type
-            base_type = base_type[0]
+            # Calculate Size
+            size = 32
 
-        else: # No base type
-            print("\033[91mError: Base type not found.\033[0m")
-            return Error("Type Error")
+            # Compile Type Node
+            type_node = Type(' '.join(sorted(types_found)), base_type, size, is_signed)
+
+        # ERROR: Invalid Type Found
+        else:
+            return Error("Invalid type specifier found.")
 
         # Create and Return Declaration Specifier Node
-        specifier_node = DeclSpec(base_type, qualifiers, storage_class)
+        specifier_node = DeclSpec(type_node, qualifiers, storage_class)
         return specifier_node
 
+    ####################################################################################################################
 
     ####################################################################################################################
     # Expression Precedence Abstraction

@@ -23,7 +23,7 @@ def main():
     ####################################################################################################################
     # Test Code
     print("\033[33;51m[Reading...]\n[Displaying Source Code]\033[0m")
-    code = ("static const int* &&main(int* param1, char(cast_var), float param2){"
+    code = ("static const short short int* &&main(int* param1, char(cast_var), float param2){"
             "\n if (1 < 2 + 1 - 1 / 1)"
             "\n { int a = 10;"
             "\n }"

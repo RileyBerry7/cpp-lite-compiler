@@ -98,7 +98,7 @@ storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
 type_qualifier: CONST | VOLATILE | RESTRICT
 
 
-type_specifier: simple_type_specifier
+?type_specifier: simple_type_specifier
                | elaborated_type_specifier
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
