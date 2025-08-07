@@ -31,29 +31,28 @@ def main():
             "\n }"
             "\n")
 
-    code = (
-        "int main(int argc, char param = 'x') {\n"
-        "  int x = 1, y = {2}, z = x + y * 3;\n"
-        "  x += y, z -= 1;\n"
-        "  if (x < z)\n"
-        "    x++;\n"
-        "  else {\n"
-        "    y = x ? y : z;\n"
-        "  }\n"
-        "  while (x < 10)\n"
-        "    x = x * 2;\n"
-        "  do z--; while (z > 0);\n"
-        "  for (int i = 0; i < 5; i++)\n"
-        "    x = x + i;\n"
-        "  switch (x) {\n"
-        "    case 1: break;\n"
-        "    case 2: x = 3; break;\n"
-        "    default: x = 4;\n"
-        "  }\n"
-        "  label1: goto label1;\n"
-        "  return;\n"
-        "}\n"
-    )
+    # code = (
+    #     "int main(int argc, char param = 'x') {\n"
+    #     "  int x = 1, y = {2}, z = x + y * 3;\n"
+    #     "  x += y, z -= 1;\n"
+    #     "  if (x < z)\n"
+    #     "    x++;\n"
+    #     "  else {\n"
+    #     "    y = x ? y : z;\n"
+    #     "  }\n"
+    #     "  while (x < 10)\n"
+    #     "    x = x * 2;\n"
+    #     "  do z--; while (z > 0);\n"
+    #     "  for (int i = 0; i < 5; i++)\n"
+    #     "    x = x + i;\n"
+    #     "  switch (x) {\n"
+    #     "    case 1: break;\n"
+    #     "    case 2: x = 3; break;\n"
+    #     "    default: x = 4;\n"
+    #     "  }\n"
+    #     "  label1: goto label1;\n"
+    #     "  return;\n"
+    #     "}\n")
 
     print(code)
 

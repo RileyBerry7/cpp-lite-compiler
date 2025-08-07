@@ -24,15 +24,18 @@ function_definition:  declaration_specifier_list declarator compound_statement
 
 declaration: declaration_specifier_list initializer_declarator_list? _SEMICOLON
 
-initializer_declarator_list: init_declarator ( _COMMA init_declarator )* _COMMA?
+initializer_declarator_list: init_declarator ( _COMMA init_declarator )*
 
 init_declarator:  declarator init_suffix?
 
-init_suffix: EQUAL expression
-           | EQUAL _LBRACE initializer_list? _RBRACE
+init_suffix: EQUAL initializer
 
-initializer_list: expression (_COMMA expression)*
+initializer_list: initializer (_COMMA initializer)*
 
+initializer: expression
+           | _LBRACE initializer_list? _RBRACE
+
+# REMOVED AMBIGUITY - PLEASE DISAMBIGUATE
 
 ############################################
 # MUTUALLY EXCLUSIVE DECLARATOR STRUCTURE  #
