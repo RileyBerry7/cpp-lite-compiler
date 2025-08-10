@@ -44,25 +44,24 @@ class Parameter(ASTNode):
 
 ########################################################################################################################
 class Type(ASTNode):
-    def __init__(self, full_type:str, base_type:str, size:int, signed: bool=True):
+    def __init__(self, full_type:str, base_type:str, size:int, signed:bool=True, elaboration:[str]=None):
         super().__init__(node_name=full_type)
         self.type_name  = base_type
         self.size       = size
         self.signed     = signed
-
+        self.elaboration = elaboration  # Struct, Class, Enum or None
 ########################################################################################################################
 class DeclSpec(ASTNode):
     def __init__(self,
                  type_node:Type      =None,
-                 type_modifier       =None,
                  qualifier           =None,
                  storage_class       =None,
-                 function_specifiers =None ):
+                 function_specifier  =None ):
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
         self.type_node       = type_node           # Required
         self.qualifier       = qualifier           # Optional
         self.storage_class   = storage_class       # Optional
-        self.func_specifiers = function_specifiers # Optional
+        self.func_specifiers = function_specifier # Optional
 
         self.children = [type_node]
 

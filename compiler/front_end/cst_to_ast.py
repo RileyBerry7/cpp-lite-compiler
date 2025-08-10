@@ -2,40 +2,43 @@
 
 from lark import Lark, Transformer, Tree
 from compiler.front_end.ast_node import *
+from compiler.utils.scalar_size import scalar_size
+
+BASE_TYPES = {'void', 'bool', 'char', 'signed', 'unsigned', 'int', 'float'}
 
 VALID_TYPE_SETS = {
-        frozenset(['void']),
-        frozenset(['bool']),
-        frozenset(['char']),
-        frozenset(['signed']),
-        frozenset(['signed', 'char']),
-        frozenset(['unsigned']),
-        frozenset(['unsigned', 'char']),
-        frozenset(['int']),
-        frozenset(['signed', 'int']),
-        frozenset(['unsigned', 'int']),
-        frozenset(['short']),
-        frozenset(['short', 'int']),
-        frozenset(['signed', 'short']),
-        frozenset(['signed', 'short', 'int']),
-        frozenset(['unsigned', 'short']),
-        frozenset(['unsigned', 'short', 'int']),
-        frozenset(['long']),
-        frozenset(['long', 'int']),
-        frozenset(['long', 'long']),
-        frozenset(['long', 'long', 'int']),
-        frozenset(['signed', 'long']),
-        frozenset(['signed', 'long', 'int']),
-        frozenset(['signed', 'long', 'long']),
-        frozenset(['signed', 'long', 'long', 'int']),
-        frozenset(['unsigned', 'long']),
-        frozenset(['unsigned', 'long', 'int']),
-        frozenset(['unsigned', 'long', 'long']),
-        frozenset(['unsigned', 'long', 'long', 'int']),
-        frozenset(['float']),
-        frozenset(['double']),
-        frozenset(['long', 'double']),
-    }
+    ('void',),
+    ('bool',),
+    ('char',),
+    ('signed',),
+    ('char', 'signed'),
+    ('unsigned',),
+    ('char', 'unsigned'),
+    ('int',),
+    ('int', 'signed'),
+    ('int', 'unsigned'),
+    ('short',),
+    ('int', 'short'),
+    ('short', 'signed'),
+    ('int', 'short', 'signed'),
+    ('short', 'unsigned'),
+    ('int', 'short', 'unsigned'),
+    ('long',),
+    ('int', 'long'),
+    ('long', 'long'),
+    ('int', 'long', 'long'),
+    ('long', 'signed'),
+    ('int', 'long', 'signed'),
+    ('long', 'long', 'signed'),
+    ('int', 'long', 'long', 'signed'),
+    ('long', 'unsigned'),
+    ('int', 'long', 'unsigned'),
+    ('long', 'long', 'unsigned'),
+    ('int', 'long', 'long', 'unsigned'),
+    ('float',),
+    ('double',),
+    ('double', 'long'),
+}
 
 ########################################################################################################################
 class CSTtoAST(Transformer):
@@ -57,54 +60,89 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     def declaration_specifier_list(self, children):
-        simple_types  = []
-        qualifiers    = []
-        storage_class = []
 
-        # Determine Children Types
+        # Initialize Empty Specs
+        simple_types       = []
+        elaborate_types    = []
+        elaborate_name     = None
+        qualifier          = None
+        storage_class      = None
+        function_specifier = None
+
+        # Determine Children Names
         if children:
             for child in children:
                 if isinstance(child, ASTNode):
                     if child.name == "simple_type_specifier":
                         simple_types.append(child.children[0].name)
-                        print("############################################################### Found Simple Type Secifier ####################")
+                    elif child.name == "elaborated_type_specifier":
+
+                        # SEMANTIC ERROR: multiple non-duplicate elaborate type names
+                        if elaborate_name is not None and child.children[1].name == elaborate_name:
+                            return Error("Multiple non-duplicate elaborate type names")
+                        else:
+                            elaborate_type = child.children[0].name
+                            elaborate_name = child.children[1].name
+
                     elif child.name == "type_qualifier":
-                        qualifiers.append(child.children[0].name)
+                        # SEMANTIC ERROR: multiple type qualifiers
+                        if qualifier is not None:
+                            return Error("Multiple type qualifiers found")
+                        qualifier = child.children[0].name
+
                     elif child.name == "storage_class_specifier":
-                        storage_class.append(child.children[0].name)
-                elif isinstance(child, Tree):
-                    if child.name == "simple_type_specifier":
-                        simple_types.append(child.children[0].value)
+                        # SEMANTIC ERROR: multiple storage class specifiers
+                        if storage_class is not None:
+                            return Error("Multiple storage class specifiers found")
+                        storage_class = child.children[0].name
 
+                    elif child.name == "function_specifier":
+                        function_specifier = child.children[0].name
 
-        # ERROR CHECKING
-        types_found = frozenset(simple_types)
+        # SEMANTIC ERROR: mutual exclusivity of simple_type & elaborate_type
+        if elaborate_types and simple_types:
+            return Error("'Elaborate' and 'Simple' types are mutually exclusive")
+
+        # ERROR CHECKING: base_type / is_signed
+        types_found = tuple(sorted(simple_types))
         if types_found in VALID_TYPE_SETS:
-            # Grab Base Type
-            base_type = "int"
+
+            # Grab base type
+            if elaborate_name is None:
+                # Identifier Type Name
+                base_type = elaborate_name
+            else:
+                # Simple Type Name
+                base_type = next((t for t in types_found if t in BASE_TYPES), None)
 
             # Check If Unsigned
             is_signed = True
+            for elem in types_found:
+                if elem == "unsigned":
+                    is_signed = False
+                    break
 
             # Calculate Size
-            size = 32
+            if base_type not in BASE_TYPES:
+                size = None
+                print("\033[93;5;28mWarning: Found elaborate type, memory size uncertain.\033[0m")
+            else:
+                size = scalar_size(types_found, base_type, "LLP64")
 
             # Compile Type Node
-            type_node = Type(' '.join(sorted(types_found)), base_type, size, is_signed)
+            type_node = Type(' '.join(types_found), base_type, size, is_signed, elaborate_types)
 
-        # ERROR: Invalid Type Found
+        # ERROR: Found Type Not in Valid Set
         else:
             return Error("Invalid type specifier found.")
 
         # Create and Return Declaration Specifier Node
-        specifier_node = DeclSpec(type_node, qualifiers, storage_class)
+        specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
         return specifier_node
 
-    ####################################################################################################################
 
     ####################################################################################################################
     # Expression Precedence Abstraction
-
     def primary(self, children):
         if children and len(children) == 1:
             return children[0]
