@@ -10,15 +10,10 @@ translation_unit: external_declaration*
 
 external_declaration: declaration
                     | function_definition
-# AMBIGUITY        | function_declaration
-
 
 ########################################################################################################################
-#  DECLARATORS  #
-#################
-
-# REMOVE AMBIGUITY
-#function_declaration: declaration_specifier_list declarator _SEMICOLON
+#  DECLARATIONS & DEFINITIONS  #
+################################
 
 function_definition: declaration_specifier_list declarator compound_statement
 
@@ -35,18 +30,19 @@ init_list: initializer (_COMMA initializer)*
 initializer: expression
            | _LBRACE init_list? _RBRACE
 
-# REMOVED AMBIGUITY - PLEASE DISAMBIGUATE LATER
 
-############################################
-# MUTUALLY EXCLUSIVE DECLARATOR STRUCTURE  #
-############################################
+########################
+#  DECLARATOR (Named)  #
+########################
 
-declarator: ptr_operator declarator
-          | direct_declarator
+declarator: ptr_list? reference_operator? direct_declarator
 
-ptr_operator: (qualified_type_name SCOPE)? STAR cv_qualifier_seq?  -> ptr_to_member_or_ptr
-            | BIT_AND                                              -> lvalue_ref
-            | AND                                                  -> rvalue_ref
+reference_operator: BIT_AND     -> lvalue_ref
+                  | AND         -> rvalue_ref
+
+ptr_list: ptr_operator+
+
+ptr_operator: (qualified_type_name SCOPE)? STAR cv_qualifier_seq?    -> ptr
 
 qualified_type_name: IDENTIFIER (SCOPE IDENTIFIER)*
 
@@ -60,27 +56,40 @@ direct_declarator: IDENTIFIER
                  | direct_declarator function_suffix
 
 array_suffix:    _LBRACKET constant_expression _RBRACKET
-function_suffix: _LPAREN parameter_list _RPAREN
+function_suffix: _LPAREN parameter_list? _RPAREN
 
-# MAY IMPLEMENT LATER
-#abstract_declarator: ptr_operator? direct_abstract_declarator
-#                   | ptr_operator
-#
-#direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
-#                          | direct_abstract_declarator array_suffix
-#                          | direct_abstract_declarator function_suffix
 
 ########################################################################################################################
-# DECLARATOR SPECIFIERS  #
+#  ABSTRACT DECLARATORS  (Unnamed)  #
+#####################################
+
+abstract_declarator: ptr_operator abstract_declarator  # allows *, C::*, &, && chains
+                   | direct_abstract_declarator
+                   |                                   # EMPTY: just the specifiers (e.g., "int")
+
+direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
+                          | direct_abstract_declarator array_suffix
+                          | direct_abstract_declarator function_suffix
+                          | array_suffix            # base-case: allow starting with [] …
+                          | function_suffix         # … or with ()
+
+########################################################################################################################
+# Parameters  #
 ##########################
 
 parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
               | ELLIPSIS                     // "..."
 
-parameter: declaration_specifier_list declarator default_arg?   // named + default arguments
-#       | declaration_specifier_list abstract_declarator? // unnamed
+parameter: declaration_specifier_list param_declarator?  default_arg?   // specs + name? + default_arguments?
+
+# Parameter - Named or Unnamed
+?param_declarator: declarator | abstract_declarator
 
 default_arg: EQUAL initializer
+
+########################################################################################################################
+#  DECLARATION SPECIFIER List #
+###############################
 
 declaration_specifier_list: declaration_specifier+
 
@@ -134,22 +143,22 @@ assignment_expression: conditional_expression
 conditional_expression: logic_or ( TERNARY expression COLON conditional_expression )?
 
 # || down to unary — same as you had, but now fed by conditional_expression above
-logic_or: logic_or OR logic_and                          -> or
+logic_or: logic_or OR logic_and                          -> or_expr
         | logic_and
 
-logic_and: logic_and AND equality                         -> and
+logic_and: logic_and AND equality                         -> and_expr
          | equality
 
-equality: equality (EQ | NEQ) relational                 -> eq
+equality: equality (EQ | NEQ) relational                 -> eq_expr
         | relational
 
 relational: relational (LT | GT | LE | GE) sum             -> rel_expr
           | sum
 
-sum: sum (PLUS | MINUS) product                     -> add
+sum: sum (PLUS | MINUS) product                     -> sum_expr
    | product
 
-product: product (STAR | SLASH | PERCENT) unary         -> mul
+product: product (STAR | SLASH | PERCENT) unary         -> prod_expr 
        | unary
 
 unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary

@@ -54,9 +54,9 @@ class CSTtoAST(Transformer):
         return ASTNode(token.value)
 
     ####################################################################################################################
-    def parameter(self, children):
-        parameter_node = Parameter(children[0], children[1])
-        return parameter_node
+    # def parameter(self, children):
+    #     parameter_node = Parameter(children[0], children[1])
+    #     return parameter_node
 
     ####################################################################################################################
     def declaration_specifier_list(self, children):
@@ -69,35 +69,47 @@ class CSTtoAST(Transformer):
         storage_class      = None
         function_specifier = None
 
+        ################################################################################################################
         # Determine Children Names
         if children:
             for child in children:
                 if isinstance(child, ASTNode):
+
+                    # FOUND: Simple Type Specifier
                     if child.name == "simple_type_specifier":
                         simple_types.append(child.children[0].name)
+
+                    # FOUND: Elaborate Type Specifier
                     elif child.name == "elaborated_type_specifier":
 
                         # SEMANTIC ERROR: multiple non-duplicate elaborate type names
                         if elaborate_name is not None and child.children[1].name == elaborate_name:
                             return Error("Multiple non-duplicate elaborate type names")
                         else:
+                            # SAVE: Elaborate Type & Name
                             elaborate_type = child.children[0].name
                             elaborate_name = child.children[1].name
 
+                    # FOUND: Type Qualifier
                     elif child.name == "type_qualifier":
                         # SEMANTIC ERROR: multiple type qualifiers
                         if qualifier is not None:
                             return Error("Multiple type qualifiers found")
                         qualifier = child.children[0].name
 
+                    # Found: Storage Class Specifier
                     elif child.name == "storage_class_specifier":
                         # SEMANTIC ERROR: multiple storage class specifiers
                         if storage_class is not None:
                             return Error("Multiple storage class specifiers found")
                         storage_class = child.children[0].name
 
+                    # Found: Function Specifier
                     elif child.name == "function_specifier":
                         function_specifier = child.children[0].name
+
+        # END - Determine Children Names
+        ################################################################################################################
 
         # SEMANTIC ERROR: mutual exclusivity of simple_type & elaborate_type
         if elaborate_types and simple_types:
@@ -108,7 +120,7 @@ class CSTtoAST(Transformer):
         if types_found in VALID_TYPE_SETS:
 
             # Grab base type
-            if elaborate_name is None:
+            if elaborate_name is not None:
                 # Identifier Type Name
                 base_type = elaborate_name
             else:
@@ -123,9 +135,10 @@ class CSTtoAST(Transformer):
                     break
 
             # Calculate Size
-            if base_type not in BASE_TYPES:
+            if elaborate_types:
                 size = None
-                print("\033[93;5;28mWarning: Found elaborate type, memory size uncertain.\033[0m")
+                print("\033[93;5;28mWarning: Found elaborate type, memory size uncertain.\n"
+                      + str(elaborate_types) + "\033[0m")
             else:
                 size = scalar_size(types_found, base_type, "LLP64")
 
@@ -204,7 +217,15 @@ class CSTtoAST(Transformer):
             return children[0]
         else:
             return ASTNode("assignment_expression", children)
+
     ####################################################################################################################
+    # This does not handle direct declarator unbinding yet
+    def direct_declarator(self, children):
+        if children and len(children) == 1:
+            return DeclName(children[0].name)
+        else:
+            return ASTNode("direct_decl", children)
+
 
     # def pointer(self, children):
     #     # Check if has children

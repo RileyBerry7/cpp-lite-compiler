@@ -39,8 +39,20 @@ class ASTNode:
 class Parameter(ASTNode):
     def __init__(self, param_type, param_name):
         super().__init__(node_name="parameter")
-        self.param_type = param_type
-        self.param_name = param_name
+        self.decl_specs = DeclSpec(type_node=param_type)
+        self.decl_name  = None
+
+        # Normalized Parameter Attributes
+        self.reference  = None
+        self.ptr_list   = []
+        self.suffixes   = []
+        self.default_init = None
+
+class NormalDecl(ASTNode):
+
+class PtrList(ASTNode):
+
+class Initializer(ASTNode):
 
 ########################################################################################################################
 class Type(ASTNode):
@@ -50,6 +62,9 @@ class Type(ASTNode):
         self.size       = size
         self.signed     = signed
         self.elaboration = elaboration  # Struct, Class, Enum or None
+
+        self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
+
 ########################################################################################################################
 class DeclSpec(ASTNode):
     def __init__(self,
@@ -65,29 +80,41 @@ class DeclSpec(ASTNode):
 
         self.children = [type_node]
 
-    # def __str__(self):
-    #     return f"{self.type_name} {' '.join(self.qualifiers)}"
 
 ########################################################################################################################
-class ReferenceType(str, Enum):
-    REFERENCE = "&"
-    DOUBLE_REFERENCE = "&&"
-    DEREFERENCE = "&" "*"
+# class ReferenceType(str, Enum):
+#     REFERENCE = "&"
+#     DOUBLE_REFERENCE = "&&"
+#     DEREFERENCE = "&" "*"
 
-class PointerChain(ASTNode):
-    def __init__(self, character: ReferenceType, qualifiers=None):
-        super().__init__("pointer_chain") # think something like: "int * * const & *function_name();"
-        qualifiers = qualifiers if qualifiers is not None else []
-        self.pointer_chain = [(character, qualifiers)]
-
-    def append_chain(self, child_chain):
-        self.pointer_chain.append(child_chain)
+# class PointerChain(ASTNode):
+#     def __init__(self, character: ReferenceType, qualifiers=None):
+#         super().__init__("pointer_chain") # think something like: "int * * const & *function_name();"
+#         qualifiers = qualifiers if qualifiers is not None else []
+#         self.pointer_chain = [(character, qualifiers)]
+#
+#     def append_chain(self, child_chain):
+#         self.pointer_chain.append(child_chain)
 
 ########################################################################################################################
 # class parameter_list(ASTNode):
 #     def __init__(self, children=None, params=None):
 #         super().__init__(node_name="parameter_list", children=)
 #         self.param_list = []
+
+class DeclName(ASTNode):
+    def __init__(self, identifier:str=None):
+        super().__init__(node_name="decl_name")
+        self.decl_name = identifier  # Identifier node
+
+class NormalDecl(ASTNode):
+    def __init__(self, decl_specs:DeclSpec, decl_name:DeclName):
+        super().__init__(node_name="normal_decl")
+        self.decl_specs = decl_specs
+        self.decl_name  = decl_name
+
+        self.children.append(decl_specs)
+        self.children.append(decl_name)
 
 ########################################################################################################################
 # ERRORS
