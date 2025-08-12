@@ -48,9 +48,24 @@ class Parameter(ASTNode):
         self.suffixes   = []
         self.default_init = None
 
-class NormalDecl(ASTNode):
+class NormalDeclarator(ASTNode):
+    def __init__(self, identifier:str=None):
+        super().__init__(node_name="decl_name")
+        self.name
+        self.ref
+        self.ptr_chain
+        self.suffixes
 
-class PtrList(ASTNode):
+class NormalDeclaration(ASTNode):
+    def __init__(self, decl_specs:DeclSpec, decl_name:DeclName):
+        super().__init__(node_name="normal_decl")
+        self.decl_specs = decl_specs
+        self.declarator = declarator
+        self.initializer = initializer
+
+class PtrLevel(ASTNode):
+    self.member_of
+    self.cv
 
 class Initializer(ASTNode):
 
