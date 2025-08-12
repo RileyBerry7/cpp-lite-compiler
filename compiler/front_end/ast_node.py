@@ -34,40 +34,60 @@ class ASTNode:
         return text_tree
 
 ########################################################################################################################
-# Inheritor Nodes
+#  Inheritor Nodes:  #
+######################
 
-class Parameter(ASTNode):
-    def __init__(self, param_type, param_name):
-        super().__init__(node_name="parameter")
-        self.decl_specs = DeclSpec(type_node=param_type)
-        self.decl_name  = None
 
-        # Normalized Parameter Attributes
-        self.reference  = None
-        self.ptr_list   = []
-        self.suffixes   = []
-        self.default_init = None
-
-class NormalDeclarator(ASTNode):
-    def __init__(self, identifier:str=None):
-        super().__init__(node_name="decl_name")
-        self.name
-        self.ref
-        self.ptr_chain
-        self.suffixes
-
-class NormalDeclaration(ASTNode):
-    def __init__(self, decl_specs:DeclSpec, decl_name:DeclName):
-        super().__init__(node_name="normal_decl")
-        self.decl_specs = decl_specs
-        self.declarator = declarator
-        self.initializer = initializer
+########################################################################################################################
+# POINTER LEVEL
 
 class PtrLevel(ASTNode):
-    self.member_of
-    self.cv
+    def __init__(self,
+                 scope_qualifiers: list[str] | None = None ,
+                 type_qualifiers : list[str] | None = None ):
+
+        super().__init__(node_name="PtrLevel")
+        self.scope_qualifier_path = scope_qualifiers or []
+        self.type_qualifier_list  = type_qualifiers  or []
+
+########################################################################################################################
+# INITIALIZER
 
 class Initializer(ASTNode):
+    def __init__(self):
+        super().__init__(node_name="initializer")
+        self.value = None
+
+
+########################################################################################################################
+# NORMALIZED DECLARATOR
+
+class NormalDeclarator(ASTNode):
+    def __init__(self, identifier:str=None, reference_type=None):
+        super().__init__(node_name="normal_declarator")
+        self.decl_name = identifier
+        self.reference = reference_type
+        self.ptr_chain = []
+        self.suffixes  = []
+
+########################################################################################################################
+# NORMALIZED DECLARATION
+
+class NormalDeclaration(ASTNode):
+    def __init__(self, decl_specs:DeclSpec, normal_declarator:NormalDeclarator, init:Initializer):
+        super().__init__(node_name="normal_declaration")
+        self.decl_specs  = decl_specs
+        self.decl_normal = normal_declarator
+        self.decl_init   = init
+
+########################################################################################################################
+# PARAMETER
+
+class Parameter(ASTNode):
+    def __init__(self, normalized_declaration:NormalDeclaration):
+        super().__init__(node_name="parameter")
+        # Normalized Parameter Attributes
+        self.param_declaration = normalized_declaration
 
 ########################################################################################################################
 class Type(ASTNode):

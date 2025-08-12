@@ -42,13 +42,10 @@ reference_operator: BIT_AND     -> lvalue_ref
 
 ptr_list: ptr_operator+
 
-ptr_operator: (qualified_type_name SCOPE)? STAR cv_qualifier_seq?    -> ptr
+ptr_operator: (scope_qualifier SCOPE)? STAR type_qualifier_list? -> ptr
 
-qualified_type_name: IDENTIFIER (SCOPE IDENTIFIER)*
+scope_qualifier: IDENTIFIER (SCOPE IDENTIFIER)*
 
-nested_name_specifier: (IDENTIFIER SCOPE)* IDENTIFIER SCOPE
-
-cv_qualifier_seq: type_qualifier+
 
 direct_declarator: IDENTIFIER
                  | _LPAREN declarator _RPAREN
@@ -103,6 +100,9 @@ declaration_specifier_list: declaration_specifier+
                        | CONSTEXPR
 
 storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
+
+
+type_qualifier_list: type_qualifier+
 
 type_qualifier: CONST | VOLATILE | RESTRICT
 
