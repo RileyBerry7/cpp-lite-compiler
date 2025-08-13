@@ -137,28 +137,28 @@ constant_expression: conditional_expression
 
 # Assignment: right-associative; allow any unary lhs (covers *p = x, a[i] = x, ++x = y is still rejected later)
 assignment_expression: conditional_expression
-                     | unary assign_op assignment_expression          -> assignment_expr
+                     | unary assign_op assignment_expression
 
 # Ternary sits between assignment and ||; middle uses full expression, right side is conditional_expression
 conditional_expression: logic_or ( TERNARY expression COLON conditional_expression )?
 
 # || down to unary — same as you had, but now fed by conditional_expression above
-logic_or: logic_or OR logic_and                          -> or_expr
+logic_or: logic_or OR logic_and                          
         | logic_and
 
-logic_and: logic_and AND equality                         -> and_expr
+logic_and: logic_and AND equality                        
          | equality
 
-equality: equality (EQ | NEQ) relational                 -> equality_expr
+equality: equality (EQ | NEQ) relational                 
         | relational
 
-relational: relational (LT | GT | LE | GE) sum             -> relational_expr
+relational: relational (LT | GT | LE | GE) sum             
           | sum
 
-sum: sum (PLUS | MINUS) product                     -> sum_expr
+sum: sum (PLUS | MINUS) product                  
    | product
 
-product: product (STAR | SLASH | PERCENT) unary         -> product_expr 
+product: product (STAR | SLASH | PERCENT) unary         
        | unary
 
 unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary

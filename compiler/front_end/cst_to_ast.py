@@ -158,18 +158,22 @@ class CSTtoAST(Transformer):
     def primary(self, children):
         if children and len(children) == 1:
             if isinstance(children[0], ASTNode) and children[0].name == "literal":
-                literal_type = token_to_literal_kind(children[0].children[0].children[0].name)
+                literal_type  = token_to_literal_kind(children[0].children[0].children[0].name)
                 literal_value =  lexeme_to_number(children[0].children[0].name)
                 return LiteralExpr(literal_type, literal_value)
 
-            else:
-                return ASTNode("primary", children)
+            # elif isinstance(children[0], ASTNode) and children[0].name == "identifier":
+            return IdentifierExpr(children[0].children[0].name)
+
+            # else:
+            #     return ASTNode("primary", children)
 
     def unary(self, children):
+        # Remove Redundant Precedence
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("unary", children)
+            return UnaryExpr(children[0], children[1].name)
 
     def postfix(self, children):
         if children and len(children) == 1:
@@ -178,37 +182,42 @@ class CSTtoAST(Transformer):
             return ASTNode("postfix", children)
 
     def product(self, children):
-        if children and len(children) == 1:
+        if len(children) == 1:
             return children[0]
         else:
-            return ASTNode("product", children)
+            return BinaryExpr(children[0], children[2], children[1].name)
 
 
     def sum(self, children):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("sum", children)
+            return BinaryExpr(children[0], children[2], children[1].name)
+
     def relational(self, children):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("relational", children)
+            return ComparisonExpr(children[0], children[2], children[1].name)
+
     def equality(self, children):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("equality", children)
+            return ComparisonExpr(children[0], children[2], children[1].name)
+
+
     def logic_and(self, children):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("logic_and", children)
+            return LogicExpr(children[0], children[2], children[1].name)
     def logic_or(self, children):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("logic_or", children)
+            return LogicExpr(children[0], children[2], children[1].name)
+
     def conditional_expression(self, children):
         if children and len(children) == 1:
             return children[0]
@@ -219,7 +228,7 @@ class CSTtoAST(Transformer):
         if children and len(children) == 1:
             return children[0]
         else:
-            return ASTNode("assignment_expression", children)
+            return AssignExpr(children[0], children[2], children[1].name)
 
     ################
 

@@ -1,6 +1,6 @@
 # ast_node.py
 
-from enum import Enum
+from enum import Enum, auto
 from typing import Union, Self
 from compiler.utils.literal_kind import *
 
@@ -164,10 +164,10 @@ class Parameter(ASTNode):
 ########################################################################################################################
 # ARRAY SUFFIX
 
-class ArraySuffix(ASTNode):
-    def __init__(self):
-        super().__init__(node_name="array_suffix")
-        self.size = None
+# class ArraySuffix(ASTNode, Expr):
+#     def __init__(self):
+#         super().__init__(node_name="array_suffix")
+#         self.size = Expr
 
 ########################################################################################################################
 # FUNCTION SUFFIX
@@ -175,11 +175,23 @@ class ArraySuffix(ASTNode):
 ########################################################################################################################
 # EXPRESSIONS
 
+class ValueCategory(Enum):
+    LVALUE  = auto()   # 'Locator Value' - location in memory
+    PRVALUE = auto()   # 'Pure   RValue' - temporary value (RHS of an assignment)
+
 # BASE EXPRESSION
 class Expr(ASTNode):
     def __init__(self, expr_type:str="Expr"):
         super().__init__(node_name=expr_type)
+        self.expr_type = expr_type
+        self.value_cat = None      # Assigned at semantic analysis / decoration
 
+
+class ConstantExpr(Expr):
+    """ MUST BE CONSTANT - will be checked at semantic analysis """
+    def __init__(self, expression:Expr):
+        super().__init__(expr_type="constant_expr")
+        self.expr = expression
 
 ########################################################################################################################
 # PRIMITIVE EXPRESSIONS
@@ -197,16 +209,45 @@ class IdentifierExpr(Expr):
         super().__init__(expr_type="identifier_expr")
         self.id_name = identifier_name
 
-# class UnaryExpr(Expr):
-#
-# class BinaryExpr(Expr):
-#
-# # Semantic structure
-# class AssignExpr(Expr):
-#
-# class CondExpr(Expr):
-#
-# class RelExpr(Expr):
+class UnaryExpr(Expr):
+    def __init__(self, operand:Expr, operator:str=None):
+        super().__init__(expr_type="unary_expr")
+        self.operand  = operand
+        self.operator = operator
+
+
+class BinaryExpr(Expr):
+    def __init__(self, left:Expr, right:Expr, operator:str=None):
+        super().__init__(expr_type="binary_expr")
+        self.left_operand  = left
+        self.right_operand = right
+        self.operator      = operator   # "+", "-", "*", "/" ...
+
+
+# Assignment Expressions
+class AssignExpr(Expr):
+    def __init__(self, left:Expr, right:Expr, operator:str=None):
+        super().__init__(expr_type="assign_expr")
+        self.left_operand  = left
+        self.right_operand = right
+        self.operator      = operator   # "=", "+=", "-=", "*=", "/=" ...
+
+# Comparison Expressions - (relational, equality)
+class ComparisonExpr(Expr):
+    def __init__(self, left:Expr, right:Expr, operator:str=None):
+        super().__init__(expr_type="comparison_expr")
+        self.left_operand = left
+        self.right_operand = right
+        self.operator = operator  # "<", ">=", "==", "!=" ...
+
+class LogicExpr(Expr):
+    def __init__(self, left:Expr, right:Expr, operator:str=None):
+        super().__init__(expr_type="logic_expr")
+        self.left_operand = left
+        self.right_operand = right
+        self.operator = operator  # "||", "&&"
+
+# Postfix Expressions
 
 ########################################################################################################################
 
