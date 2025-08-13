@@ -220,11 +220,11 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     # This does not handle direct declarator unbinding yet
-    def direct_declarator(self, children):
-        if children and len(children) == 1:
-            return DeclName(children[0].name)
-        else:
-            return ASTNode("direct_decl", children)
+    # def direct_declarator(self, children):
+    #     if children and len(children) == 1:
+    #         return DeclName(children[0].name)
+    #     else:
+    #         return ASTNode("direct_decl", children)
 
 
     # def pointer(self, children):
@@ -264,5 +264,38 @@ class CSTtoAST(Transformer):
     #     # param_list_node = parameter_list(children, params)
     #
     #     return ASTNode("parameter_list", children)
+
+    ####################################################################################################################
+    # PTR -> POINTER LEVEL
+    def ptr(self, children):
+
+        # Initialize Empty Lists
+        scope_path      = []
+        type_qualifiers = []
+
+        # Early Return: only child = plain '*'
+        if len(children) == 1:
+            return PtrLevel()
+
+        # Check For: Scope_Qualifier Child
+        elif isinstance(children[0], ASTNode) and children[0].name == "scope_qualifier":
+            for grandchild in children[0].children:
+                if grandchild != "::":
+                    scope_path.append(grandchild.name)
+
+        # Check For: Type_Qualifier Children @ [1]
+        if len(children) >= 2 and isinstance(children[1], ASTNode) and children[1].name == "type_qualifier_list":
+            for grandchild in children[1].children:
+                type_qualifiers.append(grandchild.name)
+
+        # Check For: Type_Qualifier Children @ [3]
+        elif len(children) >= 4 and isinstance(children[3], ASTNode) and children[3].name == "type_qualifier_list":
+            for grandchild in children[3].children:
+                type_qualifiers.append(grandchild.name)
+
+        # Declare and Return PtrLevel Object
+        return PtrLevel(scope_path, type_qualifiers)
+
+
 
     ####################################################################################################################

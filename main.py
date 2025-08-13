@@ -23,12 +23,13 @@ def main():
     ####################################################################################################################
     # Test Code
     print("\033[33;51m[Reading...]\n[Displaying Source Code]\033[0m")
-    code = ("int * const * main(int** const * &param1, char(cast_var), float param2){"
+    code = ("int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], char(cast_var), float SCOPE :: * param2){"
             "\n if (1 < 2 + 1 - 1 / 1)"
             "\n { int a = 10;"
             "\n }"
             "\n return 0;"
             "\n }"
+            "\n int a[3][4];"
             "\n")
 
     # code = (

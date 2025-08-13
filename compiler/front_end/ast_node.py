@@ -1,7 +1,7 @@
 # ast_node.py
 
 from enum import Enum
-from typing import Union
+from typing import Union, Self
 
 ########################################################################################################################
 class ASTNode:
@@ -38,6 +38,35 @@ class ASTNode:
 #  Inheritor Nodes:  #
 ######################
 
+########################################################################################################################
+# TYPE
+
+class Type(ASTNode):
+    def __init__(self, full_type:str, base_type:str, size:int, signed:bool=True, elaboration:[str]=None):
+        super().__init__(node_name=full_type)
+        self.type_name  = base_type
+        self.size       = size
+        self.signed     = signed
+        self.elaboration = elaboration  # Struct, Class, Enum or None
+
+        self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
+
+########################################################################################################################
+# DECLARATION SPECIFIER LIST
+
+class DeclSpec(ASTNode):
+    def __init__(self,
+                 type_node:Type      =None,
+                 qualifier           =None,
+                 storage_class       =None,
+                 function_specifier  =None ):
+        super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
+        self.type_node       = type_node           # Required
+        self.qualifier       = qualifier           # Optional
+        self.storage_class   = storage_class       # Optional
+        self.func_specifiers = function_specifier # Optional
+
+        self.children = [type_node]
 
 ########################################################################################################################
 # POINTER LEVEL
@@ -67,13 +96,31 @@ class Initializer(ASTNode):
 ########################################################################################################################
 # NORMALIZED DECLARATOR
 
+SuffixElem = Union["FuncSuffix", "ArraySuffix"]
+
 class NormalDeclarator(ASTNode):
-    def __init__(self, identifier:str=None, reference_type=None):
+    def __init__(self,
+                 ptr_chain:list[PtrLevel] | None = None,
+                 reference_type=None,
+                 identifier:str=None,
+                 suffix_list:list[SuffixElem] | None = None):
+
         super().__init__(node_name="normal_declarator")
-        self.decl_name = identifier
+
+        self.ptr_chain = ptr_chain or []
         self.reference = reference_type
-        self.ptr_chain = []
-        self.suffixes  = []
+        self.decl_name = identifier
+        self.suffixes  = suffix_list or []
+
+    def synthesize_from_child(self, child:Self):
+
+        self.ptr_chain.extend(child.ptr_chain)
+        self.reference = child.reference
+        self.decl_name = child.decl_name
+        self.suffixes.extend(child.suffixes)
+
+
+
 
 ########################################################################################################################
 # NORMALIZED DECLARATION
@@ -95,32 +142,6 @@ class Parameter(ASTNode):
         self.param_declaration = normalized_declaration
 
 ########################################################################################################################
-class Type(ASTNode):
-    def __init__(self, full_type:str, base_type:str, size:int, signed:bool=True, elaboration:[str]=None):
-        super().__init__(node_name=full_type)
-        self.type_name  = base_type
-        self.size       = size
-        self.signed     = signed
-        self.elaboration = elaboration  # Struct, Class, Enum or None
-
-        self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
-
-########################################################################################################################
-class DeclSpec(ASTNode):
-    def __init__(self,
-                 type_node:Type      =None,
-                 qualifier           =None,
-                 storage_class       =None,
-                 function_specifier  =None ):
-        super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
-        self.type_node       = type_node           # Required
-        self.qualifier       = qualifier           # Optional
-        self.storage_class   = storage_class       # Optional
-        self.func_specifiers = function_specifier # Optional
-
-        self.children = [type_node]
-
-########################################################################################################################
 # EXPRESSIONS
 
 class Expr(ASTNode):
@@ -135,8 +156,16 @@ class PrimaryExpr(Expr):
         self.identifier = identifier
         self.literal   = literal
 
-
-
+# class UnaryExpr(Expr):
+#
+# class BinaryExpr(Expr):
+#
+# # Semantic structure
+# class AssignExpr(Expr):
+#
+# class CondExpr(Expr):
+#
+# class RelExpr(Expr):
 
 ########################################################################################################################
 
