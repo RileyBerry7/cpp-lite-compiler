@@ -1,6 +1,7 @@
 # ast_node.py
 
 from enum import Enum
+from typing import Union
 
 ########################################################################################################################
 class ASTNode:
@@ -53,11 +54,15 @@ class PtrLevel(ASTNode):
 ########################################################################################################################
 # INITIALIZER
 
-class Initializer(ASTNode):
-    def __init__(self):
-        super().__init__(node_name="initializer")
-        self.value = None
+InitElem = Union["Initializer", "Expr"]
 
+class Initializer(ASTNode):
+    def __init__(self, elements: list[InitElem] | None = None):
+        super().__init__(node_name="initializer")
+        self.init_list = elements or []
+
+    def is_scalar(self) -> bool:
+        return len(self.init_list) == 1 and not isinstance(self.init_list[0], Initializer)
 
 ########################################################################################################################
 # NORMALIZED DECLARATOR
@@ -115,41 +120,30 @@ class DeclSpec(ASTNode):
 
         self.children = [type_node]
 
+########################################################################################################################
+# EXPRESSIONS
+
+class Expr(ASTNode):
+    def __init__(self, expr_type:str="Expr"):
+        super().__init__(node_name=expr_type)
+        self.type  = None # Filled in semantic analysis
+        self.value = None # Constant Value if any
+
+class PrimaryExpr(Expr):
+    def __init__(self, identifier:str=None, literal:str=None):
+        super().__init__(expr_type="primary_expr")
+        self.identifier = identifier
+        self.literal   = literal
+
+
+
 
 ########################################################################################################################
-# class ReferenceType(str, Enum):
-#     REFERENCE = "&"
-#     DOUBLE_REFERENCE = "&&"
-#     DEREFERENCE = "&" "*"
 
-# class PointerChain(ASTNode):
-#     def __init__(self, character: ReferenceType, qualifiers=None):
-#         super().__init__("pointer_chain") # think something like: "int * * const & *function_name();"
-#         qualifiers = qualifiers if qualifiers is not None else []
-#         self.pointer_chain = [(character, qualifiers)]
-#
-#     def append_chain(self, child_chain):
-#         self.pointer_chain.append(child_chain)
-
-########################################################################################################################
-# class parameter_list(ASTNode):
-#     def __init__(self, children=None, params=None):
-#         super().__init__(node_name="parameter_list", children=)
-#         self.param_list = []
-
-class DeclName(ASTNode):
-    def __init__(self, identifier:str=None):
-        super().__init__(node_name="decl_name")
-        self.decl_name = identifier  # Identifier node
-
-class NormalDecl(ASTNode):
-    def __init__(self, decl_specs:DeclSpec, decl_name:DeclName):
-        super().__init__(node_name="normal_decl")
-        self.decl_specs = decl_specs
-        self.decl_name  = decl_name
-
-        self.children.append(decl_specs)
-        self.children.append(decl_name)
+# class DeclName(ASTNode):
+#     def __init__(self, identifier:str=None):
+#         super().__init__(node_name="decl_name")
+#         self.decl_name = identifier  # Identifier node
 
 ########################################################################################################################
 # ERRORS

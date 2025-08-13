@@ -53,7 +53,7 @@ direct_declarator: IDENTIFIER
                  | direct_declarator function_suffix
 
 array_suffix:    _LBRACKET constant_expression _RBRACKET
-function_suffix: _LPAREN parameter_list? _RPAREN
+function_suffix: _LPAREN   parameter_list?     _RPAREN
 
 
 ########################################################################################################################
