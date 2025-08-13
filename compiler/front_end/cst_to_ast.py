@@ -1,7 +1,10 @@
 # cst_to_ast.py
+from multiprocessing.managers import Token
 
 from lark import Lark, Transformer, Tree
 from compiler.front_end.ast_node import *
+from compiler.utils.literal_kind import *
+from compiler.utils.lexeme_to_number import lexeme_to_number
 from compiler.utils.scalar_size import scalar_size
 
 BASE_TYPES = {'void', 'bool', 'char', 'signed', 'unsigned', 'int', 'float'}
@@ -51,12 +54,8 @@ class CSTtoAST(Transformer):
         return abstract_node
 
     def __default_token__(self, token):
-        return ASTNode(token.value)
 
-    ####################################################################################################################
-    # def parameter(self, children):
-    #     parameter_node = Parameter(children[0], children[1])
-    #     return parameter_node
+        return ASTNode(token.value, [ASTNode(token.type)])
 
     ####################################################################################################################
     def declaration_specifier_list(self, children):
@@ -158,9 +157,13 @@ class CSTtoAST(Transformer):
     # Expression Precedence Abstraction
     def primary(self, children):
         if children and len(children) == 1:
-            return children[0]
-        else:
-            return ASTNode("primary", children)
+            if isinstance(children[0], ASTNode) and children[0].name == "literal":
+                literal_type = token_to_literal_kind(children[0].children[0].children[0].name)
+                literal_value =  lexeme_to_number(children[0].children[0].name)
+                return LiteralExpr(literal_type, literal_value)
+
+            else:
+                return ASTNode("primary", children)
 
     def unary(self, children):
         if children and len(children) == 1:
@@ -217,6 +220,10 @@ class CSTtoAST(Transformer):
             return children[0]
         else:
             return ASTNode("assignment_expression", children)
+
+    ################
+
+    # def literal(self, children):
 
     ####################################################################################################################
     # This does not handle direct declarator unbinding yet

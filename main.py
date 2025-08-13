@@ -28,6 +28,9 @@ def main():
             "\n { int a = 10;"
             "\n }"
             "\n return 0;"
+            "\n foo + 1;"
+            "\n foo;"
+            "\n 1 + 2 * 3 / 4 - 5 % 6;"
             "\n }"
             "\n int a[3][4];"
             "\n")

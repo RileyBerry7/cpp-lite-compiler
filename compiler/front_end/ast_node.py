@@ -2,6 +2,7 @@
 
 from enum import Enum
 from typing import Union, Self
+from compiler.utils.literal_kind import *
 
 ########################################################################################################################
 class ASTNode:
@@ -12,6 +13,8 @@ class ASTNode:
         # Abstract Node Details
         self.name = node_name
         self.children = children if children is not None else []
+        self.span       = None
+        # self.token_type = None
 
     ####################################################################################################################
     def pretty(self):
@@ -34,9 +37,11 @@ class ASTNode:
 
         return text_tree
 
+
 ########################################################################################################################
 #  Inheritor Nodes:  #
 ######################
+
 
 ########################################################################################################################
 # TYPE
@@ -114,11 +119,23 @@ class NormalDeclarator(ASTNode):
 
     def synthesize_from_child(self, child:Self):
 
+        # Extend Current Lists
         self.ptr_chain.extend(child.ptr_chain)
-        self.reference = child.reference
-        self.decl_name = child.decl_name
         self.suffixes.extend(child.suffixes)
 
+        # Try To: Add Reference
+        if child.reference:
+            if self.reference:
+                raise ValueError("Cannot have multiple reference types in a NormalDeclarator")
+            else:
+                self.reference = child.reference
+
+        # Try To: Add Declaration Name
+        if child.decl_name:
+            if self.decl_name:
+                raise ValueError("Cannot have multiple declaration names in a NormalDeclarator")
+            else:
+                self.decl_name = child.decl_name
 
 
 
@@ -136,25 +153,49 @@ class NormalDeclaration(ASTNode):
 # PARAMETER
 
 class Parameter(ASTNode):
-    def __init__(self, normalized_declaration:NormalDeclaration):
+    def __init__(self, normalized_declaration:NormalDeclaration, default_arg:Initializer=None):
         super().__init__(node_name="parameter")
         # Normalized Parameter Attributes
         self.param_declaration = normalized_declaration
+        self.default_argument = default_arg             # (Optional)
+                                                        # default_arg: EQUAL initializer
+                                                        # initializer = list[Expr | Initializer]
+
+########################################################################################################################
+# ARRAY SUFFIX
+
+class ArraySuffix(ASTNode):
+    def __init__(self):
+        super().__init__(node_name="array_suffix")
+        self.size = None
+
+########################################################################################################################
+# FUNCTION SUFFIX
 
 ########################################################################################################################
 # EXPRESSIONS
 
+# BASE EXPRESSION
 class Expr(ASTNode):
     def __init__(self, expr_type:str="Expr"):
         super().__init__(node_name=expr_type)
-        self.type  = None # Filled in semantic analysis
-        self.value = None # Constant Value if any
 
-class PrimaryExpr(Expr):
-    def __init__(self, identifier:str=None, literal:str=None):
-        super().__init__(expr_type="primary_expr")
-        self.identifier = identifier
-        self.literal   = literal
+
+########################################################################################################################
+# PRIMITIVE EXPRESSIONS
+
+literals = Union[str, int, float]
+
+class LiteralExpr(Expr):
+    def __init__(self, literal_type:LiteralKind, literal_value:literals=None):
+        super().__init__(expr_type="literal_expr")
+        self.type  = literal_type
+        self.value = literal_value  # Primitive value (int, float, char, string)
+
+class IdentifierExpr(Expr):
+    def __init__(self, identifier_name:str=None):
+        super().__init__(expr_type="identifier_expr")
+        self.id_name = identifier_name
 
 # class UnaryExpr(Expr):
 #
