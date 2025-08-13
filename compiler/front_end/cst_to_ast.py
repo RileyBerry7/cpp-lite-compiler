@@ -150,8 +150,92 @@ class CSTtoAST(Transformer):
 
         # Create and Return Declaration Specifier Node
         specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
+
         return specifier_node
 
+    ####################################################################################################################
+    # PARAMETER
+    def parameter(self, children):
+
+        param_declaration = children[0]
+        default_args = None
+
+
+
+
+        return Parameter(param_declaration, default_args)
+
+    def default_arg(self, children):
+            if len(children) >= 1 and isinstance(children[1], Initializer):
+                return children[1]
+            else:
+                return Error("No Initializer Found for Default Argument")
+
+
+    def initializer(self, children):
+        for child in children:
+            if isinstance(child, ASTNode):
+                if isinstance(child, Expr):
+                    return Initializer(child)
+
+                if isinstance(child, Initializer):
+                    return child
+
+    ####################################################################################################################
+    # DECLARATOR
+    def declarator(self, children):
+        normalized_declarator = NormalDeclarator()
+        for child in children:
+            if isinstance(child, ASTNode) and child.name == "ptr_list":
+                for ptr_lvl in child.children:
+                    if isinstance(ptr_lvl, PtrLevel):
+                        normalized_declarator.ptr_chain.append(ptr_lvl) # Might be backwards!!!
+
+            if isinstance(child, ASTNode) and child.name == "reference_operator":
+                if children.children and child.children[0].name == "AND":
+                    normalized_declarator.reference = "lvalue"
+                else:
+                    normalized_declarator.reference = "rvalue"
+
+            if isinstance(child, NormalDeclarator):
+                normalized_declarator.synthesize_from_child(child)
+
+        return normalized_declarator
+
+
+
+
+    ####################################################################################################################
+    # DIRECT DECLARATOR
+    def direct_declarator(self, children):
+        normal_declarator = NormalDeclarator(children)
+        for child in children:
+            if isinstance(child, ASTNode):
+                if child.children and child.children[0].name == "IDENTIFIER":
+                    normal_declarator.name = child.name
+
+        return normal_declarator
+
+    ####################################################################################################################
+    # DECLARATION
+    def declaration(self, children):
+
+
+
+    ####################################################################################################################
+    # SUFFIXES
+
+    def array_suffix(self, children):
+        return ArraySuffix(children[0])
+
+    def function_suffix(self, children):
+        parameter_list = []
+        if children and children[0].name == "parameter_list":
+            for parameter in children[0].children:
+                if isinstance(parameter, Parameter):
+                    parameter_list.append(parameter)
+
+        return FuncSuffix(parameter_list)
 
     ####################################################################################################################
     # Expression Precedence Abstraction

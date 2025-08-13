@@ -164,10 +164,19 @@ class Parameter(ASTNode):
 ########################################################################################################################
 # ARRAY SUFFIX
 
-# class ArraySuffix(ASTNode, Expr):
-#     def __init__(self):
-#         super().__init__(node_name="array_suffix")
-#         self.size = Expr
+class BaseSuffix(ASTNode):
+    def __init__(self, suffix_type:str="base_suffix"):
+        super().__init__(node_name=suffix_type)
+
+class ArraySuffix(BaseSuffix):
+    def __init__(self, fixed_size:"ConstantExpr"=None):
+        super().__init__(suffix_type="array_suffix")
+        self.size = fixed_size
+
+class FuncSuffix(BaseSuffix):
+    def __init__(self, parameter_list:list[Parameter] | None = None):
+        super().__init__(suffix_type="func_suffix")
+        self.param_list = parameter_list or []
 
 ########################################################################################################################
 # FUNCTION SUFFIX
