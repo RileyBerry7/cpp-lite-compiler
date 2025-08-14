@@ -108,14 +108,17 @@ class NormalDeclarator(ASTNode):
                  ptr_chain:list[PtrLevel] | None = None,
                  reference_type=None,
                  identifier:str=None,
-                 suffix_list:list[SuffixElem] | None = None):
+                 suffix_list:list[SuffixElem] | None = None,
+                 initializer:Initializer | None = None):
 
-        super().__init__(node_name="normal_declarator")
+        super().__init__(node_name="\033[38;5;28mnormal_declarator\033[0m")
 
-        self.ptr_chain = ptr_chain or []
-        self.reference = reference_type
-        self.decl_name = identifier
-        self.suffixes  = suffix_list or []
+        self.ptr_chain   = ptr_chain or []
+        self.reference   = reference_type
+        self.decl_name   = identifier
+        self.suffixes    = suffix_list or []
+        self.initializer = initializer  # Optional
+
 
     def synthesize_from_child(self, child:Self):
 
@@ -138,16 +141,16 @@ class NormalDeclarator(ASTNode):
                 self.decl_name = child.decl_name
 
 
+#
 
 ########################################################################################################################
 # NORMALIZED DECLARATION
 
 class NormalDeclaration(ASTNode):
-    def __init__(self, decl_specs:DeclSpec, normal_declarator:NormalDeclarator, init:Initializer):
-        super().__init__(node_name="normal_declaration")
+    def __init__(self, decl_specs:DeclSpec, declarator_list:list[NormalDeclarator] | None = None):
+        super().__init__(node_name="\x1b[1;91mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
-        self.decl_normal = normal_declarator
-        self.decl_init   = init
+        self.decl_list   = declarator_list
 
 ########################################################################################################################
 # PARAMETER
@@ -191,7 +194,7 @@ class ValueCategory(Enum):
 # BASE EXPRESSION
 class Expr(ASTNode):
     def __init__(self, expr_type:str="Expr"):
-        super().__init__(node_name=expr_type)
+        super().__init__(node_name=f"\x1b[1;38;5;226m{expr_type}\x1b[0m")
         self.expr_type = expr_type
         self.value_cat = None      # Assigned at semantic analysis / decoration
 

@@ -151,6 +151,9 @@ class CSTtoAST(Transformer):
         # Create and Return Declaration Specifier Node
         specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
 
+        # TEMP DELETE CHILDREN
+        specifier_node.children = []
+
         return specifier_node
 
     ####################################################################################################################
@@ -197,13 +200,28 @@ class CSTtoAST(Transformer):
                 else:
                     normalized_declarator.reference = "rvalue"
 
+            if isinstance(child, Initializer):
+                normalized_declarator.initializer = child
+
             if isinstance(child, NormalDeclarator):
                 normalized_declarator.synthesize_from_child(child)
 
         return normalized_declarator
 
 
+    def init_declarator(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            initialized_declarator = NormalDeclarator()
+            for child in children:
+                if isinstance(child, NormalDeclarator):
+                    initialized_declarator.synthesize_from_child(child)
 
+                elif isinstance(child, Initializer):
+                    initialized_declarator.initializer = child
+
+        return initialized_declarator
 
     ####################################################################################################################
     # DIRECT DECLARATOR
@@ -219,11 +237,24 @@ class CSTtoAST(Transformer):
     ####################################################################################################################
     # DECLARATION
     def declaration(self, children):
+        decl_specs = None
+        declarator_list = []
+        for child in children:
+            if isinstance(child, DeclSpec):
+                decl_specs = child
+            elif isinstance(child, NormalDeclarator):
+                declarator_list.append(child)
+
+
+        return NormalDeclaration(decl_specs, declarator_list)
 
 
 
     ####################################################################################################################
     # SUFFIXES
+
+    def init_suffix(self, children):
+        return children[1]
 
     def array_suffix(self, children):
         return ArraySuffix(children[0])
