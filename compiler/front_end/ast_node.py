@@ -260,13 +260,28 @@ class LogicExpr(Expr):
         self.operator = operator  # "||", "&&"
 
 # Postfix Expressions
-
 ########################################################################################################################
+# STATEMENTS
 
-# class DeclName(ASTNode):
-#     def __init__(self, identifier:str=None):
-#         super().__init__(node_name="decl_name")
-#         self.decl_name = identifier  # Identifier node
+class Statement(ASTNode):
+    def __init__(self, statement_type:str="statement"):
+        super().__init__(node_name=f"\x1b[1;91mn{statement_type}\x1b[0m")
+        self.statement_type = statement_type
+        # Metadata For Semantic Information
+        # ...
+
+# Inheritor Statements
+class ExprStatement(Statement):
+    def __init__(self, expression:Expr):
+        super().__init__(statement_type="expr_statement")
+        self.expr = expression
+
+class IfStatement(Statement):
+    def __init__(self, condition:Expr, then_branch:Statement, else_branch:Statement=None):
+        super().__init__(statement_type="if_statement")
+        self.if_condition = condition   # Required - [Expr]      - usually a ComparisonExpr
+        self.then_branch = then_branch  # Required - [Statement] - usually a CompoundStatement
+        self.else_branch = else_branch  # Optional - [Statement | None]
 
 ########################################################################################################################
 # ERRORS
@@ -276,19 +291,3 @@ class Error(ASTNode):
         super().__init__(node_name="\033[1;31mERROR: " + error_type +"\033[0m")
 
         self.message = ""
-
-# class func_def(node):
-# class type_specifier(node):
-# class param_list(node):
-# class param(node):
-# class stmt(node):
-# class expr(node):
-#
-# class assign_stmt(stmt):
-# class return_stmt(stmt):
-#
-#
-# class literal_expr(expr):
-# class id_expr(expr):
-# class bin_expr(expr):
-# class un_expr(expr):
