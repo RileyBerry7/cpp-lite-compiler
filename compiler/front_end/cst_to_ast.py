@@ -57,6 +57,20 @@ class CSTtoAST(Transformer):
 
         return ASTNode(token.value, [ASTNode(token.type)])
 
+
+    ####################################################################################################################
+    # TRANSLATION UNIT
+    def translation_unit(self, children):
+        return TranslationUnit(children)
+
+    ####################################################################################################################
+    # EXTERNAL DECLARATION
+    def external_declaration(self, children):
+        if children and isinstance(children[0], NormalDeclaration):
+            return children[0]
+
+        return Error("Invalid external declaration")
+
     ####################################################################################################################
     def declaration_specifier_list(self, children):
 
@@ -151,8 +165,8 @@ class CSTtoAST(Transformer):
         # Create and Return Declaration Specifier Node
         specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
 
-        # TEMP DELETE CHILDREN
-        specifier_node.children = []
+        # # TEMP DELETE CHILDREN
+        # specifier_node.children = []
 
         return specifier_node
 
@@ -345,56 +359,57 @@ class CSTtoAST(Transformer):
         else:
             return AssignExpr(children[0], children[2], children[1].name)
 
-    ################
-
-    # def literal(self, children):
 
     ####################################################################################################################
-    # This does not handle direct declarator unbinding yet
-    # def direct_declarator(self, children):
-    #     if children and len(children) == 1:
-    #         return DeclName(children[0].name)
-    #     else:
-    #         return ASTNode("direct_decl", children)
+    # STATEMENTS
+    def expression_statement(self, children):
+        if children and len(children) == 1 and isinstance(children[0], Expr):
+            return ExprStatement(children[0])
+        else:
+            return Error("Invalid expression statement")
 
+    def return_statement(self, children):
+        if len(children) == 2 and isinstance(children[1], Expr):
+            return ReturnStatement(children[1])
+        else:
+            return Error("Invalid return statement")
 
-    # def pointer(self, children):
-    #     # Check if has children
-    #     if children:
-    #         if isinstance(children[0], ASTNode):
-    #             # Grab Reference Type
-    #             reference_type = ReferenceType(children[0].name)
-    #
-    #         # Grab Remaining Qualifiers If Any
-    #         qualifiers = []
-    #         for child in children[1:]:
-    #             if isinstance(child, ASTNode):
-    #                 qualifiers.append(child.name)
-    #
-    #     new_chain = PointerChain(reference_type, qualifiers)
-    #
-    #     return PointerChain(children)
-    #
-    #
-    #     if children:
-    #         for child in children:
-    #             if isinstance(child, PointerChain):
-    #
-    #     chain = []
-    #     for child in children:
-    #         if isinstance(child, PointerChain):
-    #                 new_chain.append_chain(child)
+    def compound_statement(self, children):
+        statement_list = []
+        for child in children:
+            if isinstance(child, Statement):
+                statement_list.append(child)
+            elif isinstance(child, NormalDeclaration):
+                statement_list.append(DeclarationStatement(child))
+
+            else:
+                return Error("Non-statement in compound statement:" + str(child.name))
+
+        return CompoundStatement(statement_list)
+
+    def selection_statement(self, children):
+        if len(children) == 1 and isinstance(children[0], Statement):
+            return children[0]
+        else:
+            return Error("Invalid selection statement")
+
+    def if_statement(self, children):
+        if_condition   = children[0]
+        then_statement = children[1]
+        else_statement = children[2] if len(children) > 2 else None
+
+        return IfStatement(if_condition, then_statement, else_statement)
+
 
     ####################################################################################################################
-    # def function_suffix(self, children):
-    #     params = []
-    #
-    #     # Gather children
-    #     # for child in children:
-    #     #     params.append(child)
-    #     # param_list_node = parameter_list(children, params)
-    #
-    #     return ASTNode("parameter_list", children)
+    # FUNCTION DEFINITION
+    def function_definition(self, children):
+        decl_specs = children[0]
+        declarator = children[1]
+        compound_statement = children[2]
+        function_definition = NormalDeclaration(decl_specs, [declarator], compound_statement)
+        function_definition.name = "\x1b[1;38;2;80;160;255mfunction_definition\x1b[0m"
+        return function_definition
 
     ####################################################################################################################
     # PTR -> POINTER LEVEL

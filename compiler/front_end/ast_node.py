@@ -44,6 +44,18 @@ class ASTNode:
 
 
 ########################################################################################################################
+# TRANSLATION UNIT
+
+class TranslationUnit(ASTNode):
+    def __init__(self, declaration_list:list[ASTNode] | None = None):
+        super().__init__(node_name="\033[1;38;5;226mtranslation_unit\033[0m")
+        self.declarations = declaration_list or []  # List of declarations (NormalDeclaration, FunctionDefinition...)
+
+        # Add Children
+        for decl in self.declarations:
+            self.children.append(decl)
+
+########################################################################################################################
 # TYPE
 
 class Type(ASTNode):
@@ -71,7 +83,14 @@ class DeclSpec(ASTNode):
         self.storage_class   = storage_class       # Optional
         self.func_specifiers = function_specifier # Optional
 
-        self.children = [type_node]
+        # Add Children For Pretty Printing
+        self.children.append(type_node)
+        if qualifier:
+            self.children.append(ASTNode(qualifier))
+        if storage_class:
+            self.children.append(ASTNode(storage_class))
+        if function_specifier:
+            self.children.append(ASTNode(function_specifier))
 
 ########################################################################################################################
 # POINTER LEVEL
@@ -119,6 +138,21 @@ class NormalDeclarator(ASTNode):
         self.suffixes    = suffix_list or []
         self.initializer = initializer  # Optional
 
+        # Add Children For Pretty Printing
+    #     self.init_children()
+    #
+    # def init_children(self):
+        # if self.ptr_chain:
+        #     self.children.append(ASTNode("ptr_chain", self.ptr_chain))
+        # if self.reference:
+        #     self.children.append(ASTNode(self.reference))
+        # if self.decl_name:
+        #     self.children.append(ASTNode(self.decl_name))
+        # if self.suffixes:
+        #     self.children.append(ASTNode("suffix_list", self.suffixes))
+        # if  self.initializer:
+        #     self.children.append( self.initializer)
+
 
     def synthesize_from_child(self, child:Self):
 
@@ -140,6 +174,9 @@ class NormalDeclarator(ASTNode):
             else:
                 self.decl_name = child.decl_name
 
+        # Reinitialize Children Every Merge
+        # self.init_children()
+
 
 #
 
@@ -147,10 +184,21 @@ class NormalDeclarator(ASTNode):
 # NORMALIZED DECLARATION
 
 class NormalDeclaration(ASTNode):
-    def __init__(self, decl_specs:DeclSpec, declarator_list:list[NormalDeclarator] | None = None):
+    def __init__(self, decl_specs:DeclSpec, declarator_list:list[NormalDeclarator] | None = None, func_body:"CompoundStatement"=None):
         super().__init__(node_name="\x1b[1;91mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
+        self.func_body   = func_body # Only used by Function Definitions
+
+        # Add Children For Pretty Printing
+        if decl_specs:
+            self.children.append(decl_specs)
+        if len(declarator_list) == 1:
+            self.children.append(declarator_list[0])
+        elif len(declarator_list) > 1:
+            self.children.append(ASTNode("declarator_list"), declarator_list)
+        if func_body:
+            self.children.append(func_body)
 
 ########################################################################################################################
 # PARAMETER
@@ -235,6 +283,11 @@ class BinaryExpr(Expr):
         self.right_operand = right
         self.operator      = operator   # "+", "-", "*", "/" ...
 
+        # Add Children For Pretty Printing
+        self.children.append(left)
+        self.children.append(ASTNode(operator))
+        self.children.append(right)
+
 
 # Assignment Expressions
 class AssignExpr(Expr):
@@ -252,6 +305,11 @@ class ComparisonExpr(Expr):
         self.right_operand = right
         self.operator = operator  # "<", ">=", "==", "!=" ...
 
+        # Add Children For Pretty Printing
+        self.children.append(left)
+        self.children.append(ASTNode(operator))
+        self.children.append(right)
+
 class LogicExpr(Expr):
     def __init__(self, left:Expr, right:Expr, operator:str=None):
         super().__init__(expr_type="logic_expr")
@@ -265,7 +323,7 @@ class LogicExpr(Expr):
 
 class Statement(ASTNode):
     def __init__(self, statement_type:str="statement"):
-        super().__init__(node_name=f"\x1b[1;91mn{statement_type}\x1b[0m")
+        super().__init__(node_name=f"\x1b[1;91m{statement_type}\x1b[0m")
         self.statement_type = statement_type
         # Metadata For Semantic Information
         # ...
@@ -276,12 +334,48 @@ class ExprStatement(Statement):
         super().__init__(statement_type="expr_statement")
         self.expr = expression
 
+        # Add Children For Pretty Printing
+        self.children.append(expression)
+
 class IfStatement(Statement):
     def __init__(self, condition:Expr, then_branch:Statement, else_branch:Statement=None):
         super().__init__(statement_type="if_statement")
         self.if_condition = condition   # Required - [Expr]      - usually a ComparisonExpr
         self.then_branch = then_branch  # Required - [Statement] - usually a CompoundStatement
         self.else_branch = else_branch  # Optional - [Statement | None]
+
+        # Add Children For Pretty Printing
+        self.children.append(condition)
+        self.children.append(then_branch)
+        if else_branch:
+            self.children.append(else_branch)
+
+class ReturnStatement(Statement):
+    def __init__(self, return_value:Expr=None):
+        super().__init__(statement_type="return_statement")
+        self.return_value = return_value  # Optional - [Expr] - usually a LiteralExpr or IdentifierExpr
+
+        # Add Children For Pretty Printing
+        if return_value:
+            self.children.append(return_value)
+
+class CompoundStatement(Statement):
+    def __init__(self, statement_list:list[Statement] | None = None):
+        super().__init__(statement_type="compound_statement")
+        self.statements = statement_list or []  # List of Statements, may be empty
+
+        # Add Children For Pretty Printing
+        for stmt in self.statements:
+            self.children.append(stmt)
+
+class DeclarationStatement(Statement):
+    def __init__(self, declaration:NormalDeclaration):
+        super().__init__(statement_type="declaration_statement")
+        self.declaration = declaration  # NormalDeclaration - wrapped in a Statement
+
+        # Add Children For Pretty Printing
+        if isinstance(self.declaration, NormalDeclaration):
+            self.children.append(declaration)
 
 ########################################################################################################################
 # ERRORS
