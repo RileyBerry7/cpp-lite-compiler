@@ -77,11 +77,12 @@ class DeclSpec(ASTNode):
                  qualifier           =None,
                  storage_class       =None,
                  function_specifier  =None ):
+
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
         self.type_node       = type_node           # Required
         self.qualifier       = qualifier           # Optional
         self.storage_class   = storage_class       # Optional
-        self.func_specifiers = function_specifier # Optional
+        self.func_specifiers = function_specifier  # Optional
 
         # Add Children For Pretty Printing
         self.children.append(type_node)
@@ -190,6 +191,9 @@ class NormalDeclaration(ASTNode):
         self.decl_list   = declarator_list
         self.func_body   = func_body # Only used by Function Definitions
 
+        # Semantic Information
+        self.symbol = None # Set during Scope Binding Pass
+
         # Add Children For Pretty Printing
         if decl_specs:
             self.children.append(decl_specs)
@@ -264,10 +268,15 @@ class LiteralExpr(Expr):
         self.type  = literal_type
         self.value = literal_value  # Primitive value (int, float, char, string)
 
+symbol: "Symbol | None" = None
+
 class IdentifierExpr(Expr):
     def __init__(self, identifier_name:str=None):
         super().__init__(expr_type="identifier_expr")
         self.id_name = identifier_name
+
+        # Semantic Information
+        self.symbol = None # Set during Scope Binding Pass
 
 class UnaryExpr(Expr):
     def __init__(self, operand:Expr, operator:str=None):

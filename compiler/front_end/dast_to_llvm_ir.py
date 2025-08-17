@@ -1,6 +1,6 @@
 # dast_to_llvm_ir.py
 
-from ast_to_dast import DecNode
+from decorator import DecNode
 from llvmlite import ir
 
 

@@ -2,8 +2,8 @@
 
 from lark import Lark
 from pathlib import Path
-from compiler.front_end.cst_to_ast import CSTtoAST
-from compiler.front_end.ast_to_dast import ASTtoDAST, DecNode
+from compiler.front_end.transformer import CSTtoAST
+from compiler.front_end.decorator import ASTtoDAST, DecNode
 
 ####################
 # GlOBAL CONSTANTS #
