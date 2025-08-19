@@ -36,6 +36,14 @@ class ASTNode:
             # text_tree = (curr_indent+1)*"  " + "[No children]\n"
 
         return text_tree
+########################################################################################################################
+    def dfs(self, visit):
+
+        visit(self) # Call Visit Function
+
+        # Recursively Walk Children
+        for child in self.children:
+            child.dfs(visit)
 
 
 ########################################################################################################################

@@ -8,6 +8,7 @@ from compiler.utils.enum_types import *
 
 @dataclass
 class Symbol:
+    id: int # Unique Identifier
     name:      str # Identifier Name
     kind:      SymbolKind
     namespace: NamespaceKind
@@ -36,10 +37,17 @@ class Symbol:
 
 class SymbolTable:
     def __init__(self):
-        self.scopes:  list[Scope]  = []  # Scope Stack
-        self.symbols: list[Symbol] = [] # Symbol Table
+        self.symbols: {Symbol}     = {} # Symbol Table
+        self.next_id: int          = 0
 
     def insert_symbol(self, symbol: Symbol):
-        print()
+
+        self.next_id += 1  # Increment ID
+
+        symbol.id = self.next_id         # Bind Symbol to Unique ID
+        self.symbols[symbol.id] = symbol # Insert Symbol into Table via ID
+
+        # Return Unique ID
+        return symbol.id
 
 #############################################################################################################3##########
