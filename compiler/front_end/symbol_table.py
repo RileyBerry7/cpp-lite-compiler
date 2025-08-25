@@ -9,20 +9,19 @@ from compiler.utils.enum_types import *
 @dataclass
 class Symbol:
     id: int # Unique Identifier
-    name:      str # Identifier Name
-    kind:      SymbolKind
-    namespace: NamespaceKind
+    name:      str          # Identifier Name
+    kind:      SymbolKind   # Symbol Role
 
-    # Declaration Context
-    scope: Scope
-    declaration_node: ASTNode
+    # Context
+    scope: Scope              # Scope within
+    declaration_node: ASTNode # Declaration within
 
-    # Declaration Specifications
-    decl_specs: DeclSpec
+    # Specs
+    decl_specs: DeclSpec      # Other specs: qualifiers, base_type...
+    storage:    StorageClass  # Linkage Duration: Extern, static...
+    func_flags: FuncAttrs     # inline, virtual, noexcept
 
-    # Semantic Information
-    storage:     StorageClass
-    func_flags:  FuncAttrs
+    # Derived Semantic Info
     is_defined:  bool = False
     order_index: int  = -1
 

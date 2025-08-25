@@ -43,9 +43,9 @@ class ScopeStack:
         self.curr_scope = new_scope    # Update Current Scope
 
 
-    def exit_scope(self):
+    # def exit_scope(self):
 
-    def resolve_scope(self):
+    # def resolve_scope(self):
 
 
 
@@ -53,27 +53,21 @@ class ScopeStack:
 #############################################################################################################3##########
 
 class SymbolKind(Enum):
-    Var       = auto()
-    Param     = auto()
-    Func      = auto()
-    TypeAlias = auto()     # typedef / using
-    StructTag = auto()
-    EnumTag   = auto()
-    Field     = auto()
-    Label     = auto()
-
-class NamespaceKind(Enum):
-    Ordinary = auto()      # variables, functions, params
-    Tag      = auto()      # struct/union/enum tags
-    Type     = auto()      # typedef/using names
-    LabelNS  = auto()      # goto labels (function scope)
+    Var       = auto()   # default variable declaration
+    Param     = auto()   # Parameter within function suffix
+    Func      = auto()   # function declaration
+    Field     = auto()   # data-member declared in a class/struc/enum
+    Label     = auto()   # Label declaration
+    TypeAlias = auto()   # typedef / using
+    Class     = auto()   # Class Declaration
+    Struct    = auto()   # Struct Declaration
+    Union     = auto()   # Union Declaration
+    Enum      = auto()   # Enum Declaration
 
 class StorageClass(Enum):
-    None_    = auto()
-    Auto     = auto()
-    Static   = auto()
-    Extern   = auto()
-    Typedef  = auto()
+    None_       = auto()
+    Static      = auto()
+    Extern      = auto()
 
 @dataclass
 class FuncAttrs:

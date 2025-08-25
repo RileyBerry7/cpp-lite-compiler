@@ -1,39 +1,57 @@
 # declarator_todeclarator_to_symbol.py
 
 from compiler.front_end.symbol_table import Symbol
-from compiler.utils.enum_types import SymbolKind
+from compiler.utils.enum_types import SymbolKind, StorageClass
+from compiler.front_end.ast_node import *
 
-def declarator_to_symbol(decl_list, declarator, unique_id: int) -> Symbol:
+def declarator_to_symbol(declaration: NormalDeclaration, unique_id: int) -> list[Symbol]:
     """
-    Convert a declarator in a declaration list to a symbol.
+    Returns a list of Symbol objects.
     """
 
-    # Build Symbol
-    id     = unique_id
-    name: str  # Identifier Name
-    kind: SymbolKind
-    namespace: NamespaceKind
+    decl_specs    = declaration.decl_specs
+    decl_list     = declaration.decl_list
+    is_func_def   = True if declaration.func_body else False
+    built_symbols = []
 
-    # Declaration Context
-    scope: Scope
-    declaration_node: ASTNode
+    if is_func_def:
+        print()
+        # Return path for Function Definition
 
-    # Declaration Specifications
-    decl_specs: DeclSpec
+    # Loop through and Build Symbol for Every Declarator
+    for declarator in decl_list:
 
-    # Semantic Information
-    storage: StorageClass
-    func_flags: FuncAttrs
-    is_defined: bool = False
-    order_index: int = -1
+        ################################################################################################################
+        # Build Symbol
+        id        = unique_id
+        name      = declarator.decl_name
+        kind      = SymbolKind.Var
 
-    # Source Information
-    # loc: None
+        # Declaration Context
+        scope     = None
+        declaration_node = declaration
 
-    # Aggregate Information
-    members: list[None] = None  # Structs / Enums
+        # Declaration Specifications
+        decl_spec = decl_specs
 
-    # Determine Symbol Kind and Namespace
+        # Semantic Information
+        storage    = StorageClass[decl_spec.storage_class.upper()]
+        func_flags: FuncAttrs
+        is_defined: bool = False
+        order_index: int = -1
+
+        # Source Information
+        # loc: None
+
+        # Aggregate Information
+        members: list[None] = None  # Structs / Enums
+
+        ################################################################################################################
+
+        # Construct / Push Symbol
+        curr_symbol = Symbol(id, name, kind, scope, declaration_node, decl_specs, storage,
+                             func_flags, is_defined, order_index, members)
+        built_symbols.append(curr_symbol)
 
 
-    return symbol
+    return built_symbols
