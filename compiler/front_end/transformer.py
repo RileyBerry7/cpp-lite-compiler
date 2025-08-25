@@ -7,6 +7,7 @@ from compiler.utils.literal_kind import *
 from compiler.utils.lexeme_to_number import lexeme_to_number
 from compiler.utils.scalar_size import scalar_size
 
+
 BASE_TYPES = {'void', 'bool', 'char', 'signed', 'unsigned', 'int', 'float'}
 
 VALID_TYPE_SETS = {
@@ -101,15 +102,15 @@ class CSTtoAST(Transformer):
                         simple_types.append(child.children[0].name)
 
                     # FOUND: Elaborate Type Specifier
-                    elif child.name == "elaborated_type_specifier":
+                    elif child.name == "class" or child.name == "enum":
 
-                        # SEMANTIC ERROR: multiple non-duplicate elaborate type names
-                        if elaborate_name is not None and child.children[1].name == elaborate_name:
-                            return Error("Multiple non-duplicate elaborate type names")
-                        else:
-                            # SAVE: Elaborate Type & Name
-                            elaborate_type = child.children[0].name
-                            elaborate_name = child.children[1].name
+                        for grandchild in child.children:
+                            if grandchild.name == "enum_body":
+                                elaborate_body =
+
+                        # SAVE: Elaborate Type & Name
+                        elaborate_type = child.children[0].name
+                        elaborate_name = child.children[1].name
 
                     # FOUND: Type Qualifier
                     elif child.name == "type_qualifier":
@@ -129,27 +130,27 @@ class CSTtoAST(Transformer):
                     ####################################################################################################
                     # FLAG SPECIFIER CHECKING
 
-                    # Found:
+                    # Found: Constexpr Flag
                     elif child.name == "constexpr":
                         is_constexpr = True
 
-                    # Found:
+                    # Found: Consteval Flag
                     elif child.name == "consteval":
                         is_consteval = True
 
-                    # Found:
+                    # Found: Constinit Flag
                     elif child.name == "constinit":
                         is_constinit = True
 
-                    # Found:
+                    # Found: Typedef Flag
                     elif child.name == "typedef":
                         is_typedef = True
 
-                    # Found:
+                    # Found: Using Flag
                     elif child.name == "using":
                         is_using_alias = True
 
-                    # Found:
+                    # Found: Friend Flag
                     elif child.name == "friend":
                         is_friend = True
 
@@ -450,6 +451,25 @@ class CSTtoAST(Transformer):
 
 
     ####################################################################################################################
+    # ENUM / CLASS BODY
+
+    def enum_body(self, children):
+        member_list = []
+        for child in children:
+            if isinstance(child, Statement):
+                member_list.append(child)
+
+            elif isinstance(child, NormalDeclaration):
+                member_list.append(DeclarationStatement(child))
+
+            else:
+                return Error("Non-statement in enum_body: " + str(child.name))
+
+        body = CompoundStatement(member_list)
+        return body
+
+
+    ####################################################################################################################
     # FUNCTION DEFINITION
     def function_definition(self, children):
         decl_specs = children[0]
@@ -457,6 +477,7 @@ class CSTtoAST(Transformer):
         compound_statement = children[2]
         function_definition = NormalDeclaration(decl_specs, [declarator], compound_statement)
         function_definition.name = "\x1b[1;38;2;80;160;255mfunction_definition\x1b[0m"
+        function_definition.body_type = BodyType.FUNCTION
         return function_definition
 
     ####################################################################################################################

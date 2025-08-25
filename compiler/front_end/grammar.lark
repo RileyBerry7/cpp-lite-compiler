@@ -117,8 +117,8 @@ simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
 #                     PLEASE DO NOT UNCOMMENT
 
 
-elaborated_type_specifier: (CLASS | STRUCT) IDENTIFIER class_body?
-                         | ENUM             IDENTIFIER enum_body?
+elaborated_type_specifier:      (CLASS | STRUCT)  IDENTIFIER class_body?  -> class
+                         | ENUM (CLASS | STRUCT)? IDENTIFIER enum_body?   -> enum
 
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
@@ -131,8 +131,8 @@ function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
 # CLASS / STRUCT BODY
 class_body: _LBRACE member_declaration* _RBRACE
 
-member_declaration: declaration                // inside class / struc
-                  | access_specifier COLON     // public:, private:, protected:
+member_declaration: declaration                                 // inside class / struc
+                  | access_specifier COLON  -> access_specifier // public:, private:, protected:
 
 access_specifier: PUBLIC | PRIVATE | PROTECTED
 

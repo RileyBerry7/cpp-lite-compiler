@@ -1,9 +1,13 @@
 # ast_node.py
 
+from __future__ import annotations
 from enum import Enum, auto
-from typing import Union, Self
+from typing import Union, Self, Generic, TypeVar
 from compiler.utils.literal_kind import *
 from compiler.utils.enum_types import *
+
+# ASTNode Type Template (Dynamic Typing)
+NodeT = TypeVar("NodeT", bound="ASTNode")
 
 ########################################################################################################################
 class ASTNode:
@@ -68,12 +72,20 @@ class TranslationUnit(ASTNode):
 # TYPE
 
 class Type(ASTNode):
-    def __init__(self, full_type:str, base_type:str, size:int, signed:bool=True, elaboration:[str]=None):
+    def __init__(self,
+                 full_type:str,
+                 base_type:str,
+                 size:int,
+                 signed:bool=True,
+                 elaboration:[str]=None,
+                 body: "CompoundStatement" | None =None):
+
         super().__init__(node_name=full_type)
         self.type_name   = base_type    # str: base_type name
         self.size        = size         # int: # of bits
         self.signed      = signed       # Bool
         self.elaboration = elaboration  # list(str): Struct, Class, Enum or None
+        self.elaborate_body = body
 
         self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
 
@@ -216,21 +228,26 @@ class NormalDeclaration(ASTNode):
         super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
+
+        # Body
         self.func_body   = body      # Used by Function / Class / Struct / Enum Definitions
-        self.body_type   = body_type # Enum_Type or None by default
+        # self.body_type   = body_type # Enum_Type or None by default
 
         # Semantic Information
         self.symbol = None # Set during Scope Binding Pass
 
         # Add Children For Pretty Printing
-        if decl_specs:
-            self.children.append(decl_specs)
-        if len(declarator_list) == 1:
-            self.children.append(declarator_list[0])
-        elif len(declarator_list) > 1:
-            self.children.append(ASTNode("declarator_list"), declarator_list)
-        if body:
-            self.children.append(body)
+        self.init_children()
+
+    def init_children(self):
+        if self.decl_specs:
+            self.children.append(self.decl_specs)
+        if len(self.decl_list) == 1:
+            self.children.append(self.decl_list[0])
+        elif len(self.decl_list) > 1:
+            self.children.append(ASTNode("declarator_list", self.decl_list))
+        if self.func_body:
+            self.children.append(self.func_body)
 
 ########################################################################################################################
 # PARAMETER
@@ -413,6 +430,52 @@ class DeclarationStatement(Statement):
         # Add Children For Pretty Printing
         if isinstance(self.declaration, NormalDeclaration):
             self.children.append(declaration)
+########################################################################################################################
+# BODY NODES
+
+class Body(ASTNode, Generic[NodeT]):
+    # Generic Parameter: Member Type Template
+    def __init__(self, body_type:str, members:list[NodeT] | None=None):
+        super().__init__(node_name=body_type)
+        self.member_list = members or []  # List of ASTNodes, may be empty
+
+    def add_member(self, member:NodeT):
+        self.member_list.append(member)
+
+        # Add Children For Pretty Printing
+        for member in self.member_list:
+            self.children.append(member)
+
+# COMPOUND BODY: Function/ If / While
+class CompoundBody(Body[Statement]):
+    def __init__(self):
+        super().__init__(body_type="compound_body")
+        # member_list: list[Statement]
+
+# CLASS BODY: Class / Struct / Union
+class ClassBody(Body[Union[NormalDeclaration, "AccessSpecifier"]]):
+    def __init__(self):
+        super().__init__(body_type="class_body")
+        # Default Access = Private
+        self.member_list.append(AccessSpecifier(AccessType.PRIVATE))
+
+# ENUM BODY: Enum (Scoped or Unscoped)
+class EnumBody(Body["Enumerator"]):
+    def __init__(self, scoped:bool=False):
+        super().__init__(body_type="enum_body")
+        self.is_scoped = scoped
+        # member_list: list[Enumerator]
+
+class Enumerator(ASTNode):
+    def __init__(self, identifier_name: str, initial_expr: ConstantExpr):
+        super().__init__(node_name="enumerator")
+        self.identifer    = identifier_name
+        self.initial_expr = initial_expr
+
+class AccessSpecifier(ASTNode):
+    def __init__(self, access_type:AccessType):
+        super().__init__(node_name="access_specifier")
+        self.type = access_type
 
 ########################################################################################################################
 # ERRORS
