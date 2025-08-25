@@ -69,10 +69,10 @@ class TranslationUnit(ASTNode):
 class Type(ASTNode):
     def __init__(self, full_type:str, base_type:str, size:int, signed:bool=True, elaboration:[str]=None):
         super().__init__(node_name=full_type)
-        self.type_name  = base_type
-        self.size       = size
-        self.signed     = signed
-        self.elaboration = elaboration  # Struct, Class, Enum or None
+        self.type_name   = base_type    # str: base_type name
+        self.size        = size         # int: # of bits
+        self.signed      = signed       # Bool
+        self.elaboration = elaboration  # list(str): Struct, Class, Enum or None
 
         self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
 
@@ -81,10 +81,10 @@ class Type(ASTNode):
 
 class DeclSpec(ASTNode):
     def __init__(self,
-                 type_node:Type      =None,
-                 qualifier           =None,
-                 storage_class       =None,
-                 function_specifier  =None ):
+                 type_node:Type      =None,   #
+                 qualifier           =None,   # const, volatile...
+                 storage_class       =None,   # static, extern, thread_local...
+                 function_specifier  =None ): # inline, constexpr, consteval, virtual...
 
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
         self.type_node       = type_node           # Required

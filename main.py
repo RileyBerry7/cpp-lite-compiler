@@ -3,7 +3,7 @@
 from lark import Lark
 from pathlib import Path
 from compiler.front_end.transformer import CSTtoAST
-from compiler.front_end.decorator import ASTtoDAST, DecNode
+from compiler.front_end.decorator import ASTtoDAST
 
 ####################
 # GlOBAL CONSTANTS #

@@ -47,6 +47,7 @@ class ASTtoDAST:
 
                 # Build Symbol
                 if node.func_body:
+                    print()
 
                 else:
                     decl_list = node.decl_list
@@ -65,6 +66,7 @@ class ASTtoDAST:
 
             # Create New Scope
             elif isinstance(node, Symbol):
+                print()
 
 
 

@@ -96,10 +96,11 @@ declaration_specifier_list: declaration_specifier+
                        | function_specifier
                        | FRIEND
                        | TYPEDEF
-                       | INLINE
                        | CONSTEXPR
+                       | CONSTEVAL
 
-storage_class_specifier: AUTO | EXTERN | STATIC | REGISTER | MUTABLE
+storage_class_specifier: EXTERN | STATIC | THREAD_LOCAL | REGISTER
+                       | MUTABLE # This is NOT a real storage class [TEMPORARY]
 
 
 type_qualifier_list: type_qualifier+
@@ -112,7 +113,7 @@ type_qualifier: CONST | VOLATILE | RESTRICT
 #               | enum_specifier
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
-                     | SIGNED | UNSIGNED | SHORT | LONG
+                     | SIGNED | UNSIGNED | SHORT | LONG | AUTO
                      // | IDENTIFIER (for typedef names)
 
 elaborated_type_specifier: (CLASS | STRUCT | ENUM) IDENTIFIER
@@ -298,6 +299,7 @@ SHORT:      "short"
 LONG:       "long"
 CONST:      "const"
 CONSTEXPR:  "constexpr"
+CONSTEVAL:  "consteval"
 VOLATILE:   "volatile"
 STATIC:     "static"
 EXTERN:     "extern"
@@ -307,6 +309,7 @@ RESTRICT:   "restrict"
 INLINE:     "inline"
 VIRTUAL:    "virtual"
 EXPLICIT:   "explicit"
+THREAD_LOCAL: "thread local"
 
 ##################
 #    KEYWORDS    #
