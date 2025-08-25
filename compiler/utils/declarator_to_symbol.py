@@ -28,7 +28,7 @@ def declarator_to_symbol(current_scope:Scope, declaration: NormalDeclaration, un
         kind      = SymbolKind.Var
 
         # Declaration Context
-        scope     = None
+        scope            = current_scope
         declaration_node = declaration
 
         # Semantic Information

@@ -3,6 +3,7 @@
 from enum import Enum, auto
 from typing import Union, Self
 from compiler.utils.literal_kind import *
+from compiler.utils.enum_types import *
 
 ########################################################################################################################
 class ASTNode:
@@ -202,15 +203,21 @@ class NormalDeclarator(ASTNode):
 ########################################################################################################################
 # NORMALIZED DECLARATION
 
+
+
+
 class NormalDeclaration(ASTNode):
-    def __init__(self, decl_specs:DeclSpec, declarator_list:list[NormalDeclarator] | None = None, func_body:"CompoundStatement"=None):
+    def __init__(self,
+                 decl_specs:DeclSpec,
+                 declarator_list:list[NormalDeclarator] | None = None,
+                 body: "CompoundStatement"=None,
+                 body_type: BodyType | None =None):
+
         super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
-        self.func_body   = func_body # Only used by Function Definitions
-        self.class_body  = None
-        self.enum_body   = None # TO-DO: Create AST Nodes for other body types
-                                #        and also combine bodies into one body
+        self.func_body   = body      # Used by Function / Class / Struct / Enum Definitions
+        self.body_type   = body_type # Enum_Type or None by default
 
         # Semantic Information
         self.symbol = None # Set during Scope Binding Pass
@@ -222,8 +229,8 @@ class NormalDeclaration(ASTNode):
             self.children.append(declarator_list[0])
         elif len(declarator_list) > 1:
             self.children.append(ASTNode("declarator_list"), declarator_list)
-        if func_body:
-            self.children.append(func_body)
+        if body:
+            self.children.append(body)
 
 ########################################################################################################################
 # PARAMETER
