@@ -110,11 +110,10 @@ type_qualifier: CONST | VOLATILE | RESTRICT
 
 ?type_specifier: simple_type_specifier
                | elaborated_type_specifier
-#               | enum_specifier
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
                      | SIGNED | UNSIGNED | SHORT | LONG | AUTO
-                     // | IDENTIFIER (for typedef names)
+                     | IDENTIFIER
 
 elaborated_type_specifier: (CLASS | STRUCT | ENUM) IDENTIFIER
 

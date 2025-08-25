@@ -84,13 +84,23 @@ class DeclSpec(ASTNode):
                  type_node:Type      =None,   #
                  qualifier           =None,   # const, volatile...
                  storage_class       =None,   # static, extern, thread_local...
-                 function_specifier  =None ): # inline, constexpr, consteval, virtual...
+                 function_specifier  =None ): # inline, constexpr, consteval, virtual, explicit...
 
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
         self.type_node       = type_node           # Required
-        self.qualifier       = qualifier           # Optional
+        self.qualifier       = qualifier           # Optional | Many
         self.storage_class   = storage_class       # Optional
         self.func_specifiers = function_specifier  # Optional
+
+        # Declaration-Level Misc. Specifiers
+        self.is_constexpr:   bool = False
+        self.is_consteval:   bool = False
+        self.is_constinit:   bool = False
+        self.is_typedef:     bool = False
+        self.is_using_alias: bool = False
+        self.is_friend:      bool = False
+        # self.alignas_value        = None
+        # self.attributes: list[str] | None = None
 
         # Add Children For Pretty Printing
         self.children.append(type_node)

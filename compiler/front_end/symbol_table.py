@@ -22,10 +22,6 @@ class Symbol:
     func_flags: FuncAttrs     # inline, virtual, noexcept
 
     # Derived Semantic Info
-    is_friend: bool        = False  # from decl_specs.other_specifiers
-    is_mutable: bool       = False  # Fields only
-    is_constexpr_var: bool = False  # Vars only
-    is_constinit:     bool = False  # Vars only
     is_defined:       bool = False
     order_index:      int  = -1
 

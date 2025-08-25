@@ -71,14 +71,12 @@ class StorageClass(Enum):
 
 @dataclass
 class FuncAttrs:
-    inline: bool    = False
-    constexpr: bool = False
-    consteval: bool = False
-    noexcept: bool  = False
-    explicit: bool  = False
-    virtual: bool   = False
-    override: bool  = False
-    final: bool     = False
+    inline   : bool = False
+    noexcept : bool = False
+    explicit : bool = False
+    virtual  : bool = False
+    override : bool = False
+    final    : bool = False
 
 # @dataclass(frozen=True)
 # class SourceLoc:

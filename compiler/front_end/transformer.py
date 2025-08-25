@@ -82,6 +82,14 @@ class CSTtoAST(Transformer):
         storage_class      = None
         function_specifier = None
 
+        # Initialize Specifier Flags
+        is_constexpr:   bool = False
+        is_consteval:   bool = False
+        is_constinit:   bool = False
+        is_typedef:     bool = False
+        is_using_alias: bool = False
+        is_friend:      bool = False
+
         ################################################################################################################
         # Determine Children Names
         if children:
@@ -120,6 +128,33 @@ class CSTtoAST(Transformer):
                     # Found: Function Specifier
                     elif child.name == "function_specifier":
                         function_specifier = child.children[0].name
+
+                    ####################################################################################################
+                    # FLAG SPECIFIER CHECKING
+
+                    # Found:
+                    elif child.name == "constexpr":
+                        is_constexpr = True
+
+                    # Found:
+                    elif child.name == "consteval":
+                        is_consteval = True
+
+                    # Found:
+                    elif child.name == "constinit":
+                        is_constinit = True
+
+                    # Found:
+                    elif child.name == "typedef":
+                        is_typedef = True
+
+                    # Found:
+                    elif child.name == "using":
+                        is_using_alias = True
+
+                    # Found:
+                    elif child.name == "friend":
+                        is_friend = True
 
         # END - Determine Children Names
         ################################################################################################################
@@ -165,9 +200,16 @@ class CSTtoAST(Transformer):
         # Create and Return Declaration Specifier Node
         specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
 
-        # # TEMP DELETE CHILDREN
-        # specifier_node.children = []
+        # Set Bool-Flag Specifiers
+        specifier_node.is_constexpr   = is_constexpr
+        specifier_node.is_consteval   = is_consteval
+        specifier_node.is_constinit   = is_constinit
+        specifier_node.is_typedef     = is_typedef
+        specifier_node.is_using_alias = is_using_alias
+        specifier_node.is_friend      = is_friend
 
+
+        # Return Declaration Specs Node
         return specifier_node
 
     ####################################################################################################################
