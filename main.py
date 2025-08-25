@@ -11,6 +11,8 @@ from compiler.front_end.decorator import ASTtoDAST
 
 GRAMMAR_PATH = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
 
+SOURCE_CODE_PATH = Path(__file__).parent / "tests" / "test_1.cpp"
+
 ########################################################################################################################
 def main():
 
@@ -22,41 +24,9 @@ def main():
 
     ####################################################################################################################
     # Test Code
-    print("\033[33;51m[Reading...]\n[Displaying Source Code]\033[0m")
-    code = ("int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], char(cast_var), float SCOPE :: * param2){"
-            "\n if (1 < 2 + 1 - 1 / 1)"
-            "\n { int a = 10;"
-            "\n }"
-            "\n return 0;"
-            "\n foo + 1;"
-            "\n foo;"
-            "\n 1 + 2 * 3 / 4 - 5 % 6;"
-            "\n }"
-            "\n")
 
-    # code = (
-    #     "int main(int argc, char param = 'x') {\n"
-    #     "  int x = 1, y = {2}, z = x + y * 3;\n"
-    #     "  x += y, z -= 1;\n"
-    #     "  if (x < z)\n"
-    #     "    x++;\n"
-    #     "  else {\n"
-    #     "    y = x ? y : z;\n"
-    #     "  }\n"
-    #     "  while (x < 10)\n"
-    #     "    x = x * 2;\n"
-    #     "  do z--; while (z > 0);\n"
-    #     "  for (int i = 0; i < 5; i++)\n"
-    #     "    x = x + i;\n"
-    #     "  switch (x) {\n"
-    #     "    case 1: break;\n"
-    #     "    case 2: x = 3; break;\n"
-    #     "    default: x = 4;\n"
-    #     "  }\n"
-    #     "  label1: goto label1;\n"
-    #     "  return;\n"
-    #     "}\n")
-
+    with open(SOURCE_CODE_PATH, "r") as f:
+        code = f.read()
     print(code)
 
     ####################################################################################################################
