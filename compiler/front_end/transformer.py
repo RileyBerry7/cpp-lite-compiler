@@ -103,14 +103,14 @@ class CSTtoAST(Transformer):
 
                     # FOUND: Elaborate Type Specifier
                     elif child.name == "class" or child.name == "enum":
-
-                        for grandchild in child.children:
-                            if grandchild.name == "enum_body":
-                                elaborate_body =
-
-                        # SAVE: Elaborate Type & Name
-                        elaborate_type = child.children[0].name
-                        elaborate_name = child.children[1].name
+                        pass
+                        # for grandchild in child.children:
+                        #     if grandchild.name == "enum_body":
+                        #         elaborate_body =
+                        #
+                        # # SAVE: Elaborate Type & Name
+                        # elaborate_type = child.children[0].name
+                        # elaborate_name = child.children[1].name
 
                     # FOUND: Type Qualifier
                     elif child.name == "type_qualifier":
@@ -434,7 +434,7 @@ class CSTtoAST(Transformer):
             else:
                 return Error("Non-statement in compound statement:" + str(child.name))
 
-        return CompoundStatement(statement_list)
+        return CompoundBody(statement_list)
 
     def selection_statement(self, children):
         if len(children) == 1 and isinstance(children[0], Statement):
@@ -465,7 +465,7 @@ class CSTtoAST(Transformer):
             else:
                 return Error("Non-statement in enum_body: " + str(child.name))
 
-        body = CompoundStatement(member_list)
+        body = CompoundBody(member_list)
         return body
 
 

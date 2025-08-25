@@ -78,7 +78,7 @@ class Type(ASTNode):
                  size:int,
                  signed:bool=True,
                  elaboration:[str]=None,
-                 body: "CompoundStatement" | None =None):
+                 body: "CompoundBody" | None =None):
 
         super().__init__(node_name=full_type)
         self.type_name   = base_type    # str: base_type name
@@ -222,7 +222,7 @@ class NormalDeclaration(ASTNode):
     def __init__(self,
                  decl_specs:DeclSpec,
                  declarator_list:list[NormalDeclarator] | None = None,
-                 body: "CompoundStatement"=None,
+                 body: "CompoundBody" =None,
                  body_type: BodyType | None =None):
 
         super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
@@ -413,14 +413,14 @@ class ReturnStatement(Statement):
         if return_value:
             self.children.append(return_value)
 
-class CompoundStatement(Statement):
-    def __init__(self, statement_list:list[Statement] | None = None):
-        super().__init__(statement_type="compound_statement")
-        self.statements = statement_list or []  # List of Statements, may be empty
-
-        # Add Children For Pretty Printing
-        for stmt in self.statements:
-            self.children.append(stmt)
+# class CompoundBody(Statement):
+#     def __init__(self, statement_list:list[Statement] | None = None):
+#         super().__init__(statement_type="compound_statement")
+#         self.member_list = statement_list or []  # List of Statements, may be empty
+#
+#         # Add Children For Pretty Printing
+#         for stmt in self.member_list:
+#             self.children.append(stmt)
 
 class DeclarationStatement(Statement):
     def __init__(self, declaration:NormalDeclaration):
@@ -439,17 +439,21 @@ class Body(ASTNode, Generic[NodeT]):
         super().__init__(node_name=body_type)
         self.member_list = members or []  # List of ASTNodes, may be empty
 
-    def add_member(self, member:NodeT):
-        self.member_list.append(member)
+        self.init_children()
 
-        # Add Children For Pretty Printing
+    def add_member(self, member:NodeT):
+        self.member_list.append(member) # Update Member_List
+        self.children.append(member)    # Update Children
+
+    # Adds Members as Children for Pretty Printing
+    def init_children(self):
         for member in self.member_list:
             self.children.append(member)
 
 # COMPOUND BODY: Function/ If / While
 class CompoundBody(Body[Statement]):
-    def __init__(self):
-        super().__init__(body_type="compound_body")
+    def __init__(self, stmt_list:list[Statement] | None = None):
+        super().__init__(body_type="compound_body", members=stmt_list)
         # member_list: list[Statement]
 
 # CLASS BODY: Class / Struct / Union
