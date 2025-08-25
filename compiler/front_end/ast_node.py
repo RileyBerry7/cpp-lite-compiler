@@ -81,16 +81,16 @@ class Type(ASTNode):
 
 class DeclSpec(ASTNode):
     def __init__(self,
-                 type_node:Type      =None,   #
-                 qualifier           =None,   # const, volatile...
-                 storage_class       =None,   # static, extern, thread_local...
-                 function_specifier  =None ): # inline, constexpr, consteval, virtual, explicit...
+                 type_node:           Type             =None,  #
+                 qualifiers:          list[str] | None =None,  # const, volatile...
+                 storage_class:       str              =None,  # static, extern, thread_local...
+                 function_specifiers: list[str] | None =None): # inline, constexpr, consteval, virtual, explicit...
 
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
-        self.type_node       = type_node           # Required
-        self.qualifier       = qualifier           # Optional | Many
-        self.storage_class   = storage_class       # Optional
-        self.func_specifiers = function_specifier  # Optional
+        self.type_node       = type_node                 # Required: Type()
+        self.qualifiers      = qualifiers or []          # Optional: [str]
+        self.storage_class   = storage_class             # Optional: str
+        self.func_specifiers = function_specifiers or [] # Optional: [str]
 
         # Declaration-Level Misc. Specifiers
         self.is_constexpr:   bool = False
@@ -104,12 +104,12 @@ class DeclSpec(ASTNode):
 
         # Add Children For Pretty Printing
         self.children.append(type_node)
-        if qualifier:
-            self.children.append(ASTNode(qualifier))
+        for child in qualifiers:
+            self.children.append(ASTNode(child))
         if storage_class:
             self.children.append(ASTNode(storage_class))
-        if function_specifier:
-            self.children.append(ASTNode(function_specifier))
+        for child in function_specifiers:
+            self.children.append(ASTNode(ASTNode(child)))
 
 ########################################################################################################################
 # POINTER LEVEL
@@ -204,7 +204,7 @@ class NormalDeclarator(ASTNode):
 
 class NormalDeclaration(ASTNode):
     def __init__(self, decl_specs:DeclSpec, declarator_list:list[NormalDeclarator] | None = None, func_body:"CompoundStatement"=None):
-        super().__init__(node_name="\x1b[1;91mnormal_declaration\x1b[0m")
+        super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
         self.func_body   = func_body # Only used by Function Definitions

@@ -78,9 +78,9 @@ class CSTtoAST(Transformer):
         simple_types       = []
         elaborate_types    = []
         elaborate_name     = None
-        qualifier          = None
+        qualifiers          = []
         storage_class      = None
-        function_specifier = None
+        function_specifiers = []
 
         # Initialize Specifier Flags
         is_constexpr:   bool = False
@@ -113,10 +113,7 @@ class CSTtoAST(Transformer):
 
                     # FOUND: Type Qualifier
                     elif child.name == "type_qualifier":
-                        # SEMANTIC ERROR: multiple type qualifiers
-                        if qualifier is not None:
-                            return Error("Multiple type qualifiers found")
-                        qualifier = child.children[0].name
+                        qualifiers.append(child.children[0].name)
 
                     # Found: Storage Class Specifier
                     elif child.name == "storage_class_specifier":
@@ -127,7 +124,7 @@ class CSTtoAST(Transformer):
 
                     # Found: Function Specifier
                     elif child.name == "function_specifier":
-                        function_specifier = child.children[0].name
+                        function_specifiers.append(child.children[0].name)
 
                     ####################################################################################################
                     # FLAG SPECIFIER CHECKING
@@ -158,6 +155,8 @@ class CSTtoAST(Transformer):
 
         # END - Determine Children Names
         ################################################################################################################
+
+        # Compute / Build Type Object
 
         # SEMANTIC ERROR: mutual exclusivity of simple_type & elaborate_type
         if elaborate_types and simple_types:
@@ -198,7 +197,7 @@ class CSTtoAST(Transformer):
             return Error("Invalid type specifier found.")
 
         # Create and Return Declaration Specifier Node
-        specifier_node = DeclSpec(type_node, qualifier, storage_class, function_specifier)
+        specifier_node = DeclSpec(type_node, qualifiers, storage_class, function_specifiers)
 
         # Set Bool-Flag Specifiers
         specifier_node.is_constexpr   = is_constexpr
@@ -295,14 +294,21 @@ class CSTtoAST(Transformer):
     def declaration(self, children):
         decl_specs = None
         declarator_list = []
+        errors = []
         for child in children:
             if isinstance(child, DeclSpec):
                 decl_specs = child
             elif isinstance(child, NormalDeclarator):
                 declarator_list.append(child)
 
+            # Error Checking
+            elif isinstance(child, Error):
+                errors.append(child)
 
-        return NormalDeclaration(decl_specs, declarator_list)
+        normal_declaration = NormalDeclaration(decl_specs, declarator_list)
+        for error in errors:
+            normal_declaration.children.append(error)
+        return normal_declaration
 
 
 

@@ -113,7 +113,7 @@ type_qualifier: CONST | VOLATILE | RESTRICT
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
                      | SIGNED | UNSIGNED | SHORT | LONG | AUTO
-                     | IDENTIFIER
+#                     | IDENTIFIER # Typedef Names - Creates Massive Ambiguity ;-;
 
 elaborated_type_specifier: (CLASS | STRUCT | ENUM) IDENTIFIER
 
