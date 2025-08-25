@@ -88,9 +88,9 @@ class DeclSpec(ASTNode):
 
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
         self.type_node       = type_node                 # Required: Type()
-        self.qualifiers      = qualifiers or []          # Optional: [str]
+        self.qualifier_set = set(qualifiers) if qualifiers is not None else set() # Optional: set(str)
         self.storage_class   = storage_class             # Optional: str
-        self.func_specifiers = function_specifiers or [] # Optional: [str]
+        self.func_specifier_set = set(function_specifiers) if function_specifiers is not None else set() # Optional: set(str)
 
         # Declaration-Level Misc. Specifiers
         self.is_constexpr:   bool = False
@@ -208,6 +208,9 @@ class NormalDeclaration(ASTNode):
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
         self.func_body   = func_body # Only used by Function Definitions
+        self.class_body  = None
+        self.enum_body   = None # TO-DO: Create AST Nodes for other body types
+                                #        and also combine bodies into one body
 
         # Semantic Information
         self.symbol = None # Set during Scope Binding Pass

@@ -1,10 +1,10 @@
 # declarator_todeclarator_to_symbol.py
 
 from compiler.front_end.symbol_table import Symbol
-from compiler.utils.enum_types import SymbolKind, StorageClass
+from compiler.utils.enum_types import *
 from compiler.front_end.ast_node import *
 
-def declarator_to_symbol(declaration: NormalDeclaration, unique_id: int) -> list[Symbol]:
+def declarator_to_symbol(current_scope:Scope, declaration: NormalDeclaration, unique_id: int) -> list[Symbol]:
     """
     Returns a list of Symbol objects.
     """
@@ -31,26 +31,46 @@ def declarator_to_symbol(declaration: NormalDeclaration, unique_id: int) -> list
         scope     = None
         declaration_node = declaration
 
-        # Declaration Specifications
-        decl_spec = decl_specs
-
         # Semantic Information
-        storage    = StorageClass[decl_spec.storage_class.upper()]
-        func_flags: FuncAttrs
-        is_defined: bool = False
-        order_index: int = -1
+
+        # Resolve: Storage Class
+        if decl_specs.storage_class and StorageClass.__members__.get(decl_spec.storage_class.upper(), None):
+            storage = StorageClass[decl_spec.storage_class.upper()]
+        else:
+            storage = StorageClass.None_
+
+        # Resolve: Function Specifiers
+        func_flags = FuncAttrs()
+        if "inline" in decl_specs.func_specifier_set:
+            func_flags.inline = True
+        if "noexcept" in decl_specs.func_specifier_set:
+            func_flags.noexcept = True
+        if "explicit" in decl_specs.func_specifier_set:
+            func_flags.explicit = True
+        if "virtual" in decl_specs.func_specifier_set:
+            func_flags.virtual = True
+        if "override" in decl_specs.func_specifier_set:
+            func_flags.override = True
+        if "final" in decl_specs.func_specifier_set:
+            func_flags.final = True
+
+        # Resolve: is_defined
+        is_defined: bool = True
+
+
+        # order_index: int = -1
 
         # Source Information
         # loc: None
 
-        # Aggregate Information
-        members: list[None] = None  # Structs / Enums
+        # Resolve Members (Fields): class, struct, enum, union, attributes, methods...
+        members = [] # members within nested scope
 
         ################################################################################################################
 
         # Construct / Push Symbol
         curr_symbol = Symbol(id, name, kind, scope, declaration_node, decl_specs, storage,
-                             func_flags, is_defined, order_index, members)
+                             func_flags, is_defined, members)
         built_symbols.append(curr_symbol)
 
 

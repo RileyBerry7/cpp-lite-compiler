@@ -4,6 +4,7 @@ from multiprocessing.managers import Token
 from lark import Tree
 from compiler.front_end.symbol_table import SymbolTable, Symbol
 from compiler.utils.enum_types import *
+from compiler.utils.declarator_to_symbol import *
 from compiler.front_end.ast_node import *
 
 
@@ -50,10 +51,9 @@ class ASTtoDAST:
                     print()
 
                 else:
-                    decl_list = node.decl_list
-                    for declarator in node.decl_list:
 
-                        symbol = declarator_to_symbol(decl_list, declarator)
+                    found_symbols = declarator_to_symbol(scope_stack.curr_scope, node, unique_id)
+                    unique_id += len(found_symbols)
 
 
                 # Check if Symbol Name Exists In Scope

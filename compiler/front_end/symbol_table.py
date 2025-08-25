@@ -13,7 +13,7 @@ class Symbol:
     kind:      SymbolKind   # Symbol Role
 
     # Context
-    scope: Scope              # Scope within
+    outer_scope: Scope        # Scope within
     declaration_node: ASTNode # Declaration within
 
     # Specs
@@ -22,14 +22,14 @@ class Symbol:
     func_flags: FuncAttrs     # inline, virtual, noexcept
 
     # Derived Semantic Info
-    is_defined:       bool = False
-    order_index:      int  = -1
+    is_defined:       bool = True
+    # order_index:      int  = -1
 
     # Source Information
     # loc: None
 
-    # Aggregate Information
-    members: list[None] = None # Structs / Enums
+    # Aggregate Types (Fields): class, struct, enum, union, attributes, methods...
+    members: list["Symbol"] | None = None # members within nested scope
 
 
 #############################################################################################################3##########
