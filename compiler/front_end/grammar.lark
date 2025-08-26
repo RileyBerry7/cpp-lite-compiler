@@ -107,6 +107,7 @@ type_qualifier_list: type_qualifier+
 
 type_qualifier: CONST | VOLATILE | RESTRICT
 
+simple_type_specifier_list: simple_type_specifier+
 
 ?type_specifier: simple_type_specifier
                | elaborated_type_specifier
@@ -117,22 +118,21 @@ simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
 #                     PLEASE DO NOT UNCOMMENT
 
 
-elaborated_type_specifier:      (CLASS | STRUCT)  IDENTIFIER class_body?  -> class
-                         | ENUM (CLASS | STRUCT)? IDENTIFIER enum_body?   -> enum
+elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class
+                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum
 
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
 
-
 ########################################################################################################################
-#  AGGREGATE BODIES (class / struct / enum) #
-#############################################
+# ELABORATE TYPE BODIES #
+#########################
 
 # CLASS / STRUCT BODY
 class_body: _LBRACE member_declaration* _RBRACE
 
-member_declaration: declaration                                 // inside class / struc
-                  | access_specifier COLON  -> access_specifier // public:, private:, protected:
+?member_declaration: declaration                                 // inside class / struc
+                   | access_specifier COLON  -> access_specifier // public:, private:, protected:
 
 access_specifier: PUBLIC | PRIVATE | PROTECTED
 
@@ -140,6 +140,11 @@ access_specifier: PUBLIC | PRIVATE | PROTECTED
 enum_body: _LBRACE enumerator_list? _RBRACE
 enumerator_list: enumerator ( _COMMA enumerator )* _COMMA?
 enumerator: IDENTIFIER (EQUAL constant_expression)?
+
+
+# ENUM UNDERLYING TYPE
+enum_base: COLON simple_type_specifier_list
+
 
 ########################################################################################################################
 #  EXPRESSIONS  #

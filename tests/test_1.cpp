@@ -2,7 +2,11 @@ int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], c
 {
     if (1 < 2 + 1 - 1 / 1)
     {
-        float myFloat;
+         enum class Color {
+            Red,
+            Green,
+            Blue
+         };
     }
     return 0;
 

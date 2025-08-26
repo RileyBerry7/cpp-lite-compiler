@@ -6,43 +6,7 @@ from compiler.front_end.ast_node import *
 from compiler.utils.literal_kind import *
 from compiler.utils.lexeme_to_number import lexeme_to_number
 from compiler.utils.scalar_size import scalar_size
-
-
-BASE_TYPES = {'void', 'bool', 'char', 'signed', 'unsigned', 'int', 'float'}
-
-VALID_TYPE_SETS = {
-    ('void',),
-    ('bool',),
-    ('char',),
-    ('signed',),
-    ('char', 'signed'),
-    ('unsigned',),
-    ('char', 'unsigned'),
-    ('int',),
-    ('int', 'signed'),
-    ('int', 'unsigned'),
-    ('short',),
-    ('int', 'short'),
-    ('short', 'signed'),
-    ('int', 'short', 'signed'),
-    ('short', 'unsigned'),
-    ('int', 'short', 'unsigned'),
-    ('long',),
-    ('int', 'long'),
-    ('long', 'long'),
-    ('int', 'long', 'long'),
-    ('long', 'signed'),
-    ('int', 'long', 'signed'),
-    ('long', 'long', 'signed'),
-    ('int', 'long', 'long', 'signed'),
-    ('long', 'unsigned'),
-    ('int', 'long', 'unsigned'),
-    ('long', 'long', 'unsigned'),
-    ('int', 'long', 'long', 'unsigned'),
-    ('float',),
-    ('double',),
-    ('double', 'long'),
-}
+from compiler.utils.valid_sets import *
 
 ########################################################################################################################
 class CSTtoAST(Transformer):
@@ -64,13 +28,30 @@ class CSTtoAST(Transformer):
     def translation_unit(self, children):
         return TranslationUnit(children)
 
+
     ####################################################################################################################
     # EXTERNAL DECLARATION
+
     def external_declaration(self, children):
         if children and isinstance(children[0], NormalDeclaration):
             return children[0]
 
         return Error("Invalid external declaration")
+
+
+    ####################################################################################################################
+
+    def enumerator(self, children):
+
+        id_name = children[0].name
+
+        if len(children) == 1:
+            return Enumerator(children[0].name)
+        elif len(children) == 3:
+            return Enumerator(children[0].name, children[2])
+        else:
+            return Error("Invalid enumerator")
+
 
     ####################################################################################################################
     def declaration_specifier_list(self, children):
@@ -165,7 +146,7 @@ class CSTtoAST(Transformer):
 
         # ERROR CHECKING: base_type / is_signed
         types_found = tuple(sorted(simple_types))
-        if types_found in VALID_TYPE_SETS:
+        if types_found in VALID_SIMPLE_TYPE_COMBOS:
 
             # Grab base type
             if elaborate_name is not None:
@@ -173,7 +154,7 @@ class CSTtoAST(Transformer):
                 base_type = elaborate_name
             else:
                 # Simple Type Name
-                base_type = next((t for t in types_found if t in BASE_TYPES), None)
+                base_type = next((t for t in types_found if t in VALID_SIMPLE_TYPES), None)
 
             # Check If Unsigned
             is_signed = True
@@ -191,7 +172,7 @@ class CSTtoAST(Transformer):
                 size = scalar_size(types_found, base_type, "LLP64")
 
             # Compile Type Node
-            type_node = Type(' '.join(types_found), base_type, size, is_signed, elaborate_types)
+            type_node = SimpleType(base_type, size, is_signed)
 
         # ERROR: Found Type Not in Valid Set
         else:
@@ -453,20 +434,23 @@ class CSTtoAST(Transformer):
     ####################################################################################################################
     # ENUM / CLASS BODY
 
-    def enum_body(self, children):
-        member_list = []
+    def class_body(self, children):
+        member_list = ClassBody()
         for child in children:
-            if isinstance(child, Statement):
-                member_list.append(child)
+            member_list.add_member(child)
 
-            elif isinstance(child, NormalDeclaration):
-                member_list.append(DeclarationStatement(child))
+        return member_list
 
-            else:
-                return Error("Non-statement in enum_body: " + str(child.name))
 
-        body = CompoundBody(member_list)
-        return body
+    def enum_body(self, children):
+        member_list = EnumBody()
+
+        # Has only-child enumerator_list
+        if children:
+            for enumerator in children[0].children:
+                member_list.add_member(enumerator)
+
+        return member_list
 
 
     ####################################################################################################################

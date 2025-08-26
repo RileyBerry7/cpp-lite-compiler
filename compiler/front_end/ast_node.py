@@ -13,11 +13,12 @@ NodeT = TypeVar("NodeT", bound="ASTNode")
 class ASTNode:
     """ Represents a node in the Abstract Syntax Tree (AST)."""
 
-    def __init__(self, node_name=None, children=None):
+    def __init__(self, node_name=None, children:list[ASTNode] | None=None):
 
         # Abstract Node Details
         self.name = node_name
-        self.children = children if children is not None else []
+        self.children = children or []
+
         self.span       = None
         # self.token_type = None
 
@@ -69,40 +70,56 @@ class TranslationUnit(ASTNode):
             self.children.append(decl)
 
 ########################################################################################################################
-# TYPE
+# SIMPLE TYPE
 
-class Type(ASTNode):
+class SimpleType(ASTNode):
     def __init__(self,
-                 full_type:str,
                  base_type:str,
                  size:int,
-                 signed:bool=True,
-                 elaboration:[str]=None,
-                 body: "CompoundBody" | None =None):
+                 signed:bool=True):
 
-        super().__init__(node_name=full_type)
-        self.type_name   = base_type    # str: base_type name
-        self.size        = size         # int: # of bits
-        self.signed      = signed       # Bool
-        self.elaboration = elaboration  # list(str): Struct, Class, Enum or None
-        self.elaborate_body = body
+        super().__init__(node_name="simple_type")
+        self.type_name   = base_type    # str:  base_type name
+        self.size        = size         # int:  # of bits
+        self.signed      = signed       # Bool: can represent negatives
 
-        self.children.append(ASTNode("size: " + str(self.size) + "-bits"))
+        self.children.append(ASTNode(str(self.size) + "-bit " + base_type))
+
+
+########################################################################################################################
+# ELABORATE TYPE
+
+class ElaborateType(ASTNode):
+    def __init__(self,
+                 elaborate_type:ElaborateType,
+                 elaborate_name:str,
+                 elaborate_body: EnumBody | ClassBody | None=None,
+                 enum_base: SimpleType | None=None):
+
+        super().__init__(node_name="elaborate_type")
+        self.type            = elaborate_type #
+        self.identifer       = elaborate_name #
+        self.body            = elaborate_body # Optional: Defining Body
+
+        # ENUM EXCLUSIVE ATTRIBUTES
+        self.underlying_type = enum_base      # Optional: Enum base type
+        self.is_scoped       = False          # Optional: Enum is_scoped
+
 
 ########################################################################################################################
 # DECLARATION SPECIFIER LIST
 
 class DeclSpec(ASTNode):
     def __init__(self,
-                 type_node:           Type             =None,  #
+                 type_node: Union[SimpleType, ElaborateType],  # int, float... | class, enum
                  qualifiers:          list[str] | None =None,  # const, volatile...
                  storage_class:       str              =None,  # static, extern, thread_local...
                  function_specifiers: list[str] | None =None): # inline, constexpr, consteval, virtual, explicit...
 
         super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
-        self.type_node       = type_node                 # Required: Type()
-        self.qualifier_set = set(qualifiers) if qualifiers is not None else set() # Optional: set(str)
-        self.storage_class   = storage_class             # Optional: str
+        self.type_node          = type_node                                            # Required: Type()
+        self.qualifier_set      = set(qualifiers) if qualifiers is not None else set() # Optional: set(str)
+        self.storage_class      = storage_class                                        # Optional: str
         self.func_specifier_set = set(function_specifiers) if function_specifiers is not None else set() # Optional: set(str)
 
         # Declaration-Level Misc. Specifiers
@@ -467,13 +484,11 @@ class ClassBody(Body[Union[NormalDeclaration, "AccessSpecifier"]]):
 class EnumBody(Body["Enumerator"]):
     def __init__(self, scoped:bool=False):
         super().__init__(body_type="enum_body")
-        self.is_scoped = scoped
-        # member_list: list[Enumerator]
 
 class Enumerator(ASTNode):
-    def __init__(self, identifier_name: str, initial_expr: ConstantExpr):
+    def __init__(self, identifier_name: str, initial_expr: ConstantExpr | None=None):
         super().__init__(node_name="enumerator")
-        self.identifer    = identifier_name
+        self.identifier   = identifier_name
         self.initial_expr = initial_expr
 
 class AccessSpecifier(ASTNode):

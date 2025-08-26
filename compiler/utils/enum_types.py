@@ -89,6 +89,7 @@ class BodyType(Enum):
     FUNCTION = auto() # function
     CLASS    = auto() # class / struct
     ENUM     = auto() # enum
+    UNION    = auto() # union
 #############################################################################################################3##########
 # Used for
 class AccessType(Enum):

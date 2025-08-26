@@ -1,0 +1,37 @@
+# valid_sets.py
+
+VALID_SIMPLE_TYPES = {'void', 'bool', 'char', 'signed', 'unsigned', 'int', 'float'}
+
+VALID_SIMPLE_TYPE_COMBOS = {
+    ('void',),
+    ('bool',),
+    ('char',),
+    ('signed',),
+    ('char', 'signed'),
+    ('unsigned',),
+    ('char', 'unsigned'),
+    ('int',),
+    ('int', 'signed'),
+    ('int', 'unsigned'),
+    ('short',),
+    ('int', 'short'),
+    ('short', 'signed'),
+    ('int', 'short', 'signed'),
+    ('short', 'unsigned'),
+    ('int', 'short', 'unsigned'),
+    ('long',),
+    ('int', 'long'),
+    ('long', 'long'),
+    ('int', 'long', 'long'),
+    ('long', 'signed'),
+    ('int', 'long', 'signed'),
+    ('long', 'long', 'signed'),
+    ('int', 'long', 'long', 'signed'),
+    ('long', 'unsigned'),
+    ('int', 'long', 'unsigned'),
+    ('long', 'long', 'unsigned'),
+    ('int', 'long', 'long', 'unsigned'),
+    ('float',),
+    ('double',),
+    ('double', 'long'),
+}
