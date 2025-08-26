@@ -114,12 +114,13 @@ simple_type_specifier_list: simple_type_specifier+
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
                      | SIGNED | UNSIGNED | SHORT | LONG | AUTO
+                     | WCHAR_T | WCHAR16_T | WCHAR32_T
 #                     | IDENTIFIER # Typedef Names - Creates Massive Ambiguity ;-;
 #                     PLEASE DO NOT UNCOMMENT
 
 
-elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class
-                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum
+elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class_type
+                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum_type
 
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
@@ -314,6 +315,9 @@ INT:        "int"
 FLOAT:      "float"
 DOUBLE:     "double"
 CHAR:       "char"
+WCHAR_T:    "wchar_t"
+WCHAR16_T:   "wchar16_t"
+WCHAR32_T:   "wchar32_t"
 VOID:       "void"
 BOOL:       "bool"
 AUTO:       "auto"

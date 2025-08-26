@@ -5,8 +5,8 @@ from lark import Lark, Transformer, Tree
 from compiler.front_end.ast_node import *
 from compiler.utils.literal_kind import *
 from compiler.utils.lexeme_to_number import lexeme_to_number
-from compiler.utils.scalar_size import scalar_size
-from compiler.utils.valid_sets import *
+from compiler.utils.resolve_simple_type import resolve_simple_type
+
 
 ########################################################################################################################
 class CSTtoAST(Transformer):
@@ -40,6 +40,46 @@ class CSTtoAST(Transformer):
 
 
     ####################################################################################################################
+    # def class_type(self, children):
+
+
+
+    def enum_type(self, children):
+
+        kind       = ElaboratedTypeKind.ENUM
+        identifier = "ERROR: id not-found"
+        is_scoped  = None
+        enum_base  = resolve_simple_type(['int'])
+        body       = None
+
+        # Loop through Children, Build Elaborate Type
+        for child in children:
+
+            # Check if Scoped
+            if child.name == "class" or child.name == "struct":
+                is_scoped = True
+
+            # Check for Scope Qualifier
+            elif child.name == "scope_qualifier":
+                pass
+
+            # Check for Enum Base
+            elif child.name == "enum_base":
+                specifier_seq = []
+                if isinstance(child.children[1], ASTNode):
+                    for specifier in child.children[1].children:
+                        specifier_seq.append(specifier.name)
+                enum_base = resolve_simple_type(specifier_seq)
+
+            # Check for Body
+            if isinstance(child, EnumBody):
+                body = child
+
+            # Else is Identifier
+            else:
+                identifier = child.name
+
+        return ElaborateType(kind, identifier, body, enum_base, is_scoped)
 
     def enumerator(self, children):
 
@@ -57,12 +97,12 @@ class CSTtoAST(Transformer):
     def declaration_specifier_list(self, children):
 
         # Initialize Empty Specs
-        simple_types       = []
-        elaborate_types    = []
-        elaborate_name     = None
+        simple_type_list    = []
         qualifiers          = []
-        storage_class      = None
         function_specifiers = []
+        storage_class       = None
+        simple_type         = None
+        elaborate_type      = None
 
         # Initialize Specifier Flags
         is_constexpr:   bool = False
@@ -73,25 +113,19 @@ class CSTtoAST(Transformer):
         is_friend:      bool = False
 
         ################################################################################################################
-        # Determine Children Names
+
+        # Determine Children
         if children:
             for child in children:
                 if isinstance(child, ASTNode):
 
                     # FOUND: Simple Type Specifier
                     if child.name == "simple_type_specifier":
-                        simple_types.append(child.children[0].name)
+                        simple_type_list.append(child.children[0].name)
 
                     # FOUND: Elaborate Type Specifier
-                    elif child.name == "class" or child.name == "enum":
-                        pass
-                        # for grandchild in child.children:
-                        #     if grandchild.name == "enum_body":
-                        #         elaborate_body =
-                        #
-                        # # SAVE: Elaborate Type & Name
-                        # elaborate_type = child.children[0].name
-                        # elaborate_name = child.children[1].name
+                    elif isinstance(child, ElaborateType):
+                        elaborate_type = child
 
                     # FOUND: Type Qualifier
                     elif child.name == "type_qualifier":
@@ -109,7 +143,7 @@ class CSTtoAST(Transformer):
                         function_specifiers.append(child.children[0].name)
 
                     ####################################################################################################
-                    # FLAG SPECIFIER CHECKING
+                    # FLAG CHECKING
 
                     # Found: Constexpr Flag
                     elif child.name == "constexpr":
@@ -135,53 +169,33 @@ class CSTtoAST(Transformer):
                     elif child.name == "friend":
                         is_friend = True
 
-        # END - Determine Children Names
+        # END - Determine Children
         ################################################################################################################
 
-        # Compute / Build Type Object
 
-        # SEMANTIC ERROR: mutual exclusivity of simple_type & elaborate_type
-        if elaborate_types and simple_types:
-            return Error("'Elaborate' and 'Simple' types are mutually exclusive")
-
-        # ERROR CHECKING: base_type / is_signed
-        types_found = tuple(sorted(simple_types))
-        if types_found in VALID_SIMPLE_TYPE_COMBOS:
-
-            # Grab base type
-            if elaborate_name is not None:
-                # Identifier Type Name
-                base_type = elaborate_name
-            else:
-                # Simple Type Name
-                base_type = next((t for t in types_found if t in VALID_SIMPLE_TYPES), None)
-
-            # Check If Unsigned
-            is_signed = True
-            for elem in types_found:
-                if elem == "unsigned":
-                    is_signed = False
-                    break
-
-            # Calculate Size
-            if elaborate_types:
-                size = None
-                print("\033[93;5;28mWarning: Found elaborate type, memory size uncertain.\n"
-                      + str(elaborate_types) + "\033[0m")
-            else:
-                size = scalar_size(types_found, base_type, "LLP64")
-
-            # Compile Type Node
-            type_node = SimpleType(base_type, size, is_signed)
-
-        # ERROR: Found Type Not in Valid Set
+        # Resolve Simple Type
+        if not simple_type_list:
+            simple_type = None
         else:
-            return Error("Invalid type specifier found.")
+            simple_type = resolve_simple_type(simple_type_list)
 
-        # Create and Return Declaration Specifier Node
-        specifier_node = DeclSpec(type_node, qualifiers, storage_class, function_specifiers)
+        # CHECK: Mutual-Exclusivity Between Simple & Elaborate Type
+        if elaborate_type and simple_type:
+            return Error("'Elaborate' and 'Simple' types are mutually exclusive.")
 
-        # Set Bool-Flag Specifiers
+        elif elaborate_type:
+            resolved_type = elaborate_type
+
+        elif simple_type:
+            resolved_type = simple_type
+
+        else:
+            return Error("Neither 'Elaborate' nor 'Simple' type was found.")
+
+        # CONSTRUCT: Declaration Specifier Node
+        specifier_node = DeclSpec(resolved_type, qualifiers, storage_class, function_specifiers)
+
+        # ASSIGN: Flag Specifiers
         specifier_node.is_constexpr   = is_constexpr
         specifier_node.is_consteval   = is_consteval
         specifier_node.is_constinit   = is_constinit
@@ -189,8 +203,7 @@ class CSTtoAST(Transformer):
         specifier_node.is_using_alias = is_using_alias
         specifier_node.is_friend      = is_friend
 
-
-        # Return Declaration Specs Node
+        # RETURN: Declaration Specifier Node
         return specifier_node
 
     ####################################################################################################################
@@ -461,7 +474,6 @@ class CSTtoAST(Transformer):
         compound_statement = children[2]
         function_definition = NormalDeclaration(decl_specs, [declarator], compound_statement)
         function_definition.name = "\x1b[1;38;2;80;160;255mfunction_definition\x1b[0m"
-        function_definition.body_type = BodyType.FUNCTION
         return function_definition
 
     ####################################################################################################################

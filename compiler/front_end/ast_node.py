@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Union, Self, Generic, TypeVar
 from compiler.utils.literal_kind import *
 from compiler.utils.enum_types import *
+from compiler.utils.valid_sets import FundamentalTypes
 
 # ASTNode Type Template (Dynamic Typing)
 NodeT = TypeVar("NodeT", bound="ASTNode")
@@ -74,7 +75,7 @@ class TranslationUnit(ASTNode):
 
 class SimpleType(ASTNode):
     def __init__(self,
-                 base_type:str,
+                 base_type:FundamentalTypes,
                  size:int,
                  signed:bool=True):
 
@@ -91,19 +92,20 @@ class SimpleType(ASTNode):
 
 class ElaborateType(ASTNode):
     def __init__(self,
-                 elaborate_type:ElaborateType,
-                 elaborate_name:str,
+                 elaborate_kind: ElaboratedTypeKind,
+                 elaborate_name: str,
                  elaborate_body: EnumBody | ClassBody | None=None,
-                 enum_base: SimpleType | None=None):
+                 enum_base     : SimpleType           | None=None,
+                 is_scoped     : bool                 | None=None):
 
         super().__init__(node_name="elaborate_type")
-        self.type            = elaborate_type #
-        self.identifer       = elaborate_name #
+        self.kind            = elaborate_kind #
+        self.identifier      = elaborate_name #
         self.body            = elaborate_body # Optional: Defining Body
 
         # ENUM EXCLUSIVE ATTRIBUTES
         self.underlying_type = enum_base      # Optional: Enum base type
-        self.is_scoped       = False          # Optional: Enum is_scoped
+        self.is_scoped       = is_scoped      # Optional: Enum is_scoped
 
 
 ########################################################################################################################
@@ -239,8 +241,7 @@ class NormalDeclaration(ASTNode):
     def __init__(self,
                  decl_specs:DeclSpec,
                  declarator_list:list[NormalDeclarator] | None = None,
-                 body: "CompoundBody" =None,
-                 body_type: BodyType | None =None):
+                 body: "CompoundBody" =None):
 
         super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
         self.decl_specs  = decl_specs
@@ -430,15 +431,6 @@ class ReturnStatement(Statement):
         if return_value:
             self.children.append(return_value)
 
-# class CompoundBody(Statement):
-#     def __init__(self, statement_list:list[Statement] | None = None):
-#         super().__init__(statement_type="compound_statement")
-#         self.member_list = statement_list or []  # List of Statements, may be empty
-#
-#         # Add Children For Pretty Printing
-#         for stmt in self.member_list:
-#             self.children.append(stmt)
-
 class DeclarationStatement(Statement):
     def __init__(self, declaration:NormalDeclaration):
         super().__init__(statement_type="declaration_statement")
@@ -477,8 +469,6 @@ class CompoundBody(Body[Statement]):
 class ClassBody(Body[Union[NormalDeclaration, "AccessSpecifier"]]):
     def __init__(self):
         super().__init__(body_type="class_body")
-        # Default Access = Private
-        self.member_list.append(AccessSpecifier(AccessType.PRIVATE))
 
 # ENUM BODY: Enum (Scoped or Unscoped)
 class EnumBody(Body["Enumerator"]):

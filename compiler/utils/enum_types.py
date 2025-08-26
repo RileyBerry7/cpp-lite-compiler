@@ -85,8 +85,7 @@ class FuncAttrs:
 #     col: int
 
 #############################################################################################################3##########
-class BodyType(Enum):
-    FUNCTION = auto() # function
+class ElaboratedTypeKind(Enum):
     CLASS    = auto() # class / struct
     ENUM     = auto() # enum
     UNION    = auto() # union
