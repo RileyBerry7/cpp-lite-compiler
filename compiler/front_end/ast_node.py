@@ -6,6 +6,7 @@ from typing import Union, Self, Generic, TypeVar
 from compiler.utils.literal_kind import *
 from compiler.utils.enum_types import *
 from compiler.utils.valid_sets import FundamentalTypes
+from compiler.utils.colors import colors
 
 # ASTNode Type Template (Dynamic Typing)
 NodeT = TypeVar("NodeT", bound="ASTNode")
@@ -63,7 +64,7 @@ class ASTNode:
 
 class TranslationUnit(ASTNode):
     def __init__(self, declaration_list:list[ASTNode] | None = None):
-        super().__init__(node_name="\033[1;38;5;226mtranslation_unit\033[0m")
+        super().__init__(node_name=colors.blue.bold.underline("translation_unit"))
         self.declarations = declaration_list or []  # List of declarations (NormalDeclaration, FunctionDefinition...)
 
         # Add Children
@@ -79,7 +80,7 @@ class SimpleType(ASTNode):
                  size:int,
                  signed:bool=True):
 
-        super().__init__(node_name="simple_type")
+        super().__init__(node_name=colors.green("simple_type"))
         self.type_name   = base_type    # str:  base_type name
         self.size        = size         # int:  # of bits
         self.signed      = signed       # Bool: can represent negatives
@@ -88,9 +89,10 @@ class SimpleType(ASTNode):
         self.init_children()
 
     def init_children(self):
-        self.children.append(ASTNode(self.type_name.name.lower()))
-        self.children.append(ASTNode(str(self.size)))
-        self.children.append(ASTNode("is signed" if self.signed else "not signed"))
+        self.children.append(ASTNode(colors.teal(self.type_name.name.lower())))
+        self.children.append(ASTNode(colors.teal(str(self.size))))
+        self.children.append(ASTNode(colors.teal("is signed" if self.signed
+                                                 else "not signed")))
 
 ########################################################################################################################
 # ELABORATE TYPE
@@ -103,7 +105,7 @@ class ElaborateType(ASTNode):
                  enum_base     : SimpleType           | None=None,
                  is_scoped     : bool                 | None=None):
 
-        super().__init__(node_name="elaborate_type")
+        super().__init__(node_name=colors.green("elaborate_type"))
         self.kind            = elaborate_kind #
         self.identifier      = elaborate_name #
         self.body            = elaborate_body # Optional: Defining Body
@@ -115,8 +117,8 @@ class ElaborateType(ASTNode):
         self.init_children()
 
     def init_children(self):
-        self.children.append(ASTNode(self.kind.name.lower()))
-        self.children.append(ASTNode(self.identifier))
+        self.children.append(ASTNode(colors.teal(self.kind.name.lower())))
+        self.children.append(ASTNode(colors.teal(self.identifier)))
         self.children.append(self.body)
 
 ########################################################################################################################
@@ -252,15 +254,18 @@ class NormalDeclaration(ASTNode):
     def __init__(self,
                  decl_specs:DeclSpec,
                  declarator_list:list[NormalDeclarator] | None = None,
-                 body: "CompoundBody" =None):
+                 body: "CompoundBody" =None,
+                 decl_kind:str="declaration"):
 
-        super().__init__(node_name="\x1b[1;38;2;80;160;255mnormal_declaration\x1b[0m")
+        super().__init__(node_name=f"\x1b[38;2;93;174;255m{decl_kind}\x1b[0m")
+
+        # Normal declarations
+        self.decl_kind   = decl_kind
         self.decl_specs  = decl_specs
         self.decl_list   = declarator_list
 
         # Body
         self.func_body   = body      # Used by Function / Class / Struct / Enum Definitions
-        # self.body_type   = body_type # Enum_Type or None by default
 
         # Semantic Information
         self.symbol = None # Set during Scope Binding Pass
@@ -319,7 +324,8 @@ class ValueCategory(Enum):
 # BASE EXPRESSION
 class Expr(ASTNode):
     def __init__(self, expr_type:str="Expr"):
-        super().__init__(node_name=f"\x1b[1;38;5;226m{expr_type}\x1b[0m")
+        super().__init__(node_name=f"\x1b[38;2;255;179;71m{expr_type}\x1b[0m")  # default: orange
+
         self.expr_type = expr_type
         self.value_cat = None      # Assigned at semantic analysis / decoration
 
@@ -337,7 +343,8 @@ literals = Union[str, int, float]
 
 class LiteralExpr(Expr):
     def __init__(self, literal_type:LiteralKind, literal_value:literals=None):
-        super().__init__(expr_type="literal_expr")
+        super().__init__(expr_type=colors.gold("literal_expr"))  # Literal values
+
         self.type  = literal_type
         self.value = literal_value  # Primitive value (int, float, char, string)
 
@@ -367,7 +374,7 @@ class BinaryExpr(Expr):
 
         # Add Children For Pretty Printing
         self.children.append(left)
-        self.children.append(ASTNode(operator))
+        self.children.append(ASTNode(colors.yellow(operator)))
         self.children.append(right)
 
 
@@ -405,7 +412,9 @@ class LogicExpr(Expr):
 
 class Statement(ASTNode):
     def __init__(self, statement_type:str="statement"):
-        super().__init__(node_name=f"\x1b[1;91m{statement_type}\x1b[0m")
+        super().__init__(node_name=f"\x1b[38;2;255;107;107m{statement_type}\x1b[0m")
+        # Default: red
+
         self.statement_type = statement_type
         # Metadata For Semantic Information
         # ...
@@ -421,7 +430,8 @@ class ExprStatement(Statement):
 
 class IfStatement(Statement):
     def __init__(self, condition:Expr, then_branch:Statement, else_branch:Statement=None):
-        super().__init__(statement_type="if_statement")
+        super().__init__(statement_type=colors.red("if_statement"))
+
         self.if_condition = condition   # Required - [Expr]      - usually a ComparisonExpr
         self.then_branch = then_branch  # Required - [Statement] - usually a CompoundStatement
         self.else_branch = else_branch  # Optional - [Statement | None]
@@ -434,7 +444,10 @@ class IfStatement(Statement):
 
 class ReturnStatement(Statement):
     def __init__(self, return_value:Expr=None):
-        super().__init__(statement_type="return_statement")
+
+        super().__init__(statement_type=f"\x1b[38;2;255;76;76mreturn_statement\x1b[0m")
+        # Control-Flow: Saturated Red
+
         self.return_value = return_value  # Optional - [Expr] - usually a LiteralExpr or IdentifierExpr
 
         # Add Children For Pretty Printing
@@ -443,7 +456,10 @@ class ReturnStatement(Statement):
 
 class DeclarationStatement(Statement):
     def __init__(self, declaration:NormalDeclaration):
-        super().__init__(statement_type="declaration_statement")
+
+        super().__init__(statement_type=colors.pink("declaration_statement"))
+        # Declaration Statement: red
+
         self.declaration = declaration  # NormalDeclaration - wrapped in a Statement
 
         # Add Children For Pretty Printing
@@ -454,8 +470,9 @@ class DeclarationStatement(Statement):
 
 class Body(ASTNode, Generic[NodeT]):
     # Generic Parameter: Member Type Template
-    def __init__(self, body_type:str, members:list[NodeT] | None=None):
-        super().__init__(node_name=body_type)
+    def __init__(self, body_type:str="body", members:list[NodeT] | None=None):
+        super().__init__(node_name=colors.purple(body_type))
+
         self.member_list = members or []  # List of ASTNodes, may be empty
 
         self.init_children()
@@ -487,7 +504,7 @@ class EnumBody(Body["Enumerator"]):
 
 class Enumerator(ASTNode):
     def __init__(self, identifier_name: str, initial_expr: ConstantExpr | None=None):
-        super().__init__(node_name="enumerator")
+        super().__init__(node_name=colors.pink("self.identifier"))
         self.identifier   = identifier_name
         self.initial_expr = initial_expr
 
@@ -501,6 +518,6 @@ class AccessSpecifier(ASTNode):
 
 class Error(ASTNode):
     def __init__(self, error_type):
-        super().__init__(node_name="\033[1;31mERROR: " + error_type +"\033[0m")
+        super().__init__(node_name=colors.white.italic("ERROR: " + error_type))
 
         self.message = ""

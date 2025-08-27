@@ -1,4 +1,5 @@
 # transformer.py
+from gc import isenabled
 from multiprocessing.managers import Token
 
 from lark import Lark, Transformer, Tree
@@ -40,9 +41,45 @@ class CSTtoAST(Transformer):
 
 
     ####################################################################################################################
-    # def class_type(self, children):
+    def class_type(self, children):
 
+        kind = ElaboratedTypeKind.CLASS
+        identifier = "ERROR: id not-found"
+        body = None
 
+        # Loop through Children, Build Elaborate Type
+        for child in children:
+
+            # Check if Union
+            if child.name == "union":
+                kind = ElaboratedTypeKind.UNION
+
+            # Check for Scope Qualifier
+            elif child.name == "scope_qualifier":
+                pass
+
+            # Check for Body
+            if isinstance(child, ClassBody):
+                body = child
+
+            # Else is Identifier
+            else:
+                identifier = child.name
+
+        return ElaborateType(kind, identifier, body)
+
+    def enumerator(self, children):
+
+        id_name = children[0].name
+
+        if len(children) == 1:
+            return Enumerator(children[0].name)
+        elif len(children) == 3:
+            return Enumerator(children[0].name, children[2])
+        else:
+            return Error("Invalid enumerator")
+
+    ################################################################################################################
 
     def enum_type(self, children):
 
@@ -219,10 +256,10 @@ class CSTtoAST(Transformer):
         return Parameter(param_declaration, default_args)
 
     def default_arg(self, children):
-            if len(children) >= 1 and isinstance(children[1], Initializer):
-                return children[1]
-            else:
-                return Error("No Initializer Found for Default Argument")
+        if len(children) >= 1 and isinstance(children[1], Initializer):
+            return children[1]
+        else:
+            return Error("No Initializer Found for Default Argument")
 
 
     def initializer(self, children):
@@ -450,7 +487,10 @@ class CSTtoAST(Transformer):
     def class_body(self, children):
         member_list = ClassBody()
         for child in children:
-            member_list.add_member(child)
+            # Found: Statement
+            if isinstance(child, Statement):
+                member_list.add_member(child)
+            # Found: Access Specifier
 
         return member_list
 
@@ -472,8 +512,10 @@ class CSTtoAST(Transformer):
         decl_specs = children[0]
         declarator = children[1]
         compound_statement = children[2]
-        function_definition = NormalDeclaration(decl_specs, [declarator], compound_statement)
-        function_definition.name = "\x1b[1;38;2;80;160;255mfunction_definition\x1b[0m"
+        function_definition = NormalDeclaration(decl_specs,
+                                                [declarator],
+                                                compound_statement,
+                                                "function_definition")
         return function_definition
 
     ####################################################################################################################
