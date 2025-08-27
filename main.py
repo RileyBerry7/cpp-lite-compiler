@@ -38,6 +38,7 @@ def main():
 
     ####################################################################################################################
     # Transform -> AST
+
     print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
     transformer = CSTtoAST()
     ast = transformer.transform(cst)
@@ -45,16 +46,11 @@ def main():
 
     ####################################################################################################################
     # Decorate -> D-AST
-    print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
 
-    # decorator = ASTtoDAST()
-    # dast = decorator.decorate(ast)
-    #
-    # buffer = DecNode("test_node_A")
-    # buffer.children.append(DecNode("test_node_B"))
-    # dast.children.append(buffer)
-    #
-    # print(dast.pretty())
+    print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
+    decorator = ASTtoDAST()
+    dast = decorator.decorate(ast)
+    print(dast.pretty())
 
 
 
