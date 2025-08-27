@@ -53,6 +53,7 @@ class Colors:
     grey    = AnsiColor(128, 128, 128)
     black   = AnsiColor(0, 0, 0)
     gold = AnsiColor(255, 215, 95)  # Golden yellow / amber (#FFD75F)
+    dark_green = AnsiColor(0, 95, 0)  # matches 256-color index 28 (dark green)
 
 
 # Singleton instance for easy importing

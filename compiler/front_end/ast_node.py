@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from enum import Enum, auto
+from multiprocessing.connection import answer_challenge
 from typing import Union, Self, Generic, TypeVar
 from compiler.utils.literal_kind import *
 from compiler.utils.enum_types import *
@@ -24,11 +25,14 @@ class ASTNode:
         self.span       = None
         # self.token_type = None
 
+        # Pretty Printing Details
+        self.ansi_color: colors = colors.white
+
     ####################################################################################################################
     def pretty(self):
         """ Returns a string visualizing the subtree rooted at this node."""
 
-        text_tree  = self.name + "\n"
+        text_tree  = self.ansi_color(self.name) + "\n"
         text_tree += self.walk(self, 1)
 
         return text_tree
@@ -38,7 +42,7 @@ class ASTNode:
 
         if node.children:
             for child in node.children:
-                text_tree += curr_indent*"  " + child.name + "\n"
+                text_tree += curr_indent*"  " + child.ansi_color(child.name) + "\n"
                 text_tree += self.walk(child, curr_indent+1)
         # else:
             # text_tree = (curr_indent+1)*"  " + "[No children]\n"
@@ -65,12 +69,18 @@ class ASTNode:
 
 class TranslationUnit(ASTNode):
     def __init__(self, declaration_list:list[ASTNode] | None = None):
-        super().__init__(node_name=colors.blue.bold.underline("translation_unit"))
-        self.declarations = declaration_list or []  # List of declarations (NormalDeclaration, FunctionDefinition...)
+        super().__init__(node_name="translation_unit")
 
-        # Add Children
-        for decl in self.declarations:
-            self.children.append(decl)
+
+        # List of External Declarations
+        self.declarations = declaration_list or []
+
+        # Add Color for Pretty-Printing
+        self.ansi_color = colors.blue.bold.underline
+
+        # Add Children for Pretty-Printing
+        for member in self.declarations:
+            self.children.append(member)
 
 ########################################################################################################################
 # SIMPLE TYPE
@@ -81,12 +91,15 @@ class SimpleType(ASTNode):
                  size:int,
                  signed:bool=True):
 
-        super().__init__(node_name=colors.green("simple_type"))
+        super().__init__(node_name="simple_type")
         self.type_name   = base_type    # str:  base_type name
         self.size        = size         # int:  # of bits
         self.signed      = signed       # Bool: can represent negatives
 
-        # Add Children for Pretty Printing
+        # Add Color for Pretty-Printing
+        self.ansi_color = colors.green
+
+        # Add Children for Pretty-Printing
         self.init_children()
 
     def init_children(self):
@@ -106,7 +119,7 @@ class ElaborateType(ASTNode):
                  enum_base     : SimpleType           | None=None,
                  is_scoped     : bool                 | None=None):
 
-        super().__init__(node_name=colors.green("elaborate_type"))
+        super().__init__(node_name="elaborate_type")
         self.kind            = elaborate_kind #
         self.identifier      = elaborate_name #
         self.body            = elaborate_body # Optional: Defining Body
@@ -115,6 +128,10 @@ class ElaborateType(ASTNode):
         self.underlying_type = enum_base      # Optional: Enum base type
         self.is_scoped       = is_scoped      # Optional: Enum is_scoped
 
+        # Add Color for Pretty-Printing
+        self.ansi_color = colors.green
+
+        # Add Children for Pretty-Printing
         self.init_children()
 
     def init_children(self):
@@ -132,7 +149,7 @@ class DeclSpec(ASTNode):
                  storage_class:       str              =None,  # static, extern, thread_local...
                  function_specifiers: list[str] | None =None): # inline, constexpr, consteval, virtual, explicit...
 
-        super().__init__(node_name="\033[38;5;28mdecl_specs\033[0m")
+        super().__init__(node_name="decl_specs")
         self.type_node          = type_node                                            # Required: Type()
         self.qualifier_set      = set(qualifiers) if qualifiers is not None else set() # Optional: set(str)
         self.storage_class      = storage_class                                        # Optional: str
@@ -148,7 +165,10 @@ class DeclSpec(ASTNode):
         # self.alignas_value        = None
         # self.attributes: list[str] | None = None
 
-        # Add Children For Pretty Printing
+        # Add Color for Pretty-Printing
+        self.ansi_color = colors.dark_green
+
+        # Add Children For Pretty-Printing
         self.children.append(type_node)
         for child in qualifiers:
             self.children.append(ASTNode(child))
