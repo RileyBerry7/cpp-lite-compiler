@@ -39,7 +39,8 @@ def resolve_simple_type(type_seq: list[str]) -> SimpleType | Error:
             modifiers.remove("long") if "long" in modifiers else None
 
         # ERROR CHECKING: base_type / is_signed
-        types_found = tuple(sorted(type_seq))
+        # type_seq = ["int"]
+        types_found = frozenset(type_seq)
         if types_found in VALID_SIMPLE_TYPE_COMBOS:
 
             # Check If Unsigned

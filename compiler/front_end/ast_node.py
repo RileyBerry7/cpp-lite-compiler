@@ -84,8 +84,13 @@ class SimpleType(ASTNode):
         self.size        = size         # int:  # of bits
         self.signed      = signed       # Bool: can represent negatives
 
-        self.children.append(ASTNode(str(self.size) + "-bit " + base_type))
+        # Add Children for Pretty Printing
+        self.init_children()
 
+    def init_children(self):
+        self.children.append(ASTNode(self.type_name.name.lower()))
+        self.children.append(ASTNode(str(self.size)))
+        self.children.append(ASTNode("is signed" if self.signed else "not signed"))
 
 ########################################################################################################################
 # ELABORATE TYPE
@@ -107,6 +112,12 @@ class ElaborateType(ASTNode):
         self.underlying_type = enum_base      # Optional: Enum base type
         self.is_scoped       = is_scoped      # Optional: Enum is_scoped
 
+        self.init_children()
+
+    def init_children(self):
+        self.children.append(ASTNode(self.kind.name.lower()))
+        self.children.append(ASTNode(self.identifier))
+        self.children.append(self.body)
 
 ########################################################################################################################
 # DECLARATION SPECIFIER LIST
@@ -254,11 +265,10 @@ class NormalDeclaration(ASTNode):
         # Semantic Information
         self.symbol = None # Set during Scope Binding Pass
 
-        # Add Children For Pretty Printing
         self.init_children()
 
     def init_children(self):
-        if self.decl_specs:
+        if self.decl_specs:# Add Children For Pretty Printing
             self.children.append(self.decl_specs)
         if len(self.decl_list) == 1:
             self.children.append(self.decl_list[0])
