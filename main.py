@@ -4,13 +4,13 @@ from lark import Lark
 from pathlib import Path
 from compiler.front_end.transformer import CSTtoAST
 from compiler.front_end.decorator import ASTtoDAST
+from compiler.context import CompilerContext
 
 ####################
 # GlOBAL CONSTANTS #
 ####################
 
-GRAMMAR_PATH = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
-
+GRAMMAR_PATH     = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
 SOURCE_CODE_PATH = Path(__file__).parent / "tests" / "test_1.cpp"
 
 ########################################################################################################################
@@ -18,13 +18,19 @@ def main():
 
     print("\nhullo world ^w^\n")
 
-    # Load Grammar
+    # INITIALIZE COMPILER CONTEXT
+    context = CompilerContext()
+
+
+    ########################################################################################################################
+
+    # Load Grammar File
     with open(GRAMMAR_PATH, "r") as f:
         grammar = f.read()
 
     ####################################################################################################################
-    # Test Code
 
+    # Load Source Code File
     with open(SOURCE_CODE_PATH, "r") as f:
         code = f.read()
     print(code)
@@ -48,9 +54,9 @@ def main():
     # Decorate -> D-AST
 
     print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
-    decorator = ASTtoDAST()
-    dast = decorator.decorate(ast)
-    print(dast.pretty())
+    decorator = ASTtoDAST(ast, context)
+    decorator.mutate()
+    print(ast.pretty())
 
 
 

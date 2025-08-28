@@ -1,6 +1,7 @@
 # scopy_stack.py
 
-from utils.enum_types import ScopeKind
+from __future__ import annotations
+from compiler.utils.enum_types import ScopeKind
 
 class Scope:
     def __init__(self, kind: ScopeKind, scope_id:int, parent: "Scope" | None = None):

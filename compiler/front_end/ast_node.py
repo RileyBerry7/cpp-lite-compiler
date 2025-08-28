@@ -8,6 +8,7 @@ from compiler.utils.literal_kind import *
 from compiler.utils.enum_types import *
 from compiler.utils.valid_sets import FundamentalTypes
 from compiler.utils.colors import colors
+from compiler.utils.data_classes import SourceLocation
 
 # ASTNode Type Template (Dynamic Typing)
 NodeT = TypeVar("NodeT", bound="ASTNode")
@@ -19,11 +20,9 @@ class ASTNode:
     def __init__(self, node_name=None, children:list[ASTNode] | None=None):
 
         # Abstract Node Details
-        self.name = node_name
+        self.name     = node_name
         self.children = children or []
-
-        self.span       = None
-        # self.token_type = None
+        self.loc      = SourceLocation
 
         # Pretty Printing Details
         self.ansi_color: colors = colors.white

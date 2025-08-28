@@ -1,7 +1,8 @@
 # symbol_table.py
 
-from front_end.ast_node import ASTNode, DeclSpec
-from utils.enum_types import *
+from compiler.front_end.ast_node import ASTNode, DeclSpec
+from compiler.utils.enum_types import *
+from compiler.scope_stack import *
 
 #############################################################################################################3##########
 
@@ -12,7 +13,7 @@ class Symbol:
     kind:      SymbolKind   # Symbol Role
 
     # Context
-    outer_scope: Scope        # Scope within
+    outer_scope     : Scope   # Scope within
     declaration_node: ASTNode # Declaration within
 
     # Specs
