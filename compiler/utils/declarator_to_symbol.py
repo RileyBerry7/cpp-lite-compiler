@@ -1,7 +1,6 @@
 # declarator_todeclarator_to_symbol.py
 
-from compiler.front_end.symbol_table import Symbol
-from compiler.utils.enum_types import *
+from compiler.symbol_table import Symbol
 from compiler.front_end.ast_node import *
 
 def declarator_to_symbol(current_scope:Scope, declaration: NormalDeclaration, unique_id: int) -> list[Symbol]:

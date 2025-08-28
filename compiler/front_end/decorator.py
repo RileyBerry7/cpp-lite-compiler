@@ -1,10 +1,3 @@
-import sys
-from multiprocessing.managers import Token
-
-from lark import Tree
-from compiler.front_end.symbol_table import SymbolTable, Symbol
-from compiler.utils.enum_types import *
-from compiler.utils.declarator_to_symbol import *
 from compiler.front_end.ast_node import *
 
 class Decorator:
@@ -42,8 +35,9 @@ class ASTtoDAST(Decorator):
     the lark tree class.
     """
     def __init__(self):
-        self.error_table = []
-        self.symbol_table = SymbolTable
+        pass
+        # self.error_table = []
+        # self.symbol_table = SymbolTable
         # self.ast = ast
 
         # self.ast.dfs(self.visit)
@@ -80,7 +74,7 @@ class ASTtoDAST(Decorator):
     #     """
     #     Goal: Resolve every identifier to a symbol in the symbol table.
     #     """
-    #     scope_stack    = ScopeStack()
+    #     scope_stack.py    = ScopeStack()
     #     unique_id      = 0 # Unique ID for symbols
     #
     #     # Called in DFS
@@ -96,7 +90,7 @@ class ASTtoDAST(Decorator):
     #
     #             else:
     #
-    #                 found_symbols = declarator_to_symbol(scope_stack.curr_scope, node, unique_id)
+    #                 found_symbols = declarator_to_symbol(scope_stack.py.curr_scope, node, unique_id)
     #                 unique_id += len(found_symbols)
     #
     #

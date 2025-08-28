@@ -1,8 +1,7 @@
 # symbol_table.py
 
-from dataclasses import dataclass, field
-from compiler.front_end.ast_node import ASTNode, DeclSpec
-from compiler.utils.enum_types import *
+from front_end.ast_node import ASTNode, DeclSpec
+from utils.enum_types import *
 
 #############################################################################################################3##########
 
