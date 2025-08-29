@@ -522,11 +522,17 @@ class EnumBody(Body["Enumerator"]):
     def __init__(self, scoped:bool=False):
         super().__init__(body_type="enum_body")
 
+# FUNCTION BODY:
+# class FunctionBody(Body[])
+
+########################################################################################################################
+
 class Enumerator(ASTNode):
     def __init__(self, identifier_name: str, initial_expr: ConstantExpr | None=None):
         super().__init__(node_name=colors.pink("self.identifier"))
         self.identifier   = identifier_name
         self.initial_expr = initial_expr
+########################################################################################################################
 
 class AccessSpecifier(ASTNode):
     def __init__(self, access_type:AccessType):

@@ -8,14 +8,13 @@ from enum import Enum, auto
 #############################################################################################################3##########
 
 class ScopeKind(Enum):
-    File      = auto()  # Global scope for a file
-    Function  = auto()  # Function scope
-    Block     = auto()  # Block scope (e.g., inside if, for, etc.)
-
-    #
-    Class     = auto()
-    Struct    = auto()  # Struct/Union scope
-    Enum      = auto()  # Enum scope
+    GLOBAL    = auto() # Global scope for a file
+    NAMESPACE = auto() # Namespace body
+    FUNCTION  = auto() # Function body
+    BLOCK     = auto() # Control-flow body (if, else, while)
+    CLASS     = auto() # class/struct/union body
+    ENUM      = auto() # Enum body
+    LAMBDA    = auto() # ???
 
 #############################################################################################################3##########
 

@@ -55,7 +55,7 @@ def main():
 
     print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
     decorator = ASTtoDAST(ast, context)
-    decorator.mutate()
+    decorator.decorate()
     print(ast.pretty())
 
 
