@@ -1,11 +1,12 @@
 # context
 
+from dataclasses import dataclass
 from compiler.symbol_table import SymbolTable
 from compiler.scope_stack  import ScopeStack
 from compiler.error_table  import DiagnosticEngine
 
+@dataclass
 class CompilerContext:
-    def __init__(self):
-        self.symbol_table = SymbolTable()
-        self.error_table  = DiagnosticEngine()
-        self.scope_tack   = ScopeStack()
+    symbol_table = SymbolTable()
+    error_table  = DiagnosticEngine()
+    scope_stack   = ScopeStack()
