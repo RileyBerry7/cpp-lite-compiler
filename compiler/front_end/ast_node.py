@@ -547,3 +547,26 @@ class Error(ASTNode):
         super().__init__(node_name=colors.white.italic("ERROR: " + error_type))
 
         self.message = ""
+
+########################################################################################################################
+# VOLATILE NODES
+
+class VolatileNode(ASTNode):
+    def __init__(self, parent_node:ASTNode, volatile_type:str="volatile_node"):
+        super().__init__(node_name=volatile_type)
+        self.parent = parent_node
+
+    def destroy(self):
+        self.parent.children.remove(self)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+class ScopeEnd(VolatileNode):
+    def __init__(self, parent: ASTNode):
+        super().__init__(parent_node=parent, volatile_type="scope_end")
+
+
+
