@@ -491,10 +491,10 @@ class DeclarationStatement(Statement):
 class Body(ASTNode, Generic[NodeT]):
     # Generic Parameter: Member Type Template
     def __init__(self, body_type:str="body", members:list[NodeT] | None=None):
-        super().__init__(node_name=colors.purple(body_type))
+        super().__init__(node_name=body_type)
 
         self.member_list = members or []  # List of ASTNodes, may be empty
-
+        self.ansi_color = colors.purple
         self.init_children()
 
     def add_member(self, member:NodeT):
@@ -551,22 +551,22 @@ class Error(ASTNode):
 ########################################################################################################################
 # VOLATILE NODES
 
-class VolatileNode(ASTNode):
-    def __init__(self, parent_node:ASTNode, volatile_type:str="volatile_node"):
-        super().__init__(node_name=volatile_type)
-        self.parent = parent_node
-
-    def destroy(self):
-        self.parent.children.remove(self)
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.__dict__ == other.__dict__
-
-class ScopeEnd(VolatileNode):
-    def __init__(self, parent: ASTNode):
-        super().__init__(parent_node=parent, volatile_type="scope_end")
-
+# class VolatileNode(ASTNode):
+#     def __init__(self, parent_node:ASTNode, volatile_type:str="volatile_node"):
+#         super().__init__(node_name=volatile_type)
+#         self.parent = parent_node
+#
+#     def destroy(self):
+#         self.parent.children.remove(self)
+#
+#     def __eq__(self, other):
+#         if not isinstance(other, self.__class__):
+#             return NotImplemented
+#         return self.__dict__ == other.__dict__
+#
+# class ScopeEnd(VolatileNode):
+#     def __init__(self, parent: ASTNode):
+#         super().__init__(parent_node=parent, volatile_type="scope_end")
+#
 
 

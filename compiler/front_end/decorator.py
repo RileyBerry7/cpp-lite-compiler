@@ -25,19 +25,32 @@ class Decorator:
     def _dfs(self, node: ASTNode):
         """Traverse the AST with optional pre- or post-order mutation."""
 
+        print("Visiting: ", node.name)
+
+        # Base Methods
         method = getattr(self, node.name, None)
 
+        # Pre/Post Specific Methods
+        pre_method = getattr(self, f"{node.name}_pre", None)
+        post_method = getattr(self, f"{node.name}_post", None)
+
         # Pre-order
-        if self.order == "pre" and callable(method):
-            method(node, node.children)
+        if self.order in ("pre", "both"):
+            if callable(pre_method):
+                pre_method(node, node.children)
+            if callable(method):
+                method(node, node.children)
 
         # Recursive walk
         for child in node.children:
             self._dfs(child)
 
         # Post-order
-        if self.order == "post" and callable(method):
-            method(node, node.children)
+        if self.order in ("post", "both"):
+            if callable(method):
+                method(node, node.children)
+            if callable(post_method):
+                post_method(node, node.children)
 
 ##########################################################################################
 
@@ -50,10 +63,11 @@ class ASTtoDAST:
         self.root    = ast_root  # AST Root
         self.context = context   # ErrorTable, SymbolTable, ScopeStack
 
-        # Initiate Decoration
-        self.decorate()
+        # # Initiate Decoration
+        # self.decorate()
 
     def decorate(self):
         pass_1 = SymbolCollector(self.root, self.context)
         pass_1.walk()
+
 ##########################################################################################

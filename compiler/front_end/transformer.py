@@ -29,7 +29,6 @@ class CSTtoAST(Transformer):
     def translation_unit(self, children):
         return TranslationUnit(children)
 
-
     ####################################################################################################################
     # EXTERNAL DECLARATION
 

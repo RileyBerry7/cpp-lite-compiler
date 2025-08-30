@@ -8,7 +8,7 @@ from compiler.utils.enum_types import ScopeKind
 
 class Scope:
     def __init__(self, kind: ScopeKind, scope_id:int, parent: Scope | None = None):
-        self.kind    = ScopeKind
+        self.kind    = kind
         self.id      = scope_id
         self.parent  = parent  or None # Scope which contains this scope (Outer Scope)
         self.symbols = {}              # Dict of {symbol_name: symbol_id}
@@ -29,11 +29,14 @@ class ScopeStack:
         self.scopes.append(new_scope)  # Push to Scope Stack
         self.curr_scope = new_scope    # Update Current Scope
         self.next_id += 1              # Increment ID
+        print("Entered Scope:", new_scope.kind.name)
 
     def exit_scope(self):
+        print("Exited Scope:", self.curr_scope.kind.name)
         if len(self.scopes) > 1:
             self.curr_scope = self.curr_scope.parent
         self.scopes.pop()
+
 
     # def resolve_scope(self):
 #############################################################################################################3##########
