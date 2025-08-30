@@ -1,6 +1,6 @@
 # decorator.py
 
-from compiler.front_end.ast_node import *
+from compiler.front_end.abstract_nodes.ast_node import *
 from compiler.context import CompilerContext
 
 ########################################################################################################################
@@ -25,7 +25,8 @@ class Decorator:
     def _dfs(self, node: ASTNode):
         """Traverse the AST with optional pre- or post-order mutation."""
 
-        print("Visiting: ", node.name)
+        # Debug Output
+        # print("Visiting: ", node.name)
 
         # Base Methods
         method = getattr(self, node.name, None)

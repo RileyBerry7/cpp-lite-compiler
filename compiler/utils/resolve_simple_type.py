@@ -1,6 +1,5 @@
 # resolve_simple_type.py
-
-from compiler.front_end.ast_node import SimpleType, Error
+from compiler.front_end.abstract_nodes import SimpleType, Error
 from compiler.utils.scalar_size import scalar_size
 from compiler.utils.valid_sets import *
 

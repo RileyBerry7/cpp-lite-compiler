@@ -1,7 +1,7 @@
 # declarator_todeclarator_to_symbol.py
 
 from compiler.symbol_table import Symbol
-from compiler.front_end.ast_node import *
+from compiler.front_end.abstract_nodes.common_nodes import *
 
 def declarator_to_symbol(current_scope:Scope, declaration: NormalDeclaration, unique_id: int) -> list[Symbol]:
     """

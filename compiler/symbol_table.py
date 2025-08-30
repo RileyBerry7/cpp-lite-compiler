@@ -1,6 +1,7 @@
 # symbol_table.py
 
-from compiler.front_end.ast_node import ASTNode, DeclSpec
+from compiler.front_end.abstract_nodes.base_node import DeclSpec
+from compiler.front_end.abstract_nodes.ast_node import ASTNode
 from compiler.utils.enum_types import *
 from compiler.scope_stack import *
 

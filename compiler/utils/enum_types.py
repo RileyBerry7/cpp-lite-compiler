@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum, auto, unique
 
 
 #############################################################################################################3##########
@@ -61,3 +61,15 @@ class AccessType(Enum):
     PRIVATE   = auto()
     PUBLIC    = auto()
     PROTECTED = auto()
+#############################################################################################################3##########
+
+@unique
+class LiteralKind(str, Enum):
+    INT     = "INT"
+    FLOAT   = "FLOAT"
+    CHAR    = "CHAR"
+    STRING  = "STRING"
+    BOOL    = "BOOL"
+    NULLPTR = "NULLPTR"
+
+#############################################################################################################3##########
