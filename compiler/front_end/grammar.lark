@@ -41,29 +41,51 @@ block_declaration: simple_declaration
 #                 | using_directive
 #                 | static_assert_declaration
 #                 | alias_declaration
-#                 | opaque_enum_declaration
+                 | opaque_enum_declaration
 
-simple_declaration: attribute_specifier? decl_specifier_seq? init_declarator_list? _SEMICOLON
+simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
 #
-attribute_specifier:
-#
-#opaque_enum_declaration: enum_key attribute_specifier? IDENTIFIER enum_base? _SEMICOLON
-#
-#enum_key: ENUM
-#        | ENUM CLASS
-#        | ENUM STRUCT
-#
-#enum_base: COLON type_specifier_seq
-#
-#enumerator_list: enumerator_definition
-#               | enumerator_list _COMMA enumerator_definition
-#
-#enumerator_definition: enumerator
-#                     | enumerator EQUAL constant_expression
-#
-#enumerator: IDENTIFIER
 
-#type_specifier_seq: simple_type_specifier_list # Not ISO
+opaque_enum_declaration: enum_key attribute_specifier? IDENTIFIER enum_base? _SEMICOLON
+
+enum_key: ENUM
+        | ENUM CLASS
+        | ENUM STRUCT
+
+enum_base: COLON type_specifier_seq
+
+enumerator_list: enumerator_definition
+               | enumerator_list _COMMA enumerator_definition
+
+enumerator_definition: enumerator
+                     | enumerator EQUAL constant_expression
+
+enumerator: IDENTIFIER
+
+type_specifier_seq: simple_type_specifier_list # Not ISO
+
+# ATTRIBUTE SPECIFIER
+attribute_specifier: _LBRACKET _LBRACKET attribute_list? _RBRACKET _RBRACKET
+
+attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
+
+attribute: attribute_token attribute_argument_clause?
+
+attribute_token: IDENTIFIER 
+               | attribute_scoped_token
+
+attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
+
+attribute_namespace: IDENTIFIER
+
+attribute_argument_clause: _LPAREN balanced_token_seq _RPAREN
+
+balanced_token_seq: balanced_token+
+
+balanced_token: _LPAREN   balanced_token_seq _RPAREN
+              | _LBRACKET balanced_token_seq _RBRACKET
+              | _LBRACE    balanced_token_seq _RBRACE
+#             | any token other than a parenthesis, a bracket, or a brace
 
 ########################################################################################################################
 function_definition: decl_specifier_seq declarator compound_statement
@@ -161,7 +183,7 @@ type_qualifier: CONST | VOLATILE | RESTRICT
 simple_type_specifier_list: simple_type_specifier+
 
 ?type_specifier: simple_type_specifier
-               | elaborated_type_specifier
+#               | elaborated_type_specifier
 
 simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
                      | SIGNED | UNSIGNED | SHORT | LONG | AUTO
@@ -170,7 +192,7 @@ simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
 #                     PLEASE DO NOT UNCOMMENT
 
 
-elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class_type
+#elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class_type
 #                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum_type
 
 
@@ -452,7 +474,7 @@ INCREMENT:  "++"
 DECREMENT:  "--"
 ARROW:      "->"
 TERNARY:    "?"
-SCOPE: "::"
+SCOPE:      "::"
 COLON:      ":"
 
 ##################
@@ -474,8 +496,6 @@ _DOT:        "."
 HASH:            "#"
 INCLUDE:         "include"
 DEFINE:          "define"
-USING_NAMESPACE: "using"
-
 
 ########################################################################################################################
 #  RULESET  #

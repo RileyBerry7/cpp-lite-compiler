@@ -29,7 +29,13 @@ class CSTtoAST(Transformer):
     ####################################################################################################################
     # Ambiguous Nodes
     def _ambig(self, possible_trees):
-        return abstract_nodes.ASTNode("Ambiguity")
+        branches = []
+        for path in possible_trees:
+            if isinstance(path, abstract_nodes.ASTNode):
+                branches.append(path)
+            else:
+                branches.append(abstract_nodes.ASTNode("Non-abstract Path"))
+        return abstract_nodes.ASTNode("Ambiguity", branches)
 
     ####################################################################################################################
     # TRANSLATION UNIT

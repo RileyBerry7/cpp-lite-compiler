@@ -1,6 +1,6 @@
 ;
 
-enum Colors
+enum colors;
 
 int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], char(cast_var), float SCOPE :: * param2)
 {
