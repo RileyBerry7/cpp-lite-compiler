@@ -40,12 +40,27 @@ block_declaration: simple_declaration
 #                 | using_declaration
 #                 | using_directive
 #                 | static_assert_declaration
-#                 | alias_declaration
+                 | alias_declaration
                  | opaque_enum_declaration
 
-simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
-#
+######################
+# ALIAS DECLARATION  #
+######################
+alias_declaration: USING IDENTIFIER EQUAL type_id _SEMICOLON
+# Example: using newTypeName = existingTypeName;
 
+# uncomment once abstract_declarator is normalized, and make abstract_declarator non-optional
+#type_id: type_specifier_seq abstract_declarator?
+type_id: type_specifier_seq
+
+########################
+#  SIMPLE DECLARATION  #
+########################
+simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
+
+#############################
+#  OPAQUE ENUM DECLARATION  #
+#############################
 opaque_enum_declaration: enum_key attribute_specifier? IDENTIFIER enum_base? _SEMICOLON
 
 enum_key: ENUM
@@ -62,9 +77,9 @@ enumerator_definition: enumerator
 
 enumerator: IDENTIFIER
 
-type_specifier_seq: simple_type_specifier_list # Not ISO
-
-# ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER
+##################################################
+#  ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER   #
+##################################################
 attribute_declaration: attribute_specifier _SEMICOLON
 
 attribute_specifier: _LBRACKET _LBRACKET attribute_list? _RBRACKET _RBRACKET
@@ -162,6 +177,44 @@ default_arg: EQUAL initializer
 ########################################################################################################################
 #  DECLARATION SPECIFIER List #
 ###############################
+# ISO C++ SPECIFIER
+type_specifier: trailing_type_specifier
+#              | class_specifier
+#              | enum_specifier
+
+trailing_type_specifier: simple_type_specifier
+#                       | elaborated_type_specifier
+#                       | typename_specifier
+#                       | cv_qualifier
+
+type_specifier_seq: (type_specifier attribute_specifier?)+
+
+trailing_type_specifier_seq: (trailing_type_specifier attribute_specifier?)+
+
+
+
+simple_type_specifier: CHAR
+                     | CHAR16_T
+                     | CHAR32_T
+                     | WCHAR_T
+                     | BOOL
+                     | SHORT
+                     | INT
+                     | LONG
+                     | SIGNED
+                     | UNSIGNED
+                     | FLOAT
+                     | DOUBLE
+                     | VOID
+                     | AUTO
+#                     | decltype_specifier
+#                     | SCOPE? nested_name_specifier? type_name                  # user-defined types
+#                     | SCOPE? nested_name_specifier template simple_template_id # user-defined templates
+
+#decltype_specifier: decltype _LPAREN expression _RPAREN
+
+########################################################################################################################
+# Non-ISO C++
 
 decl_specifier_seq: declaration_specifier+
 
@@ -184,12 +237,12 @@ type_qualifier: CONST | VOLATILE | RESTRICT
 
 simple_type_specifier_list: simple_type_specifier+
 
-?type_specifier: simple_type_specifier
+#?type_specifier: simple_type_specifier
 #               | elaborated_type_specifier
-
-simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
-                     | SIGNED | UNSIGNED | SHORT | LONG | AUTO
-                     | WCHAR_T | WCHAR16_T | WCHAR32_T
+#
+#simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
+#                     | SIGNED | UNSIGNED | SHORT | LONG | AUTO
+#                     | WCHAR_T | WCHAR16_T | WCHAR32_T
 #                     | IDENTIFIER # Typedef Names - Creates Massive Ambiguity ;-;
 #                     PLEASE DO NOT UNCOMMENT
 
@@ -391,8 +444,8 @@ FLOAT:      "float"
 DOUBLE:     "double"
 CHAR:       "char"
 WCHAR_T:    "wchar_t"
-WCHAR16_T:   "wchar16_t"
-WCHAR32_T:   "wchar32_t"
+CHAR16_T:   "char16_t"
+CHAR32_T:   "char32_t"
 VOID:       "void"
 BOOL:       "bool"
 AUTO:       "auto"

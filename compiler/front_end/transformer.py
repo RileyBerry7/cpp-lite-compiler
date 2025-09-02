@@ -35,7 +35,10 @@ class CSTtoAST(Transformer):
                 branches.append(path)
             else:
                 branches.append(abstract_nodes.ASTNode("Non-abstract Path"))
-        return abstract_nodes.ASTNode("Ambiguity", branches)
+        ambig_node = abstract_nodes.ASTNode("Ambiguity", branches)
+        from compiler.utils.colors import colors
+        ambig_node.ansi_color = colors.red.underline
+        return ambig_node
 
     ####################################################################################################################
     # TRANSLATION UNIT
