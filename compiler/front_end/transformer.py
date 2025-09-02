@@ -1,5 +1,5 @@
 # transformer.py
-
+import lark
 from lark import Transformer
 
 import compiler.front_end.abstract_nodes.ast_node
@@ -26,6 +26,10 @@ class CSTtoAST(Transformer):
         return compiler.front_end.abstract_nodes.ast_node.ASTNode(token.value, [
             compiler.front_end.abstract_nodes.ast_node.ASTNode(token.type)])
 
+    ####################################################################################################################
+    # Ambiguous Nodes
+    def _ambig(self, possible_trees):
+        return abstract_nodes.ASTNode("Ambiguity")
 
     ####################################################################################################################
     # TRANSLATION UNIT

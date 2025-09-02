@@ -17,7 +17,7 @@ class ASTNode:
         # Pretty Printing Details
         self.ansi_color: colors = colors.white
 
-    ####################################################################################################################
+    #################################################################################################################
     def pretty(self):
         """ Returns a string visualizing the subtree rooted at this node."""
 

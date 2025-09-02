@@ -57,7 +57,7 @@ class NormalDeclaration(ASTNode):
                  decl_specs:DeclSpec,
                  declarator_list:list["NormalDeclaration"] | None = None,
                  body: "CompoundBody" =None,
-                 decl_kind:str="declaration"):
+                 decl_kind:str="normal_declaration"):
 
         super().__init__(node_name=f"\x1b[38;2;93;174;255m{decl_kind}\x1b[0m")
 
@@ -83,45 +83,6 @@ class NormalDeclaration(ASTNode):
             self.children.append(ASTNode("declarator_list", self.decl_list))
         if self.func_body:
             self.children.append(self.func_body)
-
-class Declaration(ASTNode):
-    def __init__(self,
-                 decl_specs:DeclSpec, decl_type: str="declaration"):
-        super().__init__(node_name=decl_type)
-        self.decl_specs  = decl_specs
-        self.is_anonymous = False
-
-class VariableDeclaration(Declaration):
-    def __init__(self, specs: DeclSpec):
-        super().__init__(decl_specs=specs, decl_type="variable_declaration")
-        self.identifier = ""
-
-##########################################################################################
-""" C++ Declaration Types:
-        - SymbolBound:
-               VariableDeclaration -> memory container
-                      ParameterDeclaration
-                      EnumeratorDeclaration
-
-               FunctionDeclaration -> callable container
-                      (optional_body)
-
-               NamespaceDeclaration -> scope container
-                      (required_body)
-
-               TypeDeclaration -> type alias
-                      TypeDef
-                      ClassDeclaration
-                            (optional_body)
-                      EnumDeclaration
-                            (optional_body)
-
-        - Anonymous:
-               UsingDeclaration  -> scope injector
-               FriendDeclaration -> access injector
-
-        """
-##########################################################################################
 
 ########################################################################################################################
 # TRANSLATION UNIT

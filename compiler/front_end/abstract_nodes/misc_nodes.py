@@ -1,6 +1,7 @@
 # misc_nodes.py
 
 from compiler.front_end.abstract_nodes.base_node import ASTNode
+from compiler.utils.colors import colors
 
 ########################################################################################################################
 # ERRORS

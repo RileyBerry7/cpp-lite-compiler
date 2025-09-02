@@ -10,11 +10,43 @@ translation_unit: external_declaration*
 
 external_declaration: declaration
                     | function_definition
+                    | decl1
+                    | decl2
+
+decl1: _SEMICOLON
+decl2: _SEMICOLON
 
 ########################################################################################################################
 #  DECLARATIONS & DEFINITIONS  #
 ################################
 
+## ISO C++ Declarations
+#declaration-seq: declaration |declaration-seq declaration
+#declaration: block-declaration
+#           | function-definition
+#           | template-declaration
+#           | explicit-instantiation
+#           | explicit-specialization
+#           | linkage-specification
+#           | namespace-definition
+#           | empty-declaration
+#           | attribute-declaration
+#
+#block-declaration: simple-declaration
+#                 | asm-definition
+#                 | namespace-alias-definition
+#                 | using-declaration
+#                 | using-directive
+#                 | static_assert-declaration
+#                 | alias-declaration
+#                 | opaque-enum-declaration
+#
+#simple-declaration: attribute_specifier? decl_specifier_seq? init_declarator_list? _SEMICOLON
+
+
+
+
+########################################################################################################################
 function_definition: declaration_specifier_list declarator compound_statement
 
 declaration: declaration_specifier_list init_declarator_list? _SEMICOLON

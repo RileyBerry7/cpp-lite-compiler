@@ -38,7 +38,7 @@ def main():
     ####################################################################################################################
     # Parse -> CST
     print("\033[32;51m[Parsing...]\n[Displaying CST]\033[0m")
-    parser = Lark(grammar, start="start")
+    parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
     cst = parser.parse(code)
     print(cst.pretty())
 
@@ -53,10 +53,10 @@ def main():
     ####################################################################################################################
     # Decorate -> D-AST
 
-    print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
-    decorator = ASTtoDAST(ast, context)
-    decorator.decorate()
-    print(ast.pretty())
+    # print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
+    # decorator = ASTtoDAST(ast, context)
+    # decorator.decorate()
+    # print(ast.pretty())
 
 
 
