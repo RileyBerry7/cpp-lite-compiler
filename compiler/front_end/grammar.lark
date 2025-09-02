@@ -420,6 +420,9 @@ STRING_LITERAL: /"(\\"|[^"\\])*"/
 BOOL_LITERAL:   "true" | "false"
 NULLPTR:        "nullptr"
 
+COMMENT_LINE: "//" /[^\n]*/
+COMMENT_BLOCK: "/*" /(.|\n)*?/ "*/"
+
 ##############################
 #   KEYWORDS (CONTROL-FLOW)  #
 ##############################
@@ -558,3 +561,5 @@ DEFINE:          "define"
 
 %import common.WS
 %ignore WS
+%ignore COMMENT_LINE
+%ignore COMMENT_BLOCK
