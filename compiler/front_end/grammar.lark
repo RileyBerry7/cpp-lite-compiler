@@ -9,11 +9,11 @@
 translation_unit: external_declaration*
 
 external_declaration: declaration
-                    | decl1
-                    | decl2
-
-decl1: _SEMICOLON
-decl2: _SEMICOLON
+#                    | decl1
+#                    | decl2
+#
+#decl1: _SEMICOLON
+#decl2: _SEMICOLON
 
 ########################################################################################################################
 #  DECLARATIONS & DEFINITIONS  #
@@ -29,8 +29,10 @@ declaration: block_declaration
 #           | explicit_specialization
 #           | linkage_specification
 #           | namespace_definition
-#           | empty_declaration
+           | empty_declaration
 #           | attribute_declaration
+
+empty_declaration: _SEMICOLON
 
 block_declaration: simple_declaration
 #                 | asm_definition
@@ -42,9 +44,26 @@ block_declaration: simple_declaration
 #                 | opaque_enum_declaration
 
 simple_declaration: attribute_specifier? decl_specifier_seq? init_declarator_list? _SEMICOLON
-
+#
 attribute_specifier:
+#
+#opaque_enum_declaration: enum_key attribute_specifier? IDENTIFIER enum_base? _SEMICOLON
+#
+#enum_key: ENUM
+#        | ENUM CLASS
+#        | ENUM STRUCT
+#
+#enum_base: COLON type_specifier_seq
+#
+#enumerator_list: enumerator_definition
+#               | enumerator_list _COMMA enumerator_definition
+#
+#enumerator_definition: enumerator
+#                     | enumerator EQUAL constant_expression
+#
+#enumerator: IDENTIFIER
 
+#type_specifier_seq: simple_type_specifier_list # Not ISO
 
 ########################################################################################################################
 function_definition: decl_specifier_seq declarator compound_statement
@@ -152,7 +171,7 @@ simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
 
 
 elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class_type
-                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum_type
+#                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum_type
 
 
 function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
@@ -169,14 +188,14 @@ class_body: _LBRACE member_declaration* _RBRACE
 
 access_specifier: PUBLIC | PRIVATE | PROTECTED
 
-# ENUM BODY
-enum_body: _LBRACE enumerator_list? _RBRACE
-enumerator_list: enumerator ( _COMMA enumerator )* _COMMA?
-enumerator: IDENTIFIER (EQUAL constant_expression)?
-
-
-# ENUM UNDERLYING TYPE
-enum_base: COLON simple_type_specifier_list
+## ENUM BODY
+#enum_body: _LBRACE enumerator_list? _RBRACE
+#enumerator_list: enumerator ( _COMMA enumerator )* _COMMA?
+#enumerator: IDENTIFIER (EQUAL constant_expression)?
+#
+#
+## ENUM UNDERLYING TYPE
+#enum_base: COLON simple_type_specifier_list
 
 
 ########################################################################################################################
