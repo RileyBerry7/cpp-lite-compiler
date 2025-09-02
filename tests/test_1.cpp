@@ -1,3 +1,4 @@
+[[myAttribute]]
 ;
 
 enum colors;

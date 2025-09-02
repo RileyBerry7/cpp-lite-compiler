@@ -30,7 +30,7 @@ declaration: block_declaration
 #           | linkage_specification
 #           | namespace_definition
            | empty_declaration
-#           | attribute_declaration
+           | attribute_declaration
 
 empty_declaration: _SEMICOLON
 
@@ -64,7 +64,9 @@ enumerator: IDENTIFIER
 
 type_specifier_seq: simple_type_specifier_list # Not ISO
 
-# ATTRIBUTE SPECIFIER
+# ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER
+attribute_declaration: attribute_specifier _SEMICOLON
+
 attribute_specifier: _LBRACKET _LBRACKET attribute_list? _RBRACKET _RBRACKET
 
 attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
