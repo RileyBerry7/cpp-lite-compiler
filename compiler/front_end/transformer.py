@@ -40,10 +40,11 @@ class CSTtoAST(Transformer):
     # EXTERNAL DECLARATION
 
     def external_declaration(self, children):
-        if children and isinstance(children[0], abstract_nodes.NormalDeclaration):
-            return children[0]
-
-        return abstract_nodes.Error("Invalid external declaration")
+        # if children and isinstance(children[0], abstract_nodes.NormalDeclaration):
+        #     return children[0]
+        #
+        # return abstract_nodes.Error("Invalid external declaration")
+         return children[0]
 
 
     ####################################################################################################################
@@ -137,7 +138,7 @@ class CSTtoAST(Transformer):
 
 
     ####################################################################################################################
-    def declaration_specifier_list(self, children):
+    def decl_specifier_seq(self, children):
 
         # Initialize Empty Specs
         simple_type_list    = []
@@ -330,7 +331,7 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     # DECLARATION
-    def declaration(self, children):
+    def simple_declaration(self, children):
         decl_specs = None
         declarator_list = []
         errors = []
