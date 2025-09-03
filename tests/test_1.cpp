@@ -4,6 +4,7 @@ namespace newNamespace {;} // namespace_definition
 ;                          // empty_declaration     <- declaration
 
 // SECONDARY DECLARATION
+using std::cout;                     // using declaration
 using namespace existingNamespace;   // using_directive
 static_assert (1, "Error Message."); // static_assert_declaration
 using myType = int; // alias_declaration       <- block_declaration

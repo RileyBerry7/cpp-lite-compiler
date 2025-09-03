@@ -32,7 +32,7 @@ empty_declaration: _SEMICOLON
 block_declaration: simple_declaration
 #                 | asm_definition
 #                 | namespace_alias_definition
-#                 | using_declaration
+                 | using_declaration
                  | using_directive
                  | static_assert_declaration
                  | alias_declaration
@@ -52,6 +52,12 @@ block_declaration: simple_declaration
 #  ASSEMBLY DEFINITION  #
 #########################
 asm_definition: ASM _LPAREN STRING_LITERAL _RPAREN _SEMICOLON
+
+#######################
+#  USING DECLARATION  #
+#######################
+using_declaration: USING type_name? SCOPE? nested_name_specifier unqualified_id _SEMICOLON
+                 | USING SCOPE unqualified_id _SEMICOLON
 
 #####################
 #  USING DIRECTIVE  #
@@ -130,6 +136,8 @@ enumerator_definition: enumerator
 
 enumerator: IDENTIFIER
 
+enum_name: IDENTIFIER
+
 ##################################################
 #  ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER   #
 ##################################################
@@ -187,6 +195,7 @@ ptr_list: ptr_operator+
 
 ptr_operator: (scope_qualifier SCOPE)? STAR type_qualifier_list? -> ptr
 
+#scope_qualifier: IDENTIFIER (SCOPE IDENTIFIER)*
 scope_qualifier: IDENTIFIER (SCOPE IDENTIFIER)*
 
 
@@ -264,10 +273,28 @@ simple_type_specifier: CHAR
 #                     | SCOPE? nested_name_specifier? type_name                  # user-defined types
 #                     | SCOPE? nested_name_specifier template simple_template_id # user-defined templates
 
+type_name: enum_name
+#         | class_name
+#         | typedef_name
+
 #decltype_specifier: decltype _LPAREN expression _RPAREN
 
-#nested_name_specifier: type_name SCOPE
-#                     | namespace_name SCOPE
+unqualified_id: IDENTIFIER
+#              | operator_function_id
+#              | conversion_function_id
+#              | literal_operator_id
+#              | ∼ class_name
+#              | ∼ decltype_specifier
+#              | template_id
+
+qualified_id: SCOPE IDENTIFIER
+#            | SCOPE? nested_name_specifier template? unqualified_id
+#            | SCOPE operator_function_id
+#            | SCOPE literal_operator_id
+#            | SCOPE template_id
+
+nested_name_specifier: type_name SCOPE
+                     | namespace_name SCOPE
 #                     | decltype_specifier SCOPE
 #                     | nested_name_specifier identifier SCOPE
 #                     | nested_name_specifier template? simple_template_id SCOPE
