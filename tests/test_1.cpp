@@ -1,4 +1,5 @@
 // PRIMARY DECLARATIONS
+extern "C";
 [[myAttribute]];           // attribute_declaration <- declaration
 namespace newNamespace {;} // namespace_definition
 ;                          // empty_declaration     <- declaration

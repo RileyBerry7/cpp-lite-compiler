@@ -47,6 +47,12 @@ class CSTtoAST(Transformer):
     def translation_unit(self, children):
         return abstract_nodes.TranslationUnit(children)
 
+    def declaration_seq(self, children):
+        for child in children:
+            if isinstance(child, abstract_nodes.ASTNode):
+                from compiler.utils.colors import colors
+                child.ansi_color = colors.green
+        return abstract_nodes.ASTNode("declaration_seq", children)
     ####################################################################################################################
     # EXTERNAL DECLARATION
 
