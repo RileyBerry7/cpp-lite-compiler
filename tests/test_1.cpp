@@ -1,5 +1,7 @@
 // PRIMARY DECLARATIONS
-extern "C";
+extern template ;  // explicit_instantiation
+template <> ;              // explicit_specialization
+extern "C";                // linkage_specification
 [[myAttribute]];           // attribute_declaration <- declaration
 namespace newNamespace {;} // namespace_definition
 ;                          // empty_declaration     <- declaration

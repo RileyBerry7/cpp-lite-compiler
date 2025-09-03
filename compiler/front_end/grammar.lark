@@ -20,8 +20,8 @@ declaration_seq: declaration+
 declaration: block_declaration
            | function_definition
 #           | template_declaration
-#           | explicit_instantiation
-#           | explicit_specialization
+           | explicit_instantiation
+           | explicit_specialization
            | linkage_specification
            | namespace_definition
            | empty_declaration
@@ -29,7 +29,7 @@ declaration: block_declaration
 
 empty_declaration: _SEMICOLON
 
-block_declaration: simple_declaration
+block_declaration: simple_declaration  # needs expanding
                  | asm_definition
                  | namespace_alias_definition
                  | using_declaration
@@ -42,8 +42,23 @@ block_declaration: simple_declaration
 #  PRIMARY DECLARATIONS  #
 ############################
 
+
+############################
+#  EXPLICIT INSTANTIATION  #
+############################
+explicit_instantiation: EXTERN? TEMPLATE declaration
+
+#############################
+#  EXPLICIT SPECIALIZATION  #
+#############################
+explicit_specialization: TEMPLATE LT GT declaration
+
+###########################
+#  LINKAGE SPECIFICATION  #
+###########################
 linkage_specification: EXTERN STRING_LITERAL _LBRACE declaration_seq? _RBRACE
                      | EXTERN STRING_LITERAL declaration
+
 
 
 ########################################################################################################################
