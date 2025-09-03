@@ -6,21 +6,16 @@
 
 ?start: translation_unit
 
-translation_unit: external_declaration*
+translation_unit: declaration_seq?
 
-external_declaration: declaration
-#                    | decl1
-#                    | decl2
-#
-#decl1: _SEMICOLON
-#decl2: _SEMICOLON
+external_declaration: declaration # REMOVE SOON
 
 ########################################################################################################################
 #  DECLARATIONS & DEFINITIONS  #
 ################################
 
 # ISO C++ Declarations
-#declaration_seq: declaration | declaration_seq declaration
+declaration_seq: declaration+
 
 declaration: block_declaration
            | function_definition
@@ -28,7 +23,7 @@ declaration: block_declaration
 #           | explicit_instantiation
 #           | explicit_specialization
 #           | linkage_specification
-#           | namespace_definition
+           | namespace_definition
            | empty_declaration
            | attribute_declaration
 
@@ -38,10 +33,63 @@ block_declaration: simple_declaration
 #                 | asm_definition
 #                 | namespace_alias_definition
 #                 | using_declaration
-#                 | using_directive
+                 | using_directive
                  | static_assert_declaration
                  | alias_declaration
                  | opaque_enum_declaration
+
+########################################################################################################################
+#  PRIMARY DECLARATIONS  #
+############################
+
+
+
+########################################################################################################################
+#  SECONDARY DECLARATIONS  #
+############################
+
+#########################
+#  ASSEMBLY DEFINITION  #
+#########################
+asm_definition: ASM _LPAREN STRING_LITERAL _RPAREN _SEMICOLON
+
+#####################
+#  USING DIRECTIVE  #
+#####################
+#using_directive: attribute_specifier? USING NAMESPACE SCOPE? nested_name_specifier? namespace_name _SEMICOLON
+using_directive: attribute_specifier? USING NAMESPACE SCOPE? namespace_name _SEMICOLON
+# uncomment once nested_name_specifier is non-ambiguous
+
+namespace_name: original_namespace_name
+              | namespace_alias
+
+original_namespace_name: IDENTIFIER
+
+namespace_alias: IDENTIFIER
+
+
+##########################
+#  NAMESPACE DEFINITION  #
+##########################
+namespace_definition: named_namespace_definition
+                    | unnamed_namespace_definition
+
+named_namespace_definition: original_namespace_definition
+                          | extension_namespace_definition
+
+extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
+
+original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
+
+unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
+
+namespace_alias_definition: NAMESPACE IDENTIFIER EQUAL qualified_namespace_specifier _SEMICOLON
+
+#qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
+qualified_namespace_specifier: SCOPE? namespace_name
+# uncomment when nested_name_specifier is non ambiguous
+
+namespace_body: declaration_seq # declaration_seq?
 
 ######################
 # ALIAS DECLARATION  #
@@ -217,6 +265,12 @@ simple_type_specifier: CHAR
 #                     | SCOPE? nested_name_specifier template simple_template_id # user-defined templates
 
 #decltype_specifier: decltype _LPAREN expression _RPAREN
+
+#nested_name_specifier: type_name SCOPE
+#                     | namespace_name SCOPE
+#                     | decltype_specifier SCOPE
+#                     | nested_name_specifier identifier SCOPE
+#                     | nested_name_specifier template? simple_template_id SCOPE
 
 ########################################################################################################################
 # Non-ISO C++
@@ -494,6 +548,7 @@ PUBLIC:     "public"
 PRIVATE:    "private"
 PROTECTED:  "protected"
 STATIC_ASSERT: "static_assert"
+ASM:        "asm"
 
 #################
 #   OPERATORS   #

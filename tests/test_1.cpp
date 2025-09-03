@@ -1,9 +1,11 @@
 // PRIMARY DECLARATIONS
-[[myAttribute]]; // attribute_declaration <- declaration
-;                // empty_declaration     <- declaration
+[[myAttribute]];           // attribute_declaration <- declaration
+namespace newNamespace {;} // namespace_definition
+;                          // empty_declaration     <- declaration
 
 // SECONDARY DECLARATION
-static_assert (1, "Error Message.");
+using namespace existingNamespace;   // using_directive
+static_assert (1, "Error Message."); // static_assert_declaration
 using myType = int; // alias_declaration       <- block_declaration
 enum colors;        // opaque_enum_declaration <- block_declaration
 

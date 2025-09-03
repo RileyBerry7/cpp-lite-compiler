@@ -29,14 +29,16 @@ class CSTtoAST(Transformer):
     ####################################################################################################################
     # Ambiguous Nodes
     def _ambig(self, possible_trees):
+        from compiler.utils.colors import colors
         branches = []
         for path in possible_trees:
             if isinstance(path, abstract_nodes.ASTNode):
+                path.ansi_color = colors.orange
                 branches.append(path)
             else:
                 branches.append(abstract_nodes.ASTNode("Non-abstract Path"))
+                branches[-1].ansi_color = colors.red
         ambig_node = abstract_nodes.ASTNode("Ambiguity", branches)
-        from compiler.utils.colors import colors
         ambig_node.ansi_color = colors.red.underline
         return ambig_node
 
