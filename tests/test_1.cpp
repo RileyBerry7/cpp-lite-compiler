@@ -4,6 +4,8 @@ namespace newNamespace {;} // namespace_definition
 ;                          // empty_declaration     <- declaration
 
 // SECONDARY DECLARATION
+asm("mov eax, 1"); // asm_definition
+namespace myNamespace = existingNamespace; // namespace_alias_definition
 using std::cout;                     // using declaration
 using namespace existingNamespace;   // using_directive
 static_assert (1, "Error Message."); // static_assert_declaration

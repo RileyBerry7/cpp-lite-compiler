@@ -30,8 +30,8 @@ declaration: block_declaration
 empty_declaration: _SEMICOLON
 
 block_declaration: simple_declaration
-#                 | asm_definition
-#                 | namespace_alias_definition
+                 | asm_definition
+                 | namespace_alias_definition
                  | using_declaration
                  | using_directive
                  | static_assert_declaration
@@ -52,6 +52,11 @@ block_declaration: simple_declaration
 #  ASSEMBLY DEFINITION  #
 #########################
 asm_definition: ASM _LPAREN STRING_LITERAL _RPAREN _SEMICOLON
+
+################################
+#  NAMESPACE ALIAS DEFINITION  #
+################################
+namespace_alias_definition: NAMESPACE IDENTIFIER EQUAL qualified_namespace_specifier _SEMICOLON
 
 #######################
 #  USING DECLARATION  #
@@ -89,7 +94,7 @@ original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_bo
 
 unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
 
-namespace_alias_definition: NAMESPACE IDENTIFIER EQUAL qualified_namespace_specifier _SEMICOLON
+
 
 #qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
 qualified_namespace_specifier: SCOPE? namespace_name
