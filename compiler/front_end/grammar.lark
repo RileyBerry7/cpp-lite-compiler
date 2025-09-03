@@ -39,7 +39,7 @@ block_declaration: simple_declaration
 #                 | namespace_alias_definition
 #                 | using_declaration
 #                 | using_directive
-#                 | static_assert_declaration
+                 | static_assert_declaration
                  | alias_declaration
                  | opaque_enum_declaration
 
@@ -57,6 +57,11 @@ type_id: type_specifier_seq
 #  SIMPLE DECLARATION  #
 ########################
 simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
+
+###############################
+#  STATIC ASSERT DECLARATION  #
+###############################
+static_assert_declaration: STATIC_ASSERT _LPAREN constant_expression _COMMA STRING_LITERAL _RPAREN _SEMICOLON
 
 #############################
 #  OPAQUE ENUM DECLARATION  #
@@ -473,9 +478,9 @@ FINAL:      "final"
 OVERRIDE:   "override"
 THREAD_LOCAL: "thread local"
 
-##################
-#    KEYWORDS    #
-##################
+#################################
+#    KEYWORDS (DECLARATIONS)    #
+#################################
 CLASS:      "class"
 STRUCT:     "struct"
 UNION:      "union"
@@ -488,6 +493,7 @@ FRIEND:     "friend"
 PUBLIC:     "public"
 PRIVATE:    "private"
 PROTECTED:  "protected"
+STATIC_ASSERT: "static_assert"
 
 #################
 #   OPERATORS   #

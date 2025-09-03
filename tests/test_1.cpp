@@ -1,9 +1,10 @@
 // PRIMARY DECLARATIONS
 [[myAttribute]]; // attribute_declaration <- declaration
-;                // empty_declaration <- declaration
+;                // empty_declaration     <- declaration
 
 // SECONDARY DECLARATION
-using myType = int; // alias_declaration <- block_declaration
+static_assert (1, "Error Message.");
+using myType = int; // alias_declaration       <- block_declaration
 enum colors;        // opaque_enum_declaration <- block_declaration
 
 int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], char(cast_var), float SCOPE :: * param2)
