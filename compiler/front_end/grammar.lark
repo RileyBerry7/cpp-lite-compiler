@@ -24,10 +24,8 @@ declaration: block_declaration
            | explicit_specialization
            | linkage_specification
            | namespace_definition
-           | empty_declaration
            | attribute_declaration
-
-empty_declaration: _SEMICOLON
+           | empty_declaration
 
 block_declaration: simple_declaration  # needs expanding
                  | asm_definition
@@ -77,11 +75,70 @@ explicit_specialization: TEMPLATE LT GT declaration
 linkage_specification: EXTERN STRING_LITERAL _LBRACE declaration_seq? _RBRACE
                      | EXTERN STRING_LITERAL declaration
 
+##########################
+#  NAMESPACE DEFINITION  #
+##########################
+namespace_definition: named_namespace_definition
+  | unnamed_namespace_definition
+
+named_namespace_definition: original_namespace_definition
+  | extension_namespace_definition
+
+extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
+
+original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
+
+unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
+
+#qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
+qualified_namespace_specifier: SCOPE? namespace_name
+# uncomment when nested_name_specifier is non ambiguous
+
+namespace_body: declaration_seq # declaration_seq?
+
+##################################################
+#  ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER   #
+##################################################
+attribute_declaration: attribute_specifier _SEMICOLON
+
+attribute_specifier: _LBRACKET _LBRACKET attribute_list? _RBRACKET _RBRACKET
+
+attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
+
+attribute: attribute_token attribute_argument_clause?
+
+attribute_token: IDENTIFIER
+  | attribute_scoped_token
+
+attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
+
+attribute_namespace: IDENTIFIER
+
+attribute_argument_clause: _LPAREN balanced_token_seq _RPAREN
+
+balanced_token_seq: balanced_token+
+
+balanced_token: _LPAREN   balanced_token_seq _RPAREN
+  | _LBRACKET balanced_token_seq _RBRACKET
+  | _LBRACE    balanced_token_seq _RBRACE
+#             | any token other than a parenthesis, a bracket, or a brace
+
+########################
+#  EMPTY DECLARATION  #
+#######################
+empty_declaration: _SEMICOLON
+
 
 
 ########################################################################################################################
-#  SECONDARY DECLARATIONS  #
+#  SECONDARY DECLARATIONS  #  <- derived from block_declaration
 ############################
+
+########################
+#  SIMPLE DECLARATION  #
+########################
+simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
+# ^--> contains: variable_declaration, function_declaration, typedef_alias, user_defined_types
 
 #########################
 #  ASSEMBLY DEFINITION  #
@@ -113,30 +170,8 @@ original_namespace_name: IDENTIFIER
 
 namespace_alias: IDENTIFIER
 
-
-##########################
-#  NAMESPACE DEFINITION  #
-##########################
-namespace_definition: named_namespace_definition
-                    | unnamed_namespace_definition
-
-named_namespace_definition: original_namespace_definition
-                          | extension_namespace_definition
-
-extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
-
-original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
-
-unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
-
-#qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
-qualified_namespace_specifier: SCOPE? namespace_name
-# uncomment when nested_name_specifier is non ambiguous
-
-namespace_body: declaration_seq # declaration_seq?
-
 ######################
-# ALIAS DECLARATION  #
+# ALIAS DECLARATION  # -> It's a more powerful version of typedef that can alias templates.
 ######################
 alias_declaration: USING IDENTIFIER EQUAL type_id _SEMICOLON
 # Example: using newTypeName = existingTypeName;
@@ -144,11 +179,6 @@ alias_declaration: USING IDENTIFIER EQUAL type_id _SEMICOLON
 # uncomment once abstract_declarator is normalized, and make abstract_declarator non-optional
 #type_id: type_specifier_seq abstract_declarator?
 type_id: type_specifier_seq
-
-########################
-#  SIMPLE DECLARATION  #
-########################
-simple_declaration: attribute_specifier? decl_specifier_seq init_declarator_list? _SEMICOLON
 
 ###############################
 #  STATIC ASSERT DECLARATION  #
@@ -176,33 +206,6 @@ enumerator: IDENTIFIER
 
 enum_name: IDENTIFIER
 
-##################################################
-#  ATTRIBUTE DECLARATION & ATTRIBUTE SPECIFIER   #
-##################################################
-attribute_declaration: attribute_specifier _SEMICOLON
-
-attribute_specifier: _LBRACKET _LBRACKET attribute_list? _RBRACKET _RBRACKET
-
-attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
-
-attribute: attribute_token attribute_argument_clause?
-
-attribute_token: IDENTIFIER 
-               | attribute_scoped_token
-
-attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
-
-attribute_namespace: IDENTIFIER
-
-attribute_argument_clause: _LPAREN balanced_token_seq _RPAREN
-
-balanced_token_seq: balanced_token+
-
-balanced_token: _LPAREN   balanced_token_seq _RPAREN
-              | _LBRACKET balanced_token_seq _RBRACKET
-              | _LBRACE    balanced_token_seq _RBRACE
-#             | any token other than a parenthesis, a bracket, or a brace
-
 
 #
 #parameter_declaration: attribute_specifier? decl_specifier_seq declarator
@@ -211,11 +214,30 @@ balanced_token: _LPAREN   balanced_token_seq _RPAREN
 #                     | attribute_specifier? decl_specifier_seq abstract_declarator? EQUAL assignment_expression
 
 ########################################################################################################################
+# Non-ISO C++
 function_definition: decl_specifier_seq declarator compound_statement
 
-#declaration: declaration_specifier_list init_declarator_list? _SEMICOLON
+# ISO C++
+#function_definition: attribute_specifier? decl_specifier_seq? declarator function_body
+#               | attribute_specifier? decl_specifier_seq? declarator
+#               | EQUAL default _SEMICOLON
+#               | attribute_specifier? decl_specifier_seq? declarator
+#               | EQUAL delete _SEMICOLON
+########################################################################################################################
+#  DECLARATORS  #
+#################
+# ISO C++
 
-init_declarator_list: init_declarator ( _COMMA init_declarator )*
+init_declarator_list: init_declarator (_COMMA init_declarator)*
+
+#init_declarator:  declarator initializer?
+#
+#declarator: ptr_declarator
+#          | noptr_declarator parameters_and_qualifiers trailing_return_type
+
+#####################################################################
+# Non-ISO C++
+
 
 init_declarator:  declarator init_suffix?
 
@@ -285,6 +307,16 @@ default_arg: EQUAL initializer
 #  DECLARATION SPECIFIER List #
 ###############################
 # ISO C++ SPECIFIER
+
+#decl_specifier_seq: (decl_specifier attribute_specifier?)+
+
+decl_specifier: storage_class_specifier # this will phase out declaration_specifier found below.
+              | type_specifier
+              | function_specifier
+              | FRIEND
+              | TYPEDEF
+              | CONSTEXPR
+
 type_specifier: trailing_type_specifier
 #              | class_specifier
 #              | enum_specifier
