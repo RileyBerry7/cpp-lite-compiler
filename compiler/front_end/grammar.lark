@@ -19,7 +19,7 @@ declaration_seq: declaration+
 
 declaration: block_declaration
            | function_definition
-#           | template_declaration
+           | template_declaration
            | explicit_instantiation
            | explicit_specialization
            | linkage_specification
@@ -42,6 +42,24 @@ block_declaration: simple_declaration  # needs expanding
 #  PRIMARY DECLARATIONS  #
 ############################
 
+
+##########################
+#  TEMPLATE DECLARATION  #
+##########################
+template_declaration: TEMPLATE LT template_parameter_list GT declaration
+
+template_parameter_list: template_parameter (_COMMA template_parameter)*
+
+template_parameter: type_parameter
+#                  | parameter_declaration
+# uncomment once decl_specifier_seq is finished
+
+type_parameter: CLASS ELLIPSIS? IDENTIFIER?
+              | CLASS IDENTIFIER? EQUAL type_id
+              | TYPENAME ELLIPSIS? IDENTIFIER?
+              | TYPENAME IDENTIFIER? EQUAL type_id
+              | TEMPLATE LT template_parameter_list GT CLASS ELLIPSIS? IDENTIFIER?
+              | TEMPLATE LT template_parameter_list GT CLASS IDENTIFIER? EQUAL id_expression
 
 ############################
 #  EXPLICIT INSTANTIATION  #
@@ -110,8 +128,6 @@ extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRAC
 original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
 
 unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
-
-
 
 #qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
 qualified_namespace_specifier: SCOPE? namespace_name
@@ -186,6 +202,13 @@ balanced_token: _LPAREN   balanced_token_seq _RPAREN
               | _LBRACKET balanced_token_seq _RBRACKET
               | _LBRACE    balanced_token_seq _RBRACE
 #             | any token other than a parenthesis, a bracket, or a brace
+
+
+#
+#parameter_declaration: attribute_specifier? decl_specifier_seq declarator
+#                     | attribute_specifier? decl_specifier_seq declarator EQUAL assignment_expression
+#                     | attribute_specifier? decl_specifier_seq abstract_declarator?
+#                     | attribute_specifier? decl_specifier_seq abstract_declarator? EQUAL assignment_expression
 
 ########################################################################################################################
 function_definition: decl_specifier_seq declarator compound_statement
@@ -386,6 +409,19 @@ access_specifier: PUBLIC | PRIVATE | PROTECTED
 ########################################################################################################################
 #  EXPRESSIONS  #
 #################
+# ISO C++
+
+#primary_expression: literal
+#                  | this
+#                  | ( expression )
+#                  | id_expression
+#                  | lambda_expression
+
+id_expression: unqualified_id
+               | qualified_id
+
+########################################################################################################################
+# Non-ISO C++
 
 # Used For Array Sizes
 constant_expression: conditional_expression
@@ -580,6 +616,7 @@ NOEXCEPT:   "noexcept"
 FINAL:      "final"
 OVERRIDE:   "override"
 THREAD_LOCAL: "thread local"
+TYPENAME:   "typename"
 
 #################################
 #    KEYWORDS (DECLARATIONS)    #

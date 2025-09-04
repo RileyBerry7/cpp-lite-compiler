@@ -1,4 +1,5 @@
 // PRIMARY DECLARATIONS
+template <typename T> ; // template_declaration
 extern template ;  // explicit_instantiation
 template <> ;              // explicit_specialization
 extern "C";                // linkage_specification
