@@ -1,5 +1,543 @@
 # grammar.lark
 
+
+########################################################################################################################
+#  A.1 KEYWORDS   #                                                                             #  TERMINALS (TOKENS)  #
+###################                                                                             ########################
+
+##############################
+#   KEYWORDS (CONTROL-FLOW)  #
+##############################
+_IF:         "if"
+ELSE:       "else"
+SWITCH:     "switch"
+CASE:       "case"
+DEFAULT:    "default"
+FOR:        "for"
+WHILE:      "while"
+DO:         "do"
+BREAK:      "break"
+CONTINUE:   "continue"
+RETURN:     "return"
+GOTO:       "goto"
+TRY:        "try"
+CATCH:      "catch"
+THROW:      "throw"
+
+######################
+#  KEYWORDS (TYPES)  #
+######################
+INT:        "int"
+FLOAT:      "float"
+DOUBLE:     "double"
+CHAR:       "char"
+WCHAR_T:    "wchar_t"
+CHAR16_T:   "char16_t"
+CHAR32_T:   "char32_t"
+VOID:       "void"
+BOOL:       "bool"
+AUTO:       "auto"
+SIGNED:     "signed"
+UNSIGNED:   "unsigned"
+SHORT:      "short"
+LONG:       "long"
+CONST:      "const"
+CONSTEXPR:  "constexpr"
+CONSTEVAL:  "consteval"
+VOLATILE:   "volatile"
+STATIC:     "static"
+EXTERN:     "extern"
+MUTABLE:    "mutable"
+REGISTER:   "register"
+RESTRICT:   "restrict"
+INLINE:     "inline"
+VIRTUAL:    "virtual"
+EXPLICIT:   "explicit"
+NOEXCEPT:   "noexcept"
+FINAL:      "final"
+OVERRIDE:   "override"
+THREAD_LOCAL: "thread local"
+TYPENAME:   "typename"
+NEW:        "new"
+CONST_CAST:       "const_cast"
+STATIC_CAST:      "static_cast"
+DYNAMIC_CAST:     "dynamic_cast"
+REINTERPRET_CAST: "reinterpret_cast"
+TYPEID          : "typeid"
+
+
+#################################
+#    KEYWORDS (DECLARATIONS)    #
+#################################
+CLASS:      "class"
+STRUCT:     "struct"
+UNION:      "union"
+ENUM:       "enum"
+NAMESPACE:  "namespace"
+TEMPLATE:   "template"
+TYPEDEF:    "typedef"
+USING:      "using"
+FRIEND:     "friend"
+PUBLIC:     "public"
+PRIVATE:    "private"
+PROTECTED:  "protected"
+STATIC_ASSERT: "static_assert"
+ASM:        "asm"
+DELETE:     "delete"
+OPERATOR:   "operator"
+DECLTYPE:    "decltype"
+THIS:       "this"
+
+#################
+#   OPERATORS   #
+#################
+PLUS:       "+"
+MINUS:      "-"
+STAR:       "*"
+SLASH:      "/"
+PERCENT:    "%"
+EQUAL:      "="
+ELLIPSIS:    "..."
+PLUS_EQUAL:    "+="
+MINUS_EQUAL:   "-="
+STAR_EQUAL:    "*="
+SLASH_EQUAL:   "/="
+PERCENT_EQUAL: "%="
+SHL_EQUAL: "<<="
+SHR_EQUAL: ">>="
+BIT_AND_EQUAL: "&="
+BIT_OR_EQUAL: "|="
+BIT_XOR_EQUAL: "^="
+
+
+LT:         "<"
+GT:         ">"
+LE:         "<="
+GE:         ">="
+EQ:         "=="
+NEQ:        "!="
+
+AND:        "&&"
+OR:         "||"
+NOT:        "!"
+BIT_AND:    "&"
+BIT_OR:     "|"
+BIT_NOT:    "~"
+BIT_XOR:    "^"
+SHL:        "<<"
+SHR:        ">>"
+
+INCREMENT:  "++"
+DECREMENT:  "--"
+ARROW:      "->"
+ARROW_STAR: "->*"
+DOT_STAR:   ".*"
+TERNARY:    "?"
+SCOPE:      "::"
+COLON:      ":"
+
+NEW_ARRAY: "new[]"
+DELETE_ARRAY: "delete[]"
+
+CALL:      "()"
+SUBSCRIPT: "[]"
+
+SIZEOF: "sizeof"
+ALIGNOF: "alignof"
+
+##################
+#   PUNCTUATION  #
+##################
+_LPAREN:     "("
+_RPAREN:     ")"
+_LBRACE:     "{"
+_RBRACE:     "}"
+_LBRACKET:   "["
+_RBRACKET:   "]"
+_SEMICOLON:  ";"
+_COMMA:      ","
+_DOT:        "."
+
+###################
+#  MISCELLANEOUS  #
+###################
+HASH:            "#"
+INCLUDE:         "include"
+DEFINE:          "define"
+HASH_HASH: "##"
+LT_COLON: "<:"
+COLON_GT: ":>"
+LT_PERCENT: "<%"
+PERCENT_GT: "%>"
+PERCENT_COLON: "%:"
+PERCENT_COLON_PERCENT_COLON: "%:%:"
+
+############################
+#  IDENTIFIERS & LITERALS  #
+############################
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+INT_LITERAL: /0|[1-9][0-9]*/
+FLOAT_LITERAL: /([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?/
+CHAR_LITERAL:   /'([^'\\]|\\.)'/
+STRING_LITERAL: /"(\\.|[^"\\])*"/
+BOOL_LITERAL:   "true" | "false"
+NULLPTR:        "nullptr"
+
+COMMENT_LINE: "//" /[^\n]*/
+COMMENT_BLOCK: "/*" /(.|\n)*?/ "*/"
+
+# Digits & prefixes
+ZERO: "0"
+HEX_PREFIX: /0[xX]/
+
+# “OTHER_NON_WS” fallback
+OTHER_NON_WS: /[^\s]/
+
+########################################################################################################################
+#  A.2 LEXICAL CONVENTIONS   # -> ISO C++ lexical convention heavily reduced.
+##############################
+
+# ===== Preprocessing tokens =====
+preprocessing_token: OTHER_NON_WS
+#                   | IDENTIFIER
+#                   | CHAR_LITERAL
+#                   | USER_DEFINED_CHARACTER_LITERAL
+#                   | STRING_LITERAL
+#                   | USER_DEFINED_STRING_LITERAL
+#                   | preprocessing_op_or_punc
+
+token: IDENTIFIER
+     | keyword
+     | literal
+     | operator
+     | punctuator
+
+
+#preprocessing_op_or_punc: _LBRACE          | _RBRACE              | _LBRACKET
+#                        | _RBRACKET        | _LPAREN              | _RPAREN
+#                        | _DOT             | _COMMA               | _SEMICOLON
+#                        | COLON            | SCOPE                | TERNARY
+#                        | PLUS             | MINUS                | STAR
+#                        | SLASH            | PERCENT              | EQUAL
+#                        | LT               | GT                   | NOT
+#                        | BIT_AND          | BIT_OR               | BIT_XOR
+#                        | BIT_NOT          | AND                  | OR
+#                        | EQ               | NEQ                  | LE
+#                        | GE               | SHL                  | SHR
+#                        | INCREMENT        | DECREMENT            | ARROW
+#                        | DOT_STAR         | ARROW_STAR           | ELLIPSIS
+#                        | PLUS_EQUAL       | MINUS_EQUAL          | STAR_EQUAL
+#                        | SLASH_EQUAL      | PERCENT_EQUAL        | BIT_AND_EQUAL
+#                        | BIT_OR_EQUAL     | BIT_XOR_EQUAL        | SHL_EQUAL
+#                        | SHR_EQUAL        | HASH                 | HASH_HASH
+#                        | LT_COLON         | COLON_GT             | LT_PERCENT
+#                        | PERCENT_GT       | PERCENT_COLON        | PERCENT_COLON_PERCENT_COLON
+#                        | NEW              | DELETE               | AND_ALT
+#                        | OR_ALT           | NOT_ALT              | COMPL_ALT
+#                        | BITAND_ALT       | BITOR_ALT            | XOR_ALT
+#                        | AND_EQ_ALT       | OR_EQ_ALT            | NOT_EQ_ALT
+#                        | XOR_EQ_ALT
+
+literal: INT_LITERAL    | CHAR_LITERAL  
+       | FLOAT_LITERAL  | STRING_LITERAL 
+       | BOOL_LITERAL   | NULLPTR
+       | user_defined_literal
+
+
+operator: NEW            | DELETE         | NEW_ARRAY
+        | DELETE_ARRAY   | PLUS           | MINUS
+        | STAR           | SLASH          | PERCENT
+        | BIT_XOR        | BIT_AND        | BIT_OR
+        | BIT_NOT        | NOT            | EQUAL
+        | LT             | GT             | PLUS_EQUAL
+        | MINUS_EQUAL    | STAR_EQUAL     | SLASH_EQUAL
+        | PERCENT_EQUAL  | BIT_XOR_EQUAL  | BIT_AND_EQUAL
+        | BIT_OR_EQUAL   | SHL            | SHR
+        | SHL_EQUAL      | SHR_EQUAL      | EQ
+        | NEQ            | LE             | GE
+        | AND            | OR             | INCREMENT
+        | DECREMENT      | _COMMA         | ARROW
+        | ARROW_STAR     | DOT_STAR       | ELLIPSIS
+        | CALL           | SUBSCRIPT
+
+
+punctuator: _LBRACE     | _RBRACE  | _LBRACKET
+          | _RBRACKET   | _LPAREN  | _RPAREN
+          | _SEMICOLON  | _COMMA   | _DOT
+          | DOT_STAR    | ARROW    | ARROW_STAR
+          | COLON       | SCOPE    | ELLIPSIS
+
+keyword:   _IF             | ELSE           | SWITCH         | CASE
+         | DEFAULT         | FOR            | WHILE          | DO
+         | BREAK           | CONTINUE       | RETURN         | GOTO
+         | TRY             | CATCH          | THROW          | INT
+         | FLOAT           | DOUBLE         | CHAR           | WCHAR_T
+         | CHAR16_T        | CHAR32_T       | VOID           | BOOL
+         | AUTO            | SIGNED         | UNSIGNED       | SHORT
+         | LONG            | CONST          | CONSTEXPR      | CONSTEVAL
+         | VOLATILE        | STATIC         | EXTERN         | MUTABLE
+         | REGISTER        | RESTRICT       | INLINE         | VIRTUAL
+         | EXPLICIT        | NOEXCEPT       | FINAL          | OVERRIDE
+         | THREAD_LOCAL    | TYPENAME       | CLASS          | STRUCT
+         | UNION           | ENUM           | NAMESPACE      | TEMPLATE
+         | TYPEDEF         | USING          | FRIEND         | PUBLIC
+         | PRIVATE         | PROTECTED      | STATIC_ASSERT  | ASM
+         | DECLTYPE        | THIS
+
+
+# ===== User-defined literals =====
+user_defined_literal: user_defined_integer_literal
+  | user_defined_floating_literal
+  | user_defined_string_literal
+  | user_defined_character_literal
+
+user_defined_integer_literal:   INT_LITERAL    ud_suffix
+user_defined_floating_literal:  FLOAT_LITERAL  ud_suffix
+user_defined_string_literal:    STRING_LITERAL ud_suffix
+user_defined_character_literal: CHAR_LITERAL   ud_suffix
+
+ud_suffix: IDENTIFIER
+
+
+########################################################################################################################
+#  A.4 EXPRESSIONS  #
+#####################
+# ISO C++
+
+primary_expression: literal
+  | THIS
+  | _LPAREN expression _RPAREN
+  | id_expression
+  | lambda_expression
+
+id_expression: unqualified_id
+  | qualified_id
+
+unqualified_id: IDENTIFIER
+  | operator_function_id
+  | conversion_function_id
+  | literal_operator_id
+  | BIT_NOT class_name
+  | BIT_NOT decltype_specifier
+  | template_id
+
+qualified_id: SCOPE? nested_name_specifier TEMPLATE? unqualified_id
+  | SCOPE IDENTIFIER
+  | SCOPE operator_function_id
+  | SCOPE literal_operator_id
+  | SCOPE template_id
+
+nested_name_specifier: type_name SCOPE
+  | namespace_name SCOPE
+  | decltype_specifier SCOPE
+  | nested_name_specifier IDENTIFIER SCOPE
+  | nested_name_specifier TEMPLATE? simple_template_id SCOPE
+
+lambda_expression: lambda_introducer lambda_declarator? compound_statement
+
+lambda_introducer: _LBRACKET lambda_capture? _RBRACKET
+
+lambda_capture: capture_default
+  | capture_list
+  | capture_default _COMMA capture_list
+
+capture_default: BIT_AND
+  | EQUAL
+
+capture_list: capture ELLIPSIS?
+  | capture_list _COMMA capture ELLIPSIS?
+
+capture: IDENTIFIER
+  | BIT_AND IDENTIFIER
+  | THIS
+
+lambda_declarator: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? MUTABLE?
+                 | exception_specification? trailing_return_type?
+
+postfix_expression: primary_expression
+                  | postfix_expression _LBRACKET expression _RBRACKET
+                  | postfix_expression _LBRACKET braced_init_list _RBRACKET
+                  | postfix_expression _LPAREN expression_list? _RPAREN
+                  | simple_type_specifier _LPAREN expression_list? _RPAREN
+                  | typename_specifier _LPAREN expression_list? _RPAREN
+                  | simple_type_specifier braced_init_list
+                  | typename_specifier braced_init_list
+                  | postfix_expression _DOT TEMPLATE? id_expression
+                  | postfix_expression ARROW TEMPLATE? id_expression
+                  | postfix_expression _DOT pseudo_destructor_name
+                  | postfix_expression ARROW pseudo_destructor_name
+                  | postfix_expression INCREMENT
+                  | postfix_expression DECREMENT
+                  | DYNAMIC_CAST LT type_id GT _LPAREN expression _RPAREN
+                  | STATIC_CAST LT type_id GT _LPAREN expression _RPAREN
+                  | REINTERPRET_CAST LT type_id GT _LPAREN expression _RPAREN
+                  | CONST_CAST LT type_id GT _LPAREN expression _RPAREN
+                  | TYPEID _LPAREN expression _RPAREN
+                  | TYPEID _LPAREN type_id _RPAREN
+
+expression_list: initializer_list
+
+pseudo_destructor_name: SCOPE? nested_name_specifier? type_name SCOPE BIT_NOT type_name
+                      | SCOPE? nested_name_specifier TEMPLATE simple_template_id SCOPE BIT_NOT type_name
+                      | SCOPE? nested_name_specifier? BIT_NOT type_name
+                      | BIT_NOT decltype_specifier
+
+unary_expression: postfix_expression
+                | INCREMENT cast_expression
+                | DECREMENT cast_expression
+                | unary_operator cast_expression
+                | SIZEOF unary_expression
+                | SIZEOF _LPAREN type_id _RPAREN
+                | SIZEOF ELLIPSIS _LPAREN IDENTIFIER _RPAREN
+                | ALIGNOF _LPAREN type_id _RPAREN
+                | noexcept_expression
+                | new_expression
+                | delete_expression
+
+unary_operator: STAR
+              | BIT_AND
+              | PLUS
+              | MINUS
+              | NOT
+              | BIT_NOT
+
+new_expression: SCOPE? NEW new_placement? new_type_id new_initializer?
+              | SCOPE? NEW new_placement? _LPAREN type_id _RPAREN new_initializer?
+
+new_placement: _LPAREN expression_list _RPAREN
+
+new_type_id: type_specifier_seq new_declarator?
+
+new_declarator: ptr_operator new_declarator?
+              | noptr_new_declarator
+
+noptr_new_declarator: _LBRACKET expression _RBRACKET attribute_specifier?
+                    | noptr_new_declarator _LBRACKET constant_expression _RBRACKET attribute_specifier?
+
+new_initializer: _LPAREN expression_list? _RPAREN
+               | braced_init_list
+
+delete_expression: SCOPE? DELETE cast_expression
+                 | SCOPE? DELETE _LBRACKET _RBRACKET cast_expression
+
+noexcept_expression: NOEXCEPT _LPAREN expression _RPAREN
+
+cast_expression: unary_expression
+               | _LPAREN type_id _RPAREN cast_expression
+
+pm_expression: cast_expression
+             | pm_expression DOT_STAR   cast_expression
+             | pm_expression ARROW_STAR cast_expression
+
+multiplicative_expression: pm_expression
+                         | multiplicative_expression STAR pm_expression
+                         | multiplicative_expression SLASH pm_expression
+                         | multiplicative_expression PERCENT pm_expression
+
+additive_expression: multiplicative_expression
+                   | additive_expression PLUS multiplicative_expression
+                   | additive_expression MINUS multiplicative_expression
+
+shift_expression: additive_expression
+                | shift_expression SHL additive_expression
+                | shift_expression SHR additive_expression
+
+relational_expression: shift_expression
+                     | relational_expression LT shift_expression
+                     | relational_expression GT shift_expression
+                     | relational_expression LE shift_expression
+                     | relational_expression GE shift_expression
+
+equality_expression: relational_expression
+                   | equality_expression EQ relational_expression
+                   | equality_expression NEQ relational_expression
+
+and_expression: equality_expression
+              | and_expression BIT_AND equality_expression
+
+exclusive_or_expression: and_expression
+                       | exclusive_or_expression BIT_XOR and_expression
+
+inclusive_or_expression: exclusive_or_expression
+                       | inclusive_or_expression BIT_OR exclusive_or_expression
+
+logical_and_expression: inclusive_or_expression
+                      | logical_and_expression AND inclusive_or_expression
+
+logical_or_expression: logical_and_expression
+                     | logical_or_expression OR logical_and_expression
+
+conditional_expression: logical_or_expression
+                      | logical_or_expression TERNARY expression COLON assignment_expression
+
+assignment_expression: conditional_expression
+                     | logical_or_expression assignment_operator initializer_clause
+                     | throw_expression
+
+assignment_operator: EQUAL        | STAR_EQUAL
+                   | SLASH_EQUAL  | PERCENT_EQUAL
+                   | PLUS_EQUAL   | MINUS_EQUAL
+                   | SHR_EQUAL    | SHL_EQUAL
+                   | BIT_OR_EQUAL | BIT_XOR_EQUAL
+                   | BIT_AND_EQUAL
+
+expression: assignment_expression
+          | expression _COMMA assignment_expression
+
+constant_expression: conditional_expression
+
+
+########################################################################################################################
+#  A.5  STATEMENTS  #
+#####################
+
+statement: labeled_statement
+         | attribute_specifier? expression_statement
+         | attribute_specifier? compound_statement
+         | attribute_specifier? selection_statement
+         | attribute_specifier? iteration_statement
+         | attribute_specifier? jump_statement
+         | declaration_statement
+         | attribute_specifier? try_block
+
+labeled_statement: attribute_specifier? IDENTIFIER COLON statement
+                 | attribute_specifier? CASE constant_expression COLON statement
+                 | attribute_specifier? DEFAULT COLON statement
+
+expression_statement: expression? _SEMICOLON
+
+compound_statement: _LBRACE statement_seq? _RBRACE
+
+statement_seq: statement
+             | statement_seq statement
+
+selection_statement: _IF _LPAREN condition _RPAREN statement
+                   | _IF _LPAREN condition _RPAREN statement ELSE statement
+                   | SWITCH _LPAREN condition _RPAREN statement
+
+condition: expression
+         | attribute_specifier? type_specifier_seq declarator EQUAL initializer_clause
+         | attribute_specifier? type_specifier_seq declarator braced_init_list
+
+iteration_statement: WHILE _LPAREN condition _RPAREN statement
+                   | DO statement WHILE _LPAREN expression _RPAREN _SEMICOLON
+                   | FOR _LPAREN for_init_statement condition? _SEMICOLON expression? _RPAREN statement
+                   | FOR _LPAREN for_range_declaration COLON expression _RPAREN statement
+
+for_init_statement: expression_statement
+                  | simple_declaration
+
+for_range_declaration: attribute_specifier? type_specifier_seq declarator
+
+jump_statement: BREAK _SEMICOLON
+              | CONTINUE _SEMICOLON
+              | RETURN expression? _SEMICOLON
+              | RETURN braced_init_list _SEMICOLON
+              | GOTO IDENTIFIER _SEMICOLON
+
+declaration_statement: block_declaration
+
 ########################################################################################################################
 #   ENTRY POINT  #
 ##################
@@ -304,75 +842,75 @@ init_declarator_list: init_declarator
 init_declarator: declarator initializer?
 
 declarator: ptr_declarator
-  | noptr_declarator parameters_and_qualifiers trailing_return_type
+          | noptr_declarator parameters_and_qualifiers trailing_return_type
 
 ptr_declarator: noptr_declarator
-  | ptr_operator ptr_declarator
+              | ptr_operator ptr_declarator
 
 noptr_declarator: declarator_id attribute_specifier?
-  | noptr_declarator parameters_and_qualifiers
-  | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
-  | _LPAREN ptr_declarator _RPAREN
+                | noptr_declarator parameters_and_qualifiers
+                | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
+                | _LPAREN ptr_declarator _RPAREN
 
 parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq?
-  | ref_qualifier? exception_specification?
+                         | ref_qualifier? exception_specification?
 
 trailing_return_type: ARROW trailing_type_specifier_seq abstract_declarator?
 
 ptr_operator: STAR attribute_specifier? cv_qualifier_seq?
-  | BIT_AND attribute_specifier?
-  | AND attribute_specifier?
-  | SCOPE? nested_name_specifier STAR attribute_specifier? cv_qualifier_seq?
+            | BIT_AND attribute_specifier?
+            | AND attribute_specifier?
+            | SCOPE? nested_name_specifier STAR attribute_specifier? cv_qualifier_seq?
 
 cv_qualifier_seq: cv_qualifier cv_qualifier_seq?
 
 cv_qualifier: CONST
-  | VOLATILE
+            | VOLATILE
 
 ref_qualifier: BIT_AND # &
-  | AND # &&
+             | AND # &&
 
 declarator_id: ELLIPSIS? id_expression
-  | SCOPE? nested_name_specifier? class_name
+             | SCOPE? nested_name_specifier? class_name
 
 type_id: type_specifier_seq abstract_declarator?
 
 abstract_declarator: ptr_abstract_declarator
-  | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type
-  | ELLIPSIS   // covers the "..." case
+                   | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type
+                   | ELLIPSIS   // covers the "..." case
 
 ptr_abstract_declarator: noptr_abstract_declarator
-  | ptr_operator ptr_abstract_declarator?
+                       | ptr_operator ptr_abstract_declarator?
 
 noptr_abstract_declarator: noptr_abstract_declarator? parameters_and_qualifiers
-  | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
-  | _LPAREN ptr_abstract_declarator _RPAREN
+                         | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
+                         | _LPAREN ptr_abstract_declarator _RPAREN
 
 parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
-  | parameter_declaration_list _COMMA ELLIPSIS
+                            | parameter_declaration_list _COMMA ELLIPSIS
 
 parameter_declaration_list: parameter_declaration
-  | parameter_declaration_list _COMMA parameter_declaration
+                          | parameter_declaration_list _COMMA parameter_declaration
 
 parameter_declaration: attribute_specifier? decl_specifier_seq declarator
-  | attribute_specifier? decl_specifier_seq declarator EQUAL assignment_expression
-  | attribute_specifier? decl_specifier_seq abstract_declarator?
-  | attribute_specifier? decl_specifier_seq abstract_declarator? EQUAL assignment_expression
+                     | attribute_specifier? decl_specifier_seq declarator EQUAL assignment_expression
+                     | attribute_specifier? decl_specifier_seq abstract_declarator?
+                     | attribute_specifier? decl_specifier_seq abstract_declarator? EQUAL assignment_expression
 
 initializer: brace_or_equal_initializer
-  | _LPAREN expression_list _RPAREN
+           | _LPAREN expression_list _RPAREN
 
 brace_or_equal_initializer: EQUAL initializer_clause
-  | braced_init_list
+                          | braced_init_list
 
 initializer_clause: assignment_expression
-  | braced_init_list
+                  | braced_init_list
 
 initializer_list: initializer_clause ELLIPSIS?
-  | initializer_list _COMMA initializer_clause ELLIPSIS?
+                | initializer_list _COMMA initializer_clause ELLIPSIS?
 
 braced_init_list: _LBRACE initializer_list _COMMA? _RBRACE
-  | _LBRACE _RBRACE
+                | _LBRACE _RBRACE
 
 
 
@@ -467,49 +1005,6 @@ mem_initializer_id: class_or_decltype
 
 operator_function_id: OPERATOR operator
 
-operator: NEW
-        | DELETE
-        | NEW _LBRACKET _RBRACKET
-        | DELETE _LBRACKET _RBRACKET
-        | PLUS
-        | MINUS
-        | STAR
-        | SLASH
-        | PERCENT
-        | BIT_XOR
-        | BIT_AND
-        | BIT_OR
-        | BIT_NOT
-        | NOT
-        | EQUAL
-        | LT
-        | GT
-        | PLUS_EQUAL
-        | MINUS_EQUAL
-        | STAR_EQUAL
-        | SLASH_EQUAL
-        | PERCENT_EQUAL
-        | BIT_XOR_EQUAL
-        | BIT_AND_EQUAL
-        | BIT_OR_EQUAL
-        | SHL
-        | SHR
-        | SHR_EQUAL
-        | SHL_EQUAL
-        | EQ
-        | NEQ
-        | LE
-        | GE
-        | AND
-        | OR
-        | INCREMENT
-        | DECREMENT
-        | _COMMA
-        | ARROW_STAR  
-        | ARROW
-        | _LPAREN _RPAREN
-        | _LBRACKET _RBRACKET
-
 literal_operator_id: OPERATOR STRING_LITERAL IDENTIFIER
 
 
@@ -582,741 +1077,8 @@ type_id_list: type_id ELLIPSIS?
 noexcept_specification: NOEXCEPT _LPAREN constant_expression _RPAREN
                       | NOEXCEPT
 
-#####################################################################
-# Non-ISO C++
 
-#
-#init_declarator:  declarator init_suffix?
-#
-#init_suffix: EQUAL initializer
-#
-#init_list: initializer (_COMMA initializer)*
 
-#initializer: expression
-#           | _LBRACE init_list? _RBRACE
-
-
-########################
-#  DECLARATOR (Named)  #
-########################
-
-#declarator: ptr_list? reference_operator? direct_declarator
-#
-#reference_operator: BIT_AND     -> lvalue_ref
-#                  | AND         -> rvalue_ref
-#
-#ptr_list: ptr_operator+
-#
-#ptr_operator: (scope_qualifier SCOPE)? STAR type_qualifier_list? -> ptr
-#
-##scope_qualifier: IDENTIFIER (SCOPE IDENTIFIER)*
-#scope_qualifier: IDENTIFIER (SCOPE IDENTIFIER)*
-#
-#
-#direct_declarator: IDENTIFIER
-#                 | _LPAREN declarator _RPAREN
-#                 | direct_declarator array_suffix
-#                 | direct_declarator function_suffix
-#
-#array_suffix:    _LBRACKET constant_expression _RBRACKET
-#function_suffix: _LPAREN   parameter_list?     _RPAREN
-
-
-########################################################################################################################
-#  ABSTRACT DECLARATORS  (Unnamed)  #
-#####################################
-
-#abstract_declarator: ptr_operator abstract_declarator  # allows *, C::*, &, && chains
-#                   | direct_abstract_declarator
-#                   |                                   # EMPTY: just the specifiers (e.g., "int")
-#
-#direct_abstract_declarator: _LPAREN abstract_declarator _RPAREN
-#                          | direct_abstract_declarator array_suffix
-#                          | direct_abstract_declarator function_suffix
-#                          | array_suffix            # base-case: allow starting with [] …
-#                          | function_suffix         # … or with ()
-
-########################################################################################################################
-# Parameters  #
-###############
-
-#parameter_list: parameter ( _COMMA parameter )* ( _COMMA ELLIPSIS )?
-#              | ELLIPSIS                     // "..."
-#
-#parameter: decl_specifier_seq param_declarator?  default_arg?   // specs + name? + default_arguments?
-#
-## Parameter - Named or Unnamed
-#?param_declarator: declarator | abstract_declarator
-#
-#default_arg: EQUAL initializer
-
-########################################################################################################################
-#  DECLARATION SPECIFIER List #
-###############################
-# ISO C++ SPECIFIER
-
-#decl_specifier_seq: (decl_specifier attribute_specifier?)+
-
-#decl_specifier: storage_class_specifier # this will phase out declaration_specifier found below.
-#              | type_specifier
-#              | function_specifier
-#              | FRIEND
-#              | TYPEDEF
-#              | CONSTEXPR
-#
-#type_specifier: trailing_type_specifier
-##              | class_specifier
-##              | enum_specifier
-#
-#trailing_type_specifier: simple_type_specifier
-##                       | elaborated_type_specifier
-##                       | typename_specifier
-##                       | cv_qualifier
-#
-#type_specifier_seq: (type_specifier attribute_specifier?)+
-#
-#trailing_type_specifier_seq: (trailing_type_specifier attribute_specifier?)+
-#
-#
-#
-#simple_type_specifier: CHAR
-#                     | CHAR16_T
-#                     | CHAR32_T
-#                     | WCHAR_T
-#                     | BOOL
-#                     | SHORT
-#                     | INT
-#                     | LONG
-#                     | SIGNED
-#                     | UNSIGNED
-#                     | FLOAT
-#                     | DOUBLE
-#                     | VOID
-#                     | AUTO
-#                     | decltype_specifier
-#                     | SCOPE? nested_name_specifier? type_name                  # user-defined types
-#                     | SCOPE? nested_name_specifier template simple_template_id # user-defined templates
-
-#type_name: enum_name
-#         | class_name
-#         | typedef_name
-
-#decltype_specifier: decltype _LPAREN expression _RPAREN
-
-#unqualified_id: IDENTIFIER
-#              | operator_function_id
-#              | conversion_function_id
-#              | literal_operator_id
-#              | ∼ class_name
-#              | ∼ decltype_specifier
-#              | template_id
-
-#qualified_id: SCOPE IDENTIFIER
-#            | SCOPE? nested_name_specifier template? unqualified_id
-#            | SCOPE operator_function_id
-#            | SCOPE literal_operator_id
-#            | SCOPE template_id
-
-#nested_name_specifier: type_name SCOPE
-#                     | namespace_name SCOPE
-#                     | decltype_specifier SCOPE
-#                     | nested_name_specifier identifier SCOPE
-#                     | nested_name_specifier template? simple_template_id SCOPE
-
-########################################################################################################################
-# Non-ISO C++
-
-#decl_specifier_seq: declaration_specifier+
-#
-#?declaration_specifier:  storage_class_specifier
-#                       | type_specifier
-#                       | type_qualifier
-#                       | function_specifier
-#                       | FRIEND
-#                       | TYPEDEF
-#                       | CONSTEXPR
-#                       | CONSTEVAL
-#
-#storage_class_specifier: EXTERN | STATIC | THREAD_LOCAL | REGISTER
-#                       | MUTABLE # This is NOT a real storage class [TEMPORARY]
-
-
-#type_qualifier_list: type_qualifier+
-#
-#type_qualifier: CONST | VOLATILE | RESTRICT
-#
-#simple_type_specifier_list: simple_type_specifier+
-
-#?type_specifier: simple_type_specifier
-#               | elaborated_type_specifier
-#
-#simple_type_specifier: VOID | CHAR | INT | FLOAT | DOUBLE | BOOL
-#                     | SIGNED | UNSIGNED | SHORT | LONG | AUTO
-#                     | WCHAR_T | WCHAR16_T | WCHAR32_T
-#                     | IDENTIFIER # Typedef Names - Creates Massive Ambiguity ;-;
-#                     PLEASE DO NOT UNCOMMENT
-
-
-#elaborated_type_specifier: (UNION | CLASS | STRUCT)  scope_qualifier? IDENTIFIER class_body?           -> class_type
-#                         |  ENUM   (CLASS | STRUCT)? scope_qualifier? IDENTIFIER enum_base? enum_body? -> enum_type
-
-
-#function_specifier: INLINE | VIRTUAL | EXPLICIT | NOEXCEPT | OVERRIDE | FINAL
-
-########################################################################################################################
-# ELABORATE TYPE BODIES #
-#########################
-
-# CLASS / STRUCT BODY
-#class_body: _LBRACE member_declaration* _RBRACE
-
-#?member_declaration: declaration                                 // inside class / struc
-#                   | access_specifier COLON  -> access_specifier // public:, private:, protected:
-
-#access_specifier: PUBLIC | PRIVATE | PROTECTED
-
-## ENUM BODY
-#enum_body: _LBRACE enumerator_list? _RBRACE
-#enumerator_list: enumerator ( _COMMA enumerator )* _COMMA?
-#enumerator: IDENTIFIER (EQUAL constant_expression)?
-#
-#
-## ENUM UNDERLYING TYPE
-#enum_base: COLON simple_type_specifier_list
-
-
-########################################################################################################################
-#  A.4 EXPRESSIONS  #
-#################
-# ISO C++
-
-primary_expression: literal
-                  | THIS
-                  | _LPAREN expression _RPAREN
-                  | id_expression
-                  | lambda_expression
-
-id_expression: unqualified_id
-             | qualified_id
-
-unqualified_id: IDENTIFIER
-              | operator_function_id
-              | conversion_function_id
-              | literal_operator_id
-              | BIT_NOT class_name
-              | BIT_NOT decltype_specifier
-              | template_id
-
-qualified_id: SCOPE? nested_name_specifier TEMPLATE? unqualified_id
-            | SCOPE IDENTIFIER
-            | SCOPE operator_function_id
-            | SCOPE literal_operator_id
-            | SCOPE template_id
-
-nested_name_specifier: type_name SCOPE
-                     | namespace_name SCOPE
-                     | decltype_specifier SCOPE
-                     | nested_name_specifier IDENTIFIER SCOPE
-                     | nested_name_specifier TEMPLATE? simple_template_id SCOPE
-
-lambda_expression: lambda_introducer lambda_declarator? compound_statement
-
-lambda_introducer: _LBRACKET lambda_capture? _RBRACKET
-
-lambda_capture: capture_default
-              | capture_list
-              | capture_default _COMMA capture_list
-
-capture_default: BIT_AND
-               | EQUAL
-
-capture_list: capture ELLIPSIS?
-            | capture_list _COMMA capture ELLIPSIS?
-
-capture: IDENTIFIER
-       | BIT_AND IDENTIFIER
-       | THIS
-
-lambda_declarator: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? MUTABLE?
-                  exception_specification? trailing_return_type?
-
-postfix_expression: primary_expression
-                  | postfix_expression _LBRACKET expression _RBRACKET
-                  | postfix_expression _LBRACKET braced_init_list _RBRACKET
-                  | postfix_expression _LPAREN expression_list? _RPAREN
-                  | simple_type_specifier _LPAREN expression_list? _RPAREN
-                  | typename_specifier _LPAREN expression_list? _RPAREN
-                  | simple_type_specifier braced_init_list
-                  | typename_specifier braced_init_list
-                  | postfix_expression DOT TEMPLATE? id_expression
-                  | postfix_expression ARROW TEMPLATE? id_expression
-                  | postfix_expression DOT pseudo_destructor_name
-                  | postfix_expression ARROW pseudo_destructor_name
-                  | postfix_expression INCREMENT
-                  | postfix_expression DECREMENT
-                  | DYNAMIC_CAST LT type_id GT _LPAREN expression _RPAREN
-                  | STATIC_CAST LT type_id GT _LPAREN expression _RPAREN
-                  | REINTERPRET_CAST LT type_id GT _LPAREN expression _RPAREN
-                  | CONST_CAST LT type_id GT _LPAREN expression _RPAREN
-                  | TYPEID _LPAREN expression _RPAREN
-                  | TYPEID _LPAREN type_id _RPAREN
-
-expression_list: initializer_list
-
-pseudo_destructor_name: SCOPE? nested_name_specifier? type_name SCOPE BIT_NOT type_name
-                      | SCOPE? nested_name_specifier TEMPLATE simple_template_id SCOPE BIT_NOT type_name
-                      | SCOPE? nested_name_specifier? BIT_NOT type_name
-                      | BIT_NOT decltype_specifier
-
-unary_expression: postfix_expression
-                | INCREMENT cast_expression
-                | DECREMENT cast_expression
-                | unary_operator cast_expression
-                | SIZEOF unary_expression
-                | SIZEOF _LPAREN type_id _RPAREN
-                | SIZEOF ELLIPSIS _LPAREN IDENTIFIER _RPAREN
-                | ALIGNOF _LPAREN type_id _RPAREN
-                | noexcept_expression
-                | new_expression
-                | delete_expression
-
-unary_operator: STAR
-              | BIT_AND
-              | PLUS
-              | MINUS
-              | NOT
-              | BIT_NOT
-
-new_expression: SCOPE? NEW new_placement? new_type_id new_initializer?
-              | SCOPE? NEW new_placement? _LPAREN type_id _RPAREN new_initializer?
-
-new_placement: _LPAREN expression_list _RPAREN
-
-new_type_id: type_specifier_seq new_declarator?
-
-new_declarator: ptr_operator new_declarator?
-              | noptr_new_declarator
-
-noptr_new_declarator: _LBRACKET expression _RBRACKET attribute_specifier?
-                    | noptr_new_declarator _LBRACKET constant_expression _RBRACKET attribute_specifier?
-
-new_initializer: _LPAREN expression_list? _RPAREN
-               | braced_init_list
-
-delete_expression: SCOPE? DELETE cast_expression
-                 | SCOPE? DELETE _LBRACKET _RBRACKET cast_expression
-
-noexcept_expression: NOEXCEPT _LPAREN expression _RPAREN
-
-cast_expression: unary_expression
-               | _LPAREN type_id _RPAREN cast_expression
-
-pm_expression: cast_expression
-             | pm_expression DOT_STAR cast_expression
-             | pm_expression ARROW_STAR cast_expression
-
-multiplicative_expression: pm_expression
-                         | multiplicative_expression STAR pm_expression
-                         | multiplicative_expression SLASH pm_expression
-                         | multiplicative_expression PERCENT pm_expression
-
-additive_expression: multiplicative_expression
-                   | additive_expression PLUS multiplicative_expression
-                   | additive_expression MINUS multiplicative_expression
-
-shift_expression: additive_expression
-                | shift_expression SHL additive_expression
-                | shift_expression SHR additive_expression
-
-relational_expression: shift_expression
-                     | relational_expression LT shift_expression
-                     | relational_expression GT shift_expression
-                     | relational_expression LE shift_expression
-                     | relational_expression GE shift_expression
-
-equality_expression: relational_expression
-                   | equality_expression EQ relational_expression
-                   | equality_expression NEQ relational_expression
-
-and_expression: equality_expression
-              | and_expression BIT_AND equality_expression
-
-exclusive_or_expression: and_expression
-                       | exclusive_or_expression BIT_XOR and_expression
-
-inclusive_or_expression: exclusive_or_expression
-                       | inclusive_or_expression BIT_OR exclusive_or_expression
-
-logical_and_expression: inclusive_or_expression
-                      | logical_and_expression AND inclusive_or_expression
-
-logical_or_expression: logical_and_expression
-                     | logical_or_expression OR logical_and_expression
-
-conditional_expression: logical_or_expression
-                      | logical_or_expression TERNARY expression COLON assignment_expression
-
-assignment_expression: conditional_expression
-                     | logical_or_expression assignment_operator initializer_clause
-                     | throw_expression
-
-assignment_operator: EQUAL
-                   | STAR_EQUAL
-                   | SLASH_EQUAL
-                   | PERCENT_EQUAL
-                   | PLUS_EQUAL
-                   | MINUS_EQUAL
-                   | SHR_EQUAL
-                   | SHL_EQUAL
-                   | BIT_AND_EQUAL
-                   | BIT_XOR_EQUAL
-                   | BIT_OR_EQUAL
-
-expression: assignment_expression
-          | expression _COMMA assignment_expression
-
-constant_expression: conditional_expression
-
-
-########################################################################################################################
-# Non-ISO C++
-
-## Used For Array Sizes
-#constant_expression: conditional_expression
-#
-#######################
-##  PRECEDENCE ORDER  #  All the boolean/arithmetic precedence levels.
-#######################
-#
-## Lowest precedence (comma operator), left-associative
-#?expression: assignment_expression (_COMMA assignment_expression)*
-#
-## Assignment: right-associative; allow any unary lhs (covers *p = x, a[i] = x, ++x = y is still rejected later)
-#assignment_expression: conditional_expression
-#                     | unary assign_op assignment_expression
-#
-## Ternary sits between assignment and ||; middle uses full expression, right side is conditional_expression
-#conditional_expression: logic_or ( TERNARY expression COLON conditional_expression )?
-#
-## || down to unary — same as you had, but now fed by conditional_expression above
-#logic_or: logic_or OR logic_and
-#        | logic_and
-#
-#logic_and: logic_and AND equality
-#         | equality
-#
-#equality: equality (EQ | NEQ) relational
-#        | relational
-#
-#relational: relational (LT | GT | LE | GE) sum
-#          | sum
-#
-#sum: sum (PLUS | MINUS) product
-#   | product
-#
-#product: product (STAR | SLASH | PERCENT) unary
-#       | unary
-#
-#unary: (INCREMENT | DECREMENT | PLUS | MINUS | NOT | BIT_NOT | STAR | BIT_AND) unary
-#     | postfix
-#
-## Open-ended chaining of calls, indexing, member access, ++/--
-#postfix: primary post_op*
-#
-#primary: IDENTIFIER
-#       | literal
-#       | _LPAREN expression _RPAREN
-#
-#post_op: _LPAREN argument_list? _RPAREN  -> function_call
-#       | _LBRACKET expression _RBRACKET  -> array_access
-#       | _DOT IDENTIFIER                 -> member_access
-#       | ARROW IDENTIFIER                -> ptr_to_member_access
-#       | INCREMENT                       -> increment
-#       | DECREMENT                       -> decrement
-#
-#argument_list: expression ( _COMMA expression )*
-#
-#literal: INT_LITERAL
-#       | FLOAT_LITERAL
-#       | CHAR_LITERAL
-#       | STRING_LITERAL
-#       | BOOL_LITERAL
-#       | NULLPTR
-#
-############################################
-## Helper for all the assignment operators
-#assign_op: EQUAL
-#         | PLUS_EQUAL
-#         | MINUS_EQUAL
-#         | STAR_EQUAL
-#         | SLASH_EQUAL
-#         | PERCENT_EQUAL
-#         | SHL_EQUAL
-#         | SHR_EQUAL
-#         | BIT_AND_EQUAL
-#         | BIT_OR_EQUAL
-#         | BIT_XOR_EQUAL
-
-
-
-########################################################################################################################
-#  A.5  STATEMENTS  #
-#####################
-
-statement: labeled_statement
-         | attribute_specifier? expression_statement
-         | attribute_specifier? compound_statement
-         | attribute_specifier? selection_statement
-         | attribute_specifier? iteration_statement
-         | attribute_specifier? jump_statement
-         | declaration_statement
-         | attribute_specifier? try_block
-
-labeled_statement: attribute_specifier? IDENTIFIER COLON statement
-                 | attribute_specifier? CASE constant_expression COLON statement
-                 | attribute_specifier? DEFAULT COLON statement
-
-expression_statement: expression? _SEMICOLON
-
-compound_statement: _LBRACE statement_seq? _RBRACE
-
-statement_seq: statement
-             | statement_seq statement
-
-selection_statement: IF _LPAREN condition _RPAREN statement
-                   | IF _LPAREN condition _RPAREN statement ELSE statement
-                   | SWITCH _LPAREN condition _RPAREN statement
-
-condition: expression
-         | attribute_specifier? type_specifier_seq declarator EQUAL initializer_clause
-         | attribute_specifier? type_specifier_seq declarator braced_init_list
-
-iteration_statement: WHILE _LPAREN condition _RPAREN statement
-                   | DO statement WHILE _LPAREN expression _RPAREN _SEMICOLON
-                   | FOR _LPAREN for_init_statement condition? _SEMICOLON expression? _RPAREN statement
-                   | FOR _LPAREN for_range_declaration COLON expression _RPAREN statement
-
-for_init_statement: expression_statement
-                  | simple_declaration
-
-for_range_declaration: attribute_specifier? type_specifier_seq declarator
-
-jump_statement: BREAK _SEMICOLON
-              | CONTINUE _SEMICOLON
-              | RETURN expression? _SEMICOLON
-              | RETURN braced_init_list _SEMICOLON
-              | GOTO IDENTIFIER _SEMICOLON
-
-declaration_statement: block_declaration
-
-
-########################################################################################################################
-# NON-ISO C++
-
-#?statement: jump_statement
-#          | selection_statement
-#          | iteration_statement
-#          | expression_statement
-#          | labeled_statement
-#          | compound_statement
-#          | declaration
-#
-#compound_statement: _LBRACE statement* _RBRACE
-#
-#expression_statement: expression? _SEMICOLON
-#
-#
-#selection_statement: if_statement
-#                   | switch_statement
-#
-#if_statement: _IF _LPAREN expression _RPAREN statement
-#            | _IF _LPAREN expression _RPAREN statement ELSE statement
-#
-#switch_statement: SWITCH _LPAREN expression _RPAREN statement
-#
-#iteration_statement: FOR _LPAREN for_init? expression? _SEMICOLON expression? _RPAREN statement
-#                   | WHILE _LPAREN expression _RPAREN statement
-#                   | DO statement WHILE _LPAREN expression _RPAREN _SEMICOLON
-#
-#for_init: declaration
-#        | expression_statement
-#
-#?jump_statement: return_statement
-#               | break_statement
-#               | continue_statement
-#               | goto_statement
-#
-#return_statement: RETURN [expression] _SEMICOLON
-#break_statement: BREAK _SEMICOLON
-#continue_statement: CONTINUE _SEMICOLON
-#goto_statement: GOTO IDENTIFIER _SEMICOLON
-#
-#labeled_statement: IDENTIFIER COLON statement
-#                 | CASE constant_expression COLON statement
-#                 | DEFAULT COLON statement
-
-
-########################################################################################################################
-#  TERMINALS (TOKENS)  #
-########################
-
-############################
-#  IDENTIFIERS & LITERALS  #
-############################
-
-IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
-INT_LITERAL: /0|[1-9][0-9]*/
-FLOAT_LITERAL: /([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?/
-CHAR_LITERAL:   /'([^'\\]|\\.)'/
-STRING_LITERAL: /"(\\.|[^"\\])*"/
-BOOL_LITERAL:   "true" | "false"
-NULLPTR:        "nullptr"
-
-COMMENT_LINE: "//" /[^\n]*/
-COMMENT_BLOCK: "/*" /(.|\n)*?/ "*/"
-
-##############################
-#   KEYWORDS (CONTROL-FLOW)  #
-##############################
-_IF:         "if"
-ELSE:       "else"
-SWITCH:     "switch"
-CASE:       "case"
-DEFAULT:    "default"
-FOR:        "for"
-WHILE:      "while"
-DO:         "do"
-BREAK:      "break"
-CONTINUE:   "continue"
-RETURN:     "return"
-GOTO:       "goto"
-TRY:        "try"
-CATCH:      "catch"
-THROW:      "throw"
-
-######################
-#  KEYWORDS (TYPES)  #
-######################
-INT:        "int"
-FLOAT:      "float"
-DOUBLE:     "double"
-CHAR:       "char"
-WCHAR_T:    "wchar_t"
-CHAR16_T:   "char16_t"
-CHAR32_T:   "char32_t"
-VOID:       "void"
-BOOL:       "bool"
-AUTO:       "auto"
-SIGNED:     "signed"
-UNSIGNED:   "unsigned"
-SHORT:      "short"
-LONG:       "long"
-CONST:      "const"
-CONSTEXPR:  "constexpr"
-CONSTEVAL:  "consteval"
-VOLATILE:   "volatile"
-STATIC:     "static"
-EXTERN:     "extern"
-MUTABLE:    "mutable"
-REGISTER:   "register"
-RESTRICT:   "restrict"
-INLINE:     "inline"
-VIRTUAL:    "virtual"
-EXPLICIT:   "explicit"
-NOEXCEPT:   "noexcept"
-FINAL:      "final"
-OVERRIDE:   "override"
-THREAD_LOCAL: "thread local"
-TYPENAME:   "typename"
-NEW:        "new"
-
-#################################
-#    KEYWORDS (DECLARATIONS)    #
-#################################
-CLASS:      "class"
-STRUCT:     "struct"
-UNION:      "union"
-ENUM:       "enum"
-NAMESPACE:  "namespace"
-TEMPLATE:   "template"
-TYPEDEF:    "typedef"
-USING:      "using"
-FRIEND:     "friend"
-PUBLIC:     "public"
-PRIVATE:    "private"
-PROTECTED:  "protected"
-STATIC_ASSERT: "static_assert"
-ASM:        "asm"
-DELETE:     "delete"
-OPERATOR:   "operator"
-DECLTYPE:    "decltype"
-
-#################
-#   OPERATORS   #
-#################
-PLUS:       "+"
-MINUS:      "-"
-STAR:       "*"
-SLASH:      "/"
-PERCENT:    "%"
-EQUAL:      "="
-ELLIPSIS:    "..."
-PLUS_EQUAL:    "+="
-MINUS_EQUAL:   "-="
-STAR_EQUAL:    "*="
-SLASH_EQUAL:   "/="
-PERCENT_EQUAL: "%="
-SHL_EQUAL: "<<="
-SHR_EQUAL: ">>="
-BIT_AND_EQUAL: "&="
-BIT_OR_EQUAL: "|="
-BIT_XOR_EQUAL: "^="
-
-
-LT:         "<"
-GT:         ">"
-LE:         "<="
-GE:         ">="
-EQ:         "=="
-NEQ:        "!="
-
-AND:        "&&"
-OR:         "||"
-NOT:        "!"
-BIT_AND:    "&"
-BIT_OR:     "|"
-BIT_NOT:    "~"
-BIT_XOR:    "^"
-SHL:        "<<"
-SHR:        ">>"
-
-INCREMENT:  "++"
-DECREMENT:  "--"
-ARROW:      "->"
-ARROW_STAR: "->*"
-TERNARY:    "?"
-SCOPE:      "::"
-COLON:      ":"
-
-##################
-#   PUNCTUATION  #
-##################
-_LPAREN:     "("
-_RPAREN:     ")"
-_LBRACE:     "{"
-_RBRACE:     "}"
-_LBRACKET:   "["
-_RBRACKET:   "]"
-_SEMICOLON:  ";"
-_COMMA:      ","
-_DOT:        "."
-
-###################
-#  MISCELLANEOUS  #
-###################
-HASH:            "#"
-INCLUDE:         "include"
-DEFINE:          "define"
 
 ########################################################################################################################
 #  RULESET  #
