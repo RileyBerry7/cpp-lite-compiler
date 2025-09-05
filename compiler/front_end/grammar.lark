@@ -608,10 +608,10 @@ linkage_specification: EXTERN STRING_LITERAL _LBRACE declaration_seq? _RBRACE
 #  NAMESPACE DEFINITION  #
 ##########################
 namespace_definition: named_namespace_definition
-  | unnamed_namespace_definition
+                    | unnamed_namespace_definition
 
 named_namespace_definition: original_namespace_definition
-  | extension_namespace_definition
+                          | extension_namespace_definition
 
 extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
 
@@ -636,12 +636,12 @@ attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
 
 attribute: attribute_token attribute_argument_clause?
 
-attribute_token: IDENTIFIER
-  | attribute_scoped_token
+?attribute_token: IDENTIFIER
+               | attribute_scoped_token
 
-attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
+?attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
 
-attribute_namespace: IDENTIFIER
+?attribute_namespace: IDENTIFIER
 
 attribute_argument_clause: _LPAREN balanced_token_seq _RPAREN
 
@@ -692,12 +692,12 @@ using_declaration: USING type_name? SCOPE? nested_name_specifier unqualified_id 
 using_directive: attribute_specifier? USING NAMESPACE SCOPE? namespace_name _SEMICOLON
 # uncomment once nested_name_specifier is non-ambiguous
 
-namespace_name: original_namespace_name
-              | namespace_alias
+?namespace_name: original_namespace_name
+               | namespace_alias
 
-original_namespace_name: IDENTIFIER
+?original_namespace_name: IDENTIFIER
 
-namespace_alias: IDENTIFIER
+?namespace_alias: IDENTIFIER
 
 ######################
 # ALIAS DECLARATION  # -> It's a more powerful version of typedef that can alias templates.
@@ -727,9 +727,9 @@ enumerator_list: enumerator_definition
 enumerator_definition: enumerator
                      | enumerator EQUAL constant_expression
 
-enumerator: IDENTIFIER
+?enumerator: IDENTIFIER
 
-enum_name: IDENTIFIER
+?enum_name: IDENTIFIER
 
 # ENUM as a TYPE SPECIFIER:
 enum_specifier: enum_head _LBRACE enumerator_list? _RBRACE
@@ -784,7 +784,7 @@ function_specifier: INLINE
                   | VIRTUAL
                   | EXPLICIT
 
-typedef_name: IDENTIFIER
+?typedef_name: IDENTIFIER
 
 type_specifier: trailing_type_specifier
               | class_specifier
@@ -819,7 +819,7 @@ simple_type_specifier: SCOPE? nested_name_specifier? type_name
                      | AUTO
                      | decltype_specifier
 
-type_name: class_name
+?type_name: class_name
          | enum_name
          | typedef_name
 
@@ -837,7 +837,7 @@ elaborated_type_specifier: class_key attribute_specifier? SCOPE? nested_name_spe
 #####################
 
 init_declarator_list: init_declarator
-  | init_declarator_list _COMMA init_declarator
+                    | init_declarator_list _COMMA init_declarator
 
 init_declarator: declarator initializer?
 
@@ -918,7 +918,7 @@ braced_init_list: _LBRACE initializer_list _COMMA? _RBRACE
 #  A.8 CLASSES  #
 #################
 
-class_name: IDENTIFIER
+?class_name: IDENTIFIER
           | simple_template_id
 
 class_specifier: class_head _LBRACE member_specification? _RBRACE
@@ -1016,7 +1016,6 @@ template_parameter_list: template_parameter (_COMMA template_parameter)*
 
 template_parameter: type_parameter
                   | parameter_declaration
-# uncomment once decl_specifier_seq is finished
 
 type_parameter: CLASS ELLIPSIS? IDENTIFIER?
               | CLASS IDENTIFIER? EQUAL type_id
@@ -1031,7 +1030,7 @@ template_id: simple_template_id
 #           | operator_function_id LT template_argument_list? GT
 #           | literal_operator_id LT template_argument_list? GT
 
-template_name: IDENTIFIER
+?template_name: IDENTIFIER
 
 template_argument_list: template_argument ELLIPSIS?
                       | template_argument_list _COMMA template_argument ELLIPSIS?
