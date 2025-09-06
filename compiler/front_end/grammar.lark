@@ -872,13 +872,14 @@ ptr_operator: STAR attribute_specifier? cv_qualifier_seq?
             | AND attribute_specifier?
             | SCOPE? nested_name_specifier STAR attribute_specifier? cv_qualifier_seq?
 
-cv_qualifier_seq: cv_qualifier cv_qualifier_seq?
+# ISO: cv_qualifier_seq: cv_qualifier cv_qualifier_seq?
+cv_qualifier_seq: cv_qualifier+ # <- Right-Recursion Eliminated
 
 cv_qualifier: CONST
             | VOLATILE
 
 ref_qualifier: BIT_AND # &
-             | AND # &&
+             | AND     # &&
 
 declarator_id: ELLIPSIS? id_expression
              | SCOPE? nested_name_specifier? ambiguous_identifier   # <- Pruned class_name
@@ -901,8 +902,9 @@ noptr_abstract_declarator: noptr_abstract_declarator? parameters_and_qualifiers
 parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
                             | parameter_declaration_list _COMMA ELLIPSIS
 
-parameter_declaration_list: parameter_declaration
-                          | parameter_declaration_list _COMMA parameter_declaration
+#ISO: parameter_declaration_list: parameter_declaration
+#                               | parameter_declaration_list _COMMA parameter_declaration
+parameter_declaration_list: parameter_declaration (_COMMA parameter_declaration)* # <- Right-Recursion Eliminated
 
 parameter_declaration: attribute_specifier? decl_specifier_seq declarator
                      | attribute_specifier? decl_specifier_seq declarator EQUAL assignment_expression
