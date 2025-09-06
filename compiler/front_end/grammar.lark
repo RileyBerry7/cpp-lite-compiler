@@ -892,13 +892,17 @@ declarator_id: ELLIPSIS? id_expression                  # => (ctor expects class
 
 type_id: type_specifier_seq abstract_declarator?
 
+# Nameless declarator
 abstract_declarator: ptr_abstract_declarator
                    | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type
                    | ELLIPSIS   // covers the "..." case
 
+
+# Binds prefix *, &, &&
 ptr_abstract_declarator: noptr_abstract_declarator
                        | ptr_operator ptr_abstract_declarator?
 
+# Binds suffix [], (), [][]
 noptr_abstract_declarator: noptr_abstract_declarator? parameters_and_qualifiers
                          | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
                          | _LPAREN ptr_abstract_declarator _RPAREN
