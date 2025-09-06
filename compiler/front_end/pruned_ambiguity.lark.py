@@ -19,6 +19,18 @@ unqualified_id: IDENTIFIER
               | BIT_NOT simple_template_id     # <- Lifted from class_name
 #ISO:         | BIT_NOT class_name
 
+#ISO: nested_name_specifier: type_name          SCOPE
+#                          | namespace_name     SCOPE
+#                          | decltype_specifier SCOPE
+#                          | nested_name_specifier IDENTIFIER SCOPE
+#                          | nested_name_specifier TEMPLATE? simple_template_id SCOPE
+
+nested_name_specifier: ambiguous_identifier SCOPE # <- Pruned type_name U namespace_name
+                     | simple_template_id   SCOPE # <- Lifted from type_name
+                     | decltype_specifier   SCOPE
+                     | nested_name_specifier IDENTIFIER SCOPE
+                     | nested_name_specifier TEMPLATE? simple_template_id SCOPE
+
 # A.6
 ##########################
 #  NAMESPACE DEFINITION  #
@@ -57,10 +69,8 @@ type_name: ambiguous_identifier # <- Collapsed ambiguity
          | simple_template_id   # <- Lifted from class_name
 
 # A.7
-declarator_id: ELLIPSIS? id_expression
-             | SCOPE? nested_name_specifier? ambiguous_identifier   # <- Pruned class_name
-             | SCOPE? nested_name_specifier? simple_template_id     # <- Lifted from class_name
-#ISO:        | SCOPE? nested_name_specifier? class_name             # -> Collapsed ambiguity
+declarator_id: ELLIPSIS? id_expression                  # - (ctor expects class_name)
+#ISO:        | SCOPE? nested_name_specifier? class_name # -> Collapsed into id_expression
 
 # A.8
 

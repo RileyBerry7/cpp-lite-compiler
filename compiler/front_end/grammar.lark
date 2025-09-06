@@ -314,7 +314,7 @@ primary_expression: literal
   | lambda_expression
 
 id_expression: unqualified_id
-  | qualified_id
+             | qualified_id
 
 unqualified_id: IDENTIFIER
               | operator_function_id
@@ -328,14 +328,20 @@ unqualified_id: IDENTIFIER
 
 
 qualified_id: SCOPE? nested_name_specifier TEMPLATE? unqualified_id
-            | SCOPE IDENTIFIER
-            | SCOPE operator_function_id
+            | SCOPE IDENTIFIER 
+            | SCOPE operator_function_id   
             | SCOPE literal_operator_id
             | SCOPE template_id
 
-nested_name_specifier: type_name SCOPE
-                     | namespace_name SCOPE
-                     | decltype_specifier SCOPE
+#ISO: nested_name_specifier: type_name          SCOPE
+#                          | namespace_name     SCOPE
+#                          | decltype_specifier SCOPE
+#                          | nested_name_specifier IDENTIFIER SCOPE
+#                          | nested_name_specifier TEMPLATE? simple_template_id SCOPE
+
+nested_name_specifier: ambiguous_identifier SCOPE # <- Pruned type_name U namespace_name
+                     | simple_template_id   SCOPE # <- Lifted from type_name
+                     | decltype_specifier   SCOPE
                      | nested_name_specifier IDENTIFIER SCOPE
                      | nested_name_specifier TEMPLATE? simple_template_id SCOPE
 
@@ -846,8 +852,9 @@ elaborated_type_specifier: class_key attribute_specifier? SCOPE? nested_name_spe
 #  A.7 DECLARATORS  #
 #####################
 
-init_declarator_list: init_declarator
-                    | init_declarator_list _COMMA init_declarator
+#ISO: init_declarator_list: init_declarator
+#                         | init_declarator_list _COMMA init_declarator
+init_declarator_list: init_declarator (_COMMA init_declarator)* # <- Right-Recursion Eliminated
 
 init_declarator: declarator initializer?
 
@@ -881,10 +888,8 @@ cv_qualifier: CONST
 ref_qualifier: BIT_AND # &
              | AND     # &&
 
-declarator_id: ELLIPSIS? id_expression
-             | SCOPE? nested_name_specifier? ambiguous_identifier   # <- Pruned class_name
-             | SCOPE? nested_name_specifier? simple_template_id     # <- Lifted from class_name
-#ISO:        | SCOPE? nested_name_specifier? class_name             # -> Collapsed ambiguity
+declarator_id: ELLIPSIS? id_expression                  # => (ctor expects class_name)
+#ISO:        | SCOPE? nested_name_specifier? class_name # -> Collapsed into id_expression
 
 type_id: type_specifier_seq abstract_declarator?
 
