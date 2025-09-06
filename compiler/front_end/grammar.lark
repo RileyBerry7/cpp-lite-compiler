@@ -843,8 +843,7 @@ decltype_specifier: DECLTYPE _LPAREN expression _RPAREN
 
 elaborated_type_specifier: class_key attribute_specifier? SCOPE? nested_name_specifier? IDENTIFIER
                          | class_key SCOPE? nested_name_specifier TEMPLATE? simple_template_id
-                         | ENUM SCOPE?
-                         | nested_name_specifier? IDENTIFIER
+                         | ENUM SCOPE? nested_name_specifier? IDENTIFIER
 
 
 
