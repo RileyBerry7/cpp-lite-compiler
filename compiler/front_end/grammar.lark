@@ -176,13 +176,15 @@ PERCENT_COLON_PERCENT_COLON: "%:%:"
 #  IDENTIFIERS & LITERALS  #
 ############################
 
-IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+
 INT_LITERAL: /0|[1-9][0-9]*/
 FLOAT_LITERAL: /([0-9]+\.[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?/
 CHAR_LITERAL:   /'([^'\\]|\\.)'/
 STRING_LITERAL: /"(\\.|[^"\\])*"/
 BOOL_LITERAL:   "true" | "false"
 NULLPTR:        "nullptr"
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+ambiguous_identifier: IDENTIFIER
 
 COMMENT_LINE: "//" /[^\n]*/
 COMMENT_BLOCK: "/*" /(.|\n)*?/ "*/"
@@ -315,42 +317,45 @@ id_expression: unqualified_id
   | qualified_id
 
 unqualified_id: IDENTIFIER
-  | operator_function_id
-  | conversion_function_id
-  | literal_operator_id
-  | BIT_NOT class_name
-  | BIT_NOT decltype_specifier
-  | template_id
+              | operator_function_id
+              | conversion_function_id
+              | literal_operator_id
+              | BIT_NOT decltype_specifier
+              | template_id
+              | BIT_NOT ambiguous_identifier   # <- Pruned class_name
+              | BIT_NOT simple_template_id     # <- Lifted from class_name
+#ISO:         | BIT_NOT class_name
+
 
 qualified_id: SCOPE? nested_name_specifier TEMPLATE? unqualified_id
-  | SCOPE IDENTIFIER
-  | SCOPE operator_function_id
-  | SCOPE literal_operator_id
-  | SCOPE template_id
+            | SCOPE IDENTIFIER
+            | SCOPE operator_function_id
+            | SCOPE literal_operator_id
+            | SCOPE template_id
 
 nested_name_specifier: type_name SCOPE
-  | namespace_name SCOPE
-  | decltype_specifier SCOPE
-  | nested_name_specifier IDENTIFIER SCOPE
-  | nested_name_specifier TEMPLATE? simple_template_id SCOPE
+                     | namespace_name SCOPE
+                     | decltype_specifier SCOPE
+                     | nested_name_specifier IDENTIFIER SCOPE
+                     | nested_name_specifier TEMPLATE? simple_template_id SCOPE
 
 lambda_expression: lambda_introducer lambda_declarator? compound_statement
 
 lambda_introducer: _LBRACKET lambda_capture? _RBRACKET
 
 lambda_capture: capture_default
-  | capture_list
-  | capture_default _COMMA capture_list
+              | capture_list
+              | capture_default _COMMA capture_list
 
 capture_default: BIT_AND
   | EQUAL
 
 capture_list: capture ELLIPSIS?
-  | capture_list _COMMA capture ELLIPSIS?
+            | capture_list _COMMA capture ELLIPSIS?
 
 capture: IDENTIFIER
-  | BIT_AND IDENTIFIER
-  | THIS
+       | BIT_AND IDENTIFIER
+       | THIS
 
 lambda_declarator: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? MUTABLE?
                  | exception_specification? trailing_return_type?
@@ -610,18 +615,20 @@ linkage_specification: EXTERN STRING_LITERAL _LBRACE declaration_seq? _RBRACE
 namespace_definition: named_namespace_definition
                     | unnamed_namespace_definition
 
-named_namespace_definition: original_namespace_definition
-                          | extension_namespace_definition
+#ISO: named_namespace_definition: original_namespace_definition  <- Collapsed ambiguity
+#                               | extension_namespace_definition <- Collapsed ambiguity
+named_namespace_definition: INLINE? NAMESPACE namespace_name _LBRACE namespace_body _RBRACE
+# |--> Lifted from extension 'ext_namespace_def' & 'original_namespace_def"
 
-extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
+#ISO: extension_namespace_definition: INLINE? NAMESPACE original_namespace_name _LBRACE namespace_body _RBRACE
 
-original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
+#ISO: original_namespace_definition: INLINE? NAMESPACE IDENTIFIER _LBRACE namespace_body _RBRACE
 
 unnamed_namespace_definition: INLINE? NAMESPACE _LBRACE namespace_body _RBRACE
 
-#qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
-qualified_namespace_specifier: SCOPE? namespace_name
-# uncomment when nested_name_specifier is non ambiguous
+qualified_namespace_specifier: SCOPE? nested_name_specifier? namespace_name
+#                      SCOPE + namespace_name = global
+# nested_namespace_specifier + namespace_name = qualified
 
 namespace_body: declaration_seq # declaration_seq?
 
@@ -636,20 +643,20 @@ attribute_list: attribute (_COMMA attribute)* ELLIPSIS?
 
 attribute: attribute_token attribute_argument_clause?
 
-?attribute_token: IDENTIFIER
+attribute_token: IDENTIFIER
                | attribute_scoped_token
 
-?attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
+attribute_scoped_token: attribute_namespace SCOPE IDENTIFIER
 
-?attribute_namespace: IDENTIFIER
+attribute_namespace: IDENTIFIER
 
 attribute_argument_clause: _LPAREN balanced_token_seq _RPAREN
 
 balanced_token_seq: balanced_token+
 
-balanced_token: _LPAREN   balanced_token_seq _RPAREN
-  | _LBRACKET balanced_token_seq _RBRACKET
-  | _LBRACE    balanced_token_seq _RBRACE
+balanced_token: _LPAREN   balanced_token_seq  _RPAREN
+              | _LBRACKET balanced_token_seq  _RBRACKET
+              | _LBRACE    balanced_token_seq _RBRACE
 #             | any token other than a parenthesis, a bracket, or a brace
 
 ########################
@@ -689,15 +696,16 @@ using_declaration: USING type_name? SCOPE? nested_name_specifier unqualified_id 
 #  USING DIRECTIVE  #
 #####################
 #using_directive: attribute_specifier? USING NAMESPACE SCOPE? nested_name_specifier? namespace_name _SEMICOLON
-using_directive: attribute_specifier? USING NAMESPACE SCOPE? namespace_name _SEMICOLON
+using_directive: attribute_specifier? USING NAMESPACE SCOPE? ambiguous_identifier _SEMICOLON
 # uncomment once nested_name_specifier is non-ambiguous
 
-?namespace_name: original_namespace_name
-               | namespace_alias
+#ISO: namespace_name: ambiguous_identifier <- Pruned into ambiguous_identifier
+#                   | namespace_alias
+namespace_name: ambiguous_identifier # <- Re-aliased into ambiguous_identifier
 
-?original_namespace_name: IDENTIFIER
+#ISO: original_namespace_name: IDENTIFIER <- Pruned into ambiguous_identifier
 
-?namespace_alias: IDENTIFIER
+#ISO: namespace_alias: IDENTIFIER <- Pruned into ambiguous_identifier
 
 ######################
 # ALIAS DECLARATION  # -> It's a more powerful version of typedef that can alias templates.
@@ -727,9 +735,9 @@ enumerator_list: enumerator_definition
 enumerator_definition: enumerator
                      | enumerator EQUAL constant_expression
 
-?enumerator: IDENTIFIER
+enumerator: IDENTIFIER
 
-?enum_name: IDENTIFIER
+#ISO: enum_name: IDENTIFIER <- Pruned into ambiguous_identifier
 
 # ENUM as a TYPE SPECIFIER:
 enum_specifier: enum_head _LBRACE enumerator_list? _RBRACE
@@ -784,7 +792,7 @@ function_specifier: INLINE
                   | VIRTUAL
                   | EXPLICIT
 
-?typedef_name: IDENTIFIER
+#ISO: typedef_name: IDENTIFIER <- Pruned into ambiguous_identifier
 
 type_specifier: trailing_type_specifier
               | class_specifier
@@ -819,9 +827,11 @@ simple_type_specifier: SCOPE? nested_name_specifier? type_name
                      | AUTO
                      | decltype_specifier
 
-?type_name: class_name
-         | enum_name
-         | typedef_name
+#ISO: type_name: class_name
+#          | enum_name
+#          | typedef_name
+type_name: ambiguous_identifier # <- Collapsed ambiguity
+         | simple_template_id   # <- Lifted from class_name
 
 decltype_specifier: DECLTYPE _LPAREN expression _RPAREN
 
@@ -871,7 +881,9 @@ ref_qualifier: BIT_AND # &
              | AND # &&
 
 declarator_id: ELLIPSIS? id_expression
-             | SCOPE? nested_name_specifier? class_name
+             | SCOPE? nested_name_specifier? ambiguous_identifier   # <- Pruned class_name
+             | SCOPE? nested_name_specifier? simple_template_id     # <- Lifted from class_name
+#ISO:        | SCOPE? nested_name_specifier? class_name             # -> Collapsed ambiguity
 
 type_id: type_specifier_seq abstract_declarator?
 
@@ -906,8 +918,8 @@ brace_or_equal_initializer: EQUAL initializer_clause
 initializer_clause: assignment_expression
                   | braced_init_list
 
-initializer_list: initializer_clause ELLIPSIS?
-                | initializer_list _COMMA initializer_clause ELLIPSIS?
+initializer_list: initializer_clause (_COMMA initializer_clause)* ELLIPSIS?
+
 
 braced_init_list: _LBRACE initializer_list _COMMA? _RBRACE
                 | _LBRACE _RBRACE
@@ -918,8 +930,8 @@ braced_init_list: _LBRACE initializer_list _COMMA? _RBRACE
 #  A.8 CLASSES  #
 #################
 
-?class_name: IDENTIFIER
-          | simple_template_id
+#ISO: class_name: IDENTIFIER          <- Pruned into ambiguous_identifier
+#               | simple_template_id  <- Factor out non-ambiguity
 
 class_specifier: class_head _LBRACE member_specification? _RBRACE
 
@@ -967,8 +979,11 @@ base_specifier: attribute_specifier? base_type_specifier
               | attribute_specifier? VIRTUAL access_specifier? base_type_specifier
               | attribute_specifier? access_specifier VIRTUAL? base_type_specifier
 
-class_or_decltype: SCOPE? nested_name_specifier? class_name
-                 | decltype_specifier
+class_or_decltype: decltype_specifier
+                 | SCOPE? nested_name_specifier? ambiguous_identifier   # <- Pruned class_name
+                 | SCOPE? nested_name_specifier? simple_template_id     # <- Lifted from class_name
+#ISO:            | SCOPE? nested_name_specifier? class_name             # -> Collapsed ambiguity
+
 
 base_type_specifier: class_or_decltype
 
