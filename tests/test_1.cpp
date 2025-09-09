@@ -28,3 +28,4 @@ int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], c
 //    foo;
     1 + 2 * 3 / 4 - 5 % 6;
 }
+(int*)42;

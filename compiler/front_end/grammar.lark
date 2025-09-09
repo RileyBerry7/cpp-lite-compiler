@@ -354,7 +354,7 @@ lambda_capture: capture_default
               | capture_default _COMMA capture_list
 
 capture_default: BIT_AND
-  | EQUAL
+               | EQUAL
 
 capture_list: capture ELLIPSIS?
             | capture_list _COMMA capture ELLIPSIS?
@@ -919,9 +919,13 @@ declarator_id: ELLIPSIS? id_expression                  # => (ctor expects class
 type_id: type_specifier_seq abstract_declarator?
 
 # Nameless declarator
-abstract_declarator: ptr_abstract_declarator
-                   | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type
-                   | ELLIPSIS   // covers the "..." case
+#ISO abstract_declarator: ptr_abstract_declarator                                                   # <- Redefined
+#                       | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type # <- Redefined
+#                       | ELLIPSIS                                                                  # => Non-ambiguous Branch
+abstract_declarator: declarator_prefix declarator_suffix            # <- Unambiguous 
+                   | parameters_and_qualifiers trailing_return_type # <- Unambiguous
+                   | declarator_prefix _LPAREN abstract_declarator _RPAREN declarator_suffix # <- Nested empty declarators 
+                   | ELLIPSIS # => Original
 
 
 # Binds prefix *, &, &&
