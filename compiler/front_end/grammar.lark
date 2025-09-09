@@ -857,16 +857,42 @@ init_declarator_list: init_declarator (_COMMA init_declarator)* # <- Right-Recur
 
 init_declarator: declarator initializer?
 
-declarator: ptr_declarator
-          | noptr_declarator parameters_and_qualifiers trailing_return_type
+#ISO: declarator: ptr_declarator # <- Fully Redefined
+#               | noptr_declarator parameters_and_qualifiers trailing_return_type
+declarator: declarator_prefix declarator_name declarator_suffix
+          | declarator_name parameters_and_qualifiers trailing_return_type
 
-ptr_declarator: noptr_declarator
-              | ptr_operator ptr_declarator
+########################################################################################################################
+# A.7.1 DISAMBIGUATION OF ISO 'DECLARATOR' #
+############################################
 
-noptr_declarator: declarator_id attribute_specifier?
-                | noptr_declarator parameters_and_qualifiers
-                | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
-                | _LPAREN ptr_declarator _RPAREN
+#################################################################################################
+# Cause   : Mutual recursion between ptr_declarator and noptr_declarator (ambiguous structure). #
+# Solution: Collapse/redefine into explicit prefix and suffix sequences to remove recursion.    #
+#################################################################################################
+# START - Original Grammar; (Non-ISO)
+
+declarator_prefix: ptr_operator*
+
+declarator_name: declarator_id attribute_specifier?
+               | _LPAREN declarator _RPAREN # handles nested (identifier)
+
+declarator_suffix: suffix*
+
+suffix: parameters_and_qualifiers                                      # function suffix
+      | _LBRACKET constant_expression? _RBRACKET attribute_specifier? # array suffix
+
+# END - Original Grammar; (Non-ISO)
+#################################################################################################
+
+
+#ISO: ptr_declarator: noptr_declarator            # <- Mutual recursion (heavily ambiguous)
+#                   | ptr_operator ptr_declarator #
+
+#ISO: noptr_declarator: declarator_id attribute_specifier?
+#                     | noptr_declarator parameters_and_qualifiers
+#                     | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
+#                     | _LPAREN ptr_declarator _RPAREN
 
 parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq?
                          | ref_qualifier? exception_specification?
