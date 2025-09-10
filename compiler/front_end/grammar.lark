@@ -502,8 +502,9 @@ assignment_operator: EQUAL        | STAR_EQUAL
                    | BIT_OR_EQUAL | BIT_XOR_EQUAL
                    | BIT_AND_EQUAL
 
-expression: assignment_expression
-          | expression _COMMA assignment_expression
+#ISO: expression: assignment_expression
+#               | expression _COMMA assignment_expression
+expression: assignment_expression (_COMMA assignment_expression)* # <- Left-Recursion Eliminated
 
 constant_expression: conditional_expression
 

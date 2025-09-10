@@ -390,8 +390,7 @@ class CSTtoAST(Transformer):
     # # Expression Precedence Abstraction
     # def primary(self, children):
     #     if children and len(children) == 1:
-    #         if isinstance(children[0],
-    #                       compiler.front_end.abstract_nodes.ast_node.ASTNode) and children[0].name == "literal":
+    #         if isinstance(children[0], ASTNode) and children[0].name == "literal":
     #             literal_type  = token_to_literal_kind(children[0].children[0].children[0].name)
     #             literal_value =  lexeme_to_number(children[0].children[0].name)
     #             return abstract_nodes.LiteralExpr(literal_type, literal_value)
@@ -402,17 +401,19 @@ class CSTtoAST(Transformer):
     #         # else:
     #         #     return ASTNode("primary", children)
     #
-    # def unary(self, children):
-    #     # Remove Redundant Precedence
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
+    def unary_expression(self, children):
+        # Remove Redundant Precedence
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("unary_expression", children)
     #         return abstract_nodes.UnaryExpr(children[0], children[1].name)
-    #
-    # def postfix(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
+
+    def postfix_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("postfix_expression", children)
     #         return compiler.front_end.abstract_nodes.ast_node.ASTNode("postfix", children)
     #
     # def product(self, children):
@@ -451,19 +452,85 @@ class CSTtoAST(Transformer):
     #         return children[0]
     #     else:
     #         return abstract_nodes.LogicExpr(children[0], children[2], children[1].name)
-    #
-    # def conditional_expression(self, children):
-    #     if children and len(children) == 1:
+
+
+
+
+
+    # def cast_expression(self, children):
+    #     if len(children) == 1:
     #         return children[0]
     #     else:
-    #         return compiler.front_end.abstract_nodes.ast_node.ASTNode("conditional_expression", children)
-    #
-    # def assignment_expression(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.AssignExpr(children[0], children[2], children[1].name)
-    #
+    #         return self
+    def pm_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("pm_expression", children)
+    def multiplicative_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("multiplicative_expression", children)
+    def additive_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("additive_expression", children)
+    def shift_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("shift_expression", children)
+    def relational_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("relational_expression", children)
+    def equality_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("equality_expression", children)
+    def and_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("and_expression", children)
+    def exclusive_or_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("exclusive_or_expression", children)
+    def inclusive_or_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("inclusive_or_expression", children)
+    def logical_and_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("logical_and_expression", children)
+    def logical_or_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("logical_or_expression", children)
+    def conditional_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("conditional_expression", children)
+            # return compiler.front_end.abstract_nodes.ast_node.ASTNode("conditional_expression", children)
+
+    def assignment_expression(self, children):
+        if children and len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("assignment_expression", children)
+            # return abstract_nodes.AssignExpr(children[0], children[2], children[1].name)
+
     #
     # ####################################################################################################################
     # # STATEMENTS

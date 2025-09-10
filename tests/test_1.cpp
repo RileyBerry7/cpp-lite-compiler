@@ -29,5 +29,5 @@ int * const * main()
     foo + 1;
     foo;
     1 + 2 * 3 / 4 - 5 % 6;
+    (int*)42;
 }
-//(int*)42;
