@@ -16,16 +16,18 @@
 //using myType = int; // alias_declaration       <- block_declaration
 //enum colors;        // opaque_enum_declaration <- block_declaration
 
-int * const * main(int ** A::B::C::* const * const volatile * &param1[10][20], char(cast_var), float SCOPE :: * param2)
+int * const * main()
 {
-//    if (1 < 2 + 1 - 1 / 1)
-//    {
-//
-//    }
+    int *var1[];
+    int ** A::B::C::* const * const volatile * &var1[10][20];
+    char(var2); //static_cast
+    (char)cast_var; // C style cast
+    A::B::myType var3;
+//  if (1 < 2 + 1 - 1 / 1){}
     return 0;
 
-//    foo + 1;
-//    foo;
+    foo + 1;
+    foo;
     1 + 2 * 3 / 4 - 5 % 6;
 }
-(int*)42;
+//(int*)42;

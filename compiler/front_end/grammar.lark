@@ -308,10 +308,14 @@ ud_suffix: IDENTIFIER
 # ISO C++
 
 primary_expression: literal
-  | THIS
-  | _LPAREN expression _RPAREN
-  | id_expression
-  | lambda_expression
+                  | THIS
+                  | id_expression
+                  | lambda_expression
+                  | ambiguous_cast             # <- Disambiguation Wrapper
+#ISO:             | _LPAREN expression _RPAREN # <- Collapsed into cast_expression
+
+# Original Rule (Non-ISO):
+ambiguous_cast: cast_expression # <- Ambiguity Collapsed within wrapper
 
 id_expression: unqualified_id
              | qualified_id
@@ -420,11 +424,16 @@ new_placement: _LPAREN expression_list _RPAREN
 
 new_type_id: type_specifier_seq new_declarator?
 
-new_declarator: ptr_operator new_declarator?
-              | noptr_new_declarator
+#ISO: new_declarator: ptr_operator new_declarator?
+#                   | noptr_new_declarator
+new_declarator: declarator_prefix new_declarator_suffix
 
-noptr_new_declarator: _LBRACKET expression _RBRACKET attribute_specifier?
-                    | noptr_new_declarator _LBRACKET constant_expression _RBRACKET attribute_specifier?
+# Original Rule (Non-ISO):
+new_declarator_suffix: _LBRACKET expression          _RBRACKET # dynamic bound
+                     | _LBRACKET constant_expression _RBRACKET # static bound
+
+#ISO: noptr_new_declarator: _LBRACKET expression _RBRACKET attribute_specifier?
+#                         | noptr_new_declarator _LBRACKET constant_expression _RBRACKET attribute_specifier?
 
 new_initializer: _LPAREN expression_list? _RPAREN
                | braced_init_list
@@ -800,7 +809,7 @@ function_specifier: INLINE
 
 #ISO: typedef_name: IDENTIFIER <- Pruned into ambiguous_identifier
 
-type_specifier: trailing_type_specifier
+type_specifier: trailing_type_specifier # also wraps simple_type_specifier
               | class_specifier
               | enum_specifier
 
@@ -1085,7 +1094,7 @@ template_id: simple_template_id
 #           | operator_function_id LT template_argument_list? GT
 #           | literal_operator_id LT template_argument_list? GT
 
-?template_name: IDENTIFIER
+template_name: IDENTIFIER
 
 template_argument_list: template_argument ELLIPSIS?
                       | template_argument_list _COMMA template_argument ELLIPSIS?
