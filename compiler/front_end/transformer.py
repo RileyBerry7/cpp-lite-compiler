@@ -49,6 +49,17 @@ class CSTtoAST(Transformer):
         ambig_node.ansi_color = colors.red.underline
         return ambig_node
 
+    ####################################################################################################################
+    def literal(self, children):
+
+        kind = get_kind(children[0].name)
+        value = children[0].children[0].name
+
+        return abstract_nodes.Literal(kind, value)
+
+
+    ####################################################################################################################
+
     # ####################################################################################################################
     # # TRANSLATION UNIT
     # def translation_unit(self, children):

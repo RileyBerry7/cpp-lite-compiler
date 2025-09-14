@@ -72,4 +72,17 @@ class LiteralKind(str, Enum):
     BOOL    = "BOOL"
     NULLPTR = "NULLPTR"
 
+def get_kind(raw_token: str):
+    if raw_token == "INT_LITERAL":
+        return LiteralKind.INT
+    elif  raw_token == "FLOAT_LITERAL":
+        return LiteralKind.FLOAT
+    elif  raw_token == "STRING_LITERAL":
+        return LiteralKind.STRING
+    elif  raw_token == "CHAR_LITERAL":
+        return LiteralKind.CHAR
+    elif  raw_token == "BOOL_LITERAL":
+        return LiteralKind.BOOL
+    elif  raw_token == "NULLPTR_LITERAL":
+        return LiteralKind.NULLPTR
 #############################################################################################################3##########
