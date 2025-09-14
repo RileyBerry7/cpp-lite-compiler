@@ -38,7 +38,7 @@ def main():
     ####################################################################################################################
     # Parse -> CST
     print("\033[32;51m[Parsing...]\n[Displaying CST]\033[0m")
-    # parser = Lark(grammar, start='start', parser='lalr', debug=True, strict=True)
+    # parser = Lark(grammar, start='start', parser='lalr', lexer='contextual', debug=True, strict=True)
     parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
     cst = parser.parse(code)
     print(cst.pretty())
