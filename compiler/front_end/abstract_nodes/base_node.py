@@ -415,3 +415,19 @@ class AccessSpecifier(ASTNode):
     def __init__(self, access_type:AccessType):
         super().__init__(node_name="access_specifier")
         self.type = access_type
+
+########################################################################################################################
+class Literal(ASTNode):
+    def __init__(self, kind: LiteralKind, value):
+        super().__init__(node_name=kind.lower()+"_literal")
+        self.literal_kind  = kind
+        self.literal_value = value
+
+
+########################################################################################################################
+
+
+
+########################################################################################################################
+
+

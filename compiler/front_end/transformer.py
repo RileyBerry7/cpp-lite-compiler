@@ -18,8 +18,16 @@ class CSTtoAST(Transformer):
     """
 
     def __default__(self, data, children, meta):
-        abstract_node = abstract_nodes.ast_node.ASTNode(data, children)
-        return abstract_node
+        # ambig_children = []
+        # for child in children:
+        #     if isinstance(child, ASTNode) and child.name != "Non-Ambiguity":
+        #         ambig_children.append(child)
+        #
+        # if ambig_children:
+        #     return ASTNode(data, ambig_children)
+        #
+        # return ASTNode("Non-Ambiguity", children)
+        return ASTNode(data, children)
 
     def __default_token__(self, token):
 
@@ -457,11 +465,11 @@ class CSTtoAST(Transformer):
 
 
 
-    # def cast_expression(self, children):
-    #     if len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return self
+    def cast_expression(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return ASTNode("cast_expression", children)
     def pm_expression(self, children):
         if len(children) == 1:
             return children[0]

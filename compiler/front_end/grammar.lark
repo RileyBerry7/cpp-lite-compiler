@@ -444,7 +444,8 @@ delete_expression: SCOPE? DELETE cast_expression
 noexcept_expression: NOEXCEPT _LPAREN expression _RPAREN
 
 cast_expression: unary_expression
-               | _LPAREN type_id _RPAREN cast_expression
+               | _LPAREN type_id _RPAREN cast_expression # C Style Cast   (int)var;
+                                                         # C++ Style Cast int(var); <- includes: static, constant, dynamic, reinterpret
 
 pm_expression: cast_expression
              | pm_expression DOT_STAR   cast_expression
