@@ -42,7 +42,7 @@ def main():
     # parser = Lark(grammar, start='start', parser='lalr', lexer='contextual', debug=True, strict=True)
     parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
     cst = parser.parse(code)
-    print(cst.pretty())
+    # print(cst.pretty())
 
     ####################################################################################################################
     # Transform -> AST

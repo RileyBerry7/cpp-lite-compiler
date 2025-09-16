@@ -63,6 +63,12 @@ class CSTtoAST(Transformer):
     def block_declaration(self, children):
         return children[0]
 
+    def declaration(self, children):
+        return children[0]
+
+    def declaration_seq(self, children):
+        return children[0]
+
     # ####################################################################################################################
     # # TRANSLATION UNIT
     # def translation_unit(self, children):
