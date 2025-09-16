@@ -68,6 +68,7 @@ class ASTtoDAST:
         # self.decorate()
 
     def decorate(self):
+        # pass_0 =
         pass_1 = SymbolCollector(self.root, self.context)
         pass_1.walk()
 

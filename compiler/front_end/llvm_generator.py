@@ -1,8 +1,16 @@
 # llvm_generator.py
 
-from llvmlite import ir
+from llvmlite import ir, binding as llvm
 from compiler.context import CompilerContext
 from compiler.front_end.abstract_nodes.ast_node import ASTNode
+
+# LLVM Setup
+llvm.initialize()
+llvm.initialize_native_target()
+llvm.initialize_native_asmprinter()
+
+# Target Machine Setup
+TARGET_MACHINE = llvm.Target.from_default_triple().create_target_machine()
 
 ########################################################################################################################
 class LLVMGenerator:
@@ -43,6 +51,8 @@ class LoweringPass(Decorator):
 
     # def translation_unit_post(self, node: ASTNode, children: list[ASTNode]):
 
+    def function_definition_pre(self, node: ASTNode, children: list[ASTNode]):
+        self.emit_function(node)
 
     ####################################################################################################################
     #  EMIT METHODS  #
@@ -52,7 +62,9 @@ class LoweringPass(Decorator):
         if self.module is not None:
             print("Error: more than one translation unit found.") # Error
         else:
-            self.module = ir.Module(name=curr_node.name)  # Create: IR Module
+            self.module             = ir.Module(name=curr_node.name)  # Create: IR Module
+            self.module.triple      = llvm.get_default_triple()
+            self.module.data_layout = str(TARGET_MACHINE.target_data)
 
     ####################################################################################################################
     def emit_function_type(self, func_def_node: ASTNode):
@@ -65,16 +77,16 @@ class LoweringPass(Decorator):
         arguments = (ir.DoubleType(), ir.DoubleType())
         is_variadic = False  # Can accept more more arguments than specified
         function_type = ir.FunctionType(return_type, arguments, is_variadic)
-        function_name = curr_node.decorations["main"]
+        function_name = curr_node = "function_name"
         function = ir.Function(self.module, function_type, function_name)
 
         # Allow Builder to 'Enter' New Block
         block = function.append_basic_block(name="entry")
         self.builder = ir.IRBuilder(block)  # update builder
 
-        # a, b = function.args                    # parameters_and_qualifiers
-        # result = builder.fadd(a, b, name="res") # emit_expression
-        # self.builder.ret(result)                # return_statement
+        a, b = function.args                         # parameters_and_qualifiers
+        result = self.builder.fadd(a, b, name="res") # emit_expression
+        self.builder.ret(result)                     # return_statement
 ########################################################################################################################
 
 
