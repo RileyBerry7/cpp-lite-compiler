@@ -1,6 +1,8 @@
 # transformer.py
 import lark
 from lark import Transformer
+
+from compiler.context import CompilerContext
 from compiler.front_end import abstract_nodes
 from compiler.front_end.abstract_nodes import ASTNode
 
@@ -16,6 +18,10 @@ class CSTtoAST(Transformer):
     """
     A Transformer that converts a CST to an AST.
     """
+    def disambiguate(self, ast_root: ASTNode, context: CompilerContext) -> ASTNode:
+        from compiler.front_end.disambiguator import Disambiguator
+        ambiguity_resolution_pass = Disambiguator(ast_root, context)
+        return ast_root
 
     def __default__(self, data, children, meta):
         # ambig_children = []
