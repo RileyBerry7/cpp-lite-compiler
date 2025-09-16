@@ -4,6 +4,7 @@ from lark import Lark
 from pathlib import Path
 from compiler.front_end.transformer import CSTtoAST
 from compiler.front_end.decorator import ASTtoDAST
+from compiler.front_end.llvm_generator import LLVMGenerator
 from compiler.context import CompilerContext
 
 ####################
@@ -64,6 +65,10 @@ def main():
     ####################################################################################################################
     # Generate -> LLVM IR
     print("\033[34;51m[Generating...]\n[Displaying LLVM IR]\033[0m")
+    ir_generator = LLVMGenerator(ast, context)
+    ir_generator.generate()
+    llvm_ir = ir_generator.module
+    print(llvm_ir)
 
 
 
