@@ -21,6 +21,7 @@ class CSTtoAST(Transformer):
     def disambiguate(self, ast_root: ASTNode, context: CompilerContext) -> ASTNode:
         from compiler.front_end.disambiguator import Disambiguator
         ambiguity_resolution_pass = Disambiguator(ast_root, context)
+        ambiguity_resolution_pass.walk()
         return ast_root
 
     def __default__(self, data, children, meta):
@@ -48,9 +49,6 @@ class CSTtoAST(Transformer):
             if isinstance(path, abstract_nodes.ASTNode):
                 path.ansi_color = colors.orange
                 branches.append(path)
-            else:
-                branches.append(abstract_nodes.ASTNode("Non-abstract Path"))
-                branches[-1].ansi_color = colors.red
         ambig_node = abstract_nodes.ASTNode("Ambiguity", branches)
         ambig_node.ansi_color = colors.red.underline
         return ambig_node

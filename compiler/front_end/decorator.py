@@ -25,15 +25,16 @@ class Decorator:
     def _dfs(self, node: ASTNode):
         """Traverse the AST with optional pre- or post-order mutation."""
 
-        # Debug Output
-        # print("Visiting: ", node.name)
-
         # Base Methods
         method = getattr(self, node.name, None)
 
         # Pre/Post Specific Methods
         pre_method = getattr(self, f"{node.name}_pre", None)
         post_method = getattr(self, f"{node.name}_post", None)
+
+        # Fall-back to 'Default' Method
+        if method is None and pre_method is None and post_method is None:
+            method = getattr(self, "__default__", None)
 
         # Pre-order
         if self.order in ("pre", "both"):
