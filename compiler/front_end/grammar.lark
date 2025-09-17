@@ -528,12 +528,14 @@ labeled_statement: attribute_specifier? IDENTIFIER COLON statement
                  | attribute_specifier? CASE constant_expression COLON statement
                  | attribute_specifier? DEFAULT COLON statement
 
-expression_statement: expression? _SEMICOLON
+#ISO: expression_statement: expression? _SEMICOLON
+expression_statement: expression _SEMICOLON # <- Collapsed Ambiguity into empty_declaration
 
 compound_statement: _LBRACE statement_seq? _RBRACE
 
-statement_seq: statement
-             | statement_seq statement
+#ISO: statement_seq: statement
+#                  | statement_seq statement
+statement_seq: statement+ # <- Eliminated Left-Recursion
 
 selection_statement: _IF _LPAREN condition _RPAREN statement
                    | _IF _LPAREN condition _RPAREN statement ELSE statement

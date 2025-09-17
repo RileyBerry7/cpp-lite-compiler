@@ -22,7 +22,7 @@ class Disambiguator(Decorator):
             if ambig_branch.name == "DeadBranch":
                 children.pop(index)
             if len(children) == 1:
-                print("Ambiguous Branch Resolved!!")
+                # print("Ambiguous Branch Resolved!!")
                 node.name = children[0].name
                 children[:] = children[0].children
                 node.ansi_color = colors.green.underline
