@@ -799,8 +799,10 @@ decl_specifier: storage_class_specifier
               | TYPEDEF
               | CONSTEXPR
 
-decl_specifier_seq: decl_specifier attribute_specifier?
-                  | decl_specifier decl_specifier_seq
+#ISO: decl_specifier_seq: decl_specifier attribute_specifier?
+#                       | decl_specifier decl_specifier_seq
+
+decl_specifier_seq: (decl_specifier attribute_specifier?)+ # <- Eliminated Right-Recursion
 
 storage_class_specifier: REGISTER
                        | STATIC
@@ -910,7 +912,7 @@ suffix: parameters_and_qualifiers                                     # function
 
 parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq?
                          | ref_qualifier? exception_specification? # <- Remove Nullability ε
-#ISO:                    | ref_qualifier? exception_specification?
+#ISO:                    | ref_qualifier? exception_specification? # Fixing this will cause a parser error
 
 trailing_return_type: ARROW trailing_type_specifier_seq abstract_declarator?
 

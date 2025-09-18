@@ -61,6 +61,9 @@ class CSTtoAST(Transformer):
 
         return abstract_nodes.Literal(kind, value)
 
+    ####################################################################################################################
+    def IDENTIFIER(self, children):
+        return abstract_nodes.Identifier(children[0])
 
     ####################################################################################################################
 

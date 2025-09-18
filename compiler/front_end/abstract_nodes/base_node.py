@@ -423,9 +423,19 @@ class Literal(ASTNode):
         self.literal_kind  = kind
         self.literal_value = value
 
+        # Pretty Printing
+        self.ansi_color = colors.grey
+
 
 ########################################################################################################################
+class Identifier(ASTNode):
+    def __init__(self, id_name: str):
+        super().__init__(node_name="identifier: " + id_name)
+        self.id_name = id_name
+        self.symbol_id: int | None = None
 
+        # Pretty Printing
+        self.ansi_color = colors.grey
 
 
 ########################################################################################################################
