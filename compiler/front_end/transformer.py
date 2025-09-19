@@ -24,21 +24,21 @@ class CSTtoAST(Transformer):
         ambiguity_resolution_pass.walk()
         return ast_root
 
+    ####################################################################################################################
     def __default__(self, data, children, meta):
-        # ambig_children = []
-        # for child in children:
-        #     if isinstance(child, ASTNode) and child.name != "Non-Ambiguity":
-        #         ambig_children.append(child)
-        #
-        # if ambig_children:
-        #     return ASTNode(data, ambig_children)
-        #
-        # return ASTNode("Non-Ambiguity", children)
         return ASTNode(data, children)
 
+    ####################################################################################################################
     def __default_token__(self, token):
-
-        return ASTNode(token.type, [ASTNode(token.value)])
+        from compiler.front_end.disambiguator import keywords, operators
+        if token.type == "IDENTIFIER":
+            return abstract_nodes.Identifier(token.value)
+        elif token.value in keywords:
+            return abstract_nodes.Keyword(token.value)
+        elif token.value in operators:
+            return abstract_nodes.Operator(token.value)
+        else:
+            return ASTNode(token.type, [ASTNode(token.value)])
 
     ####################################################################################################################
     # Ambiguous Nodes
@@ -55,15 +55,13 @@ class CSTtoAST(Transformer):
 
     ####################################################################################################################
     def literal(self, children):
-
         kind = get_kind(children[0].name)
         value = children[0].children[0].name
-
         return abstract_nodes.Literal(kind, value)
 
     ####################################################################################################################
-    def IDENTIFIER(self, children):
-        return abstract_nodes.Identifier(children[0])
+    # def IDENTIFIER(self, children):
+    #     return abstract_nodes.Identifier(children)
 
     ####################################################################################################################
 

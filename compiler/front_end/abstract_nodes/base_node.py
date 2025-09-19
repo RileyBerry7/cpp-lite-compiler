@@ -433,10 +433,21 @@ class Identifier(ASTNode):
         super().__init__(node_name="identifier: " + id_name)
         self.id_name = id_name
         self.symbol_id: int | None = None
-
-        # Pretty Printing
         self.ansi_color = colors.grey
 
+########################################################################################################################
+class Keyword(ASTNode):
+    def __init__(self, keyword: str):
+        super().__init__(node_name="keyword: " + keyword)
+        self.lexeme = keyword
+        self.ansi_color = colors.grey
+
+########################################################################################################################
+class Operator(ASTNode):
+    def __init__(self, lexeme: str):
+        super().__init__(node_name="operator: " + lexeme)
+        self.op_string = lexeme
+        self.ansi_color = colors.grey
 
 ########################################################################################################################
 

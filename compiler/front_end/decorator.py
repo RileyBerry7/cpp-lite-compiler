@@ -2,6 +2,7 @@
 
 from compiler.front_end.abstract_nodes.ast_node import *
 from compiler.context import CompilerContext
+import re
 
 ########################################################################################################################
 
@@ -25,12 +26,15 @@ class Decorator:
     def _dfs(self, node: ASTNode):
         """Traverse the AST with optional pre- or post-order mutation."""
 
+        # String Pre-processing
+        call_sign = re.split(r'[\s:]', node.name, 1)[0] # cuts off ws & ':'
+
         # Base Methods
-        method = getattr(self, node.name, None)
+        method = getattr(self, call_sign, None)
 
         # Pre/Post Specific Methods
-        pre_method = getattr(self, f"{node.name}_pre", None)
-        post_method = getattr(self, f"{node.name}_post", None)
+        pre_method = getattr(self, f"{call_sign}_pre", None)
+        post_method = getattr(self, f"{call_sign}_post", None)
 
         # Fall-back to 'Default' Method
         if method is None and pre_method is None and post_method is None:

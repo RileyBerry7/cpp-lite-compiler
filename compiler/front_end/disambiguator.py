@@ -1,11 +1,12 @@
 from compiler.front_end.abstract_nodes.ast_node import ASTNode
+from compiler.front_end import abstract_nodes
 from compiler.front_end.decorator import Decorator
 from compiler.utils.colors import colors
 
 class Disambiguator(Decorator):
 
-    def IDENTIFIER(self, node:ASTNode, children: list[ASTNode]):
-        if children[0].name in keywords:
+    def identifier(self, node:abstract_nodes.Identifier, children: list[ASTNode]):
+        if node.id_name in keywords or node.id_name in operators:
             node.name = "DeadBranch"
             node.ansi_color = colors.red
             children.clear()
@@ -46,13 +47,6 @@ keywords = {
     "using", "friend", "public", "private", "protected", "static_assert",
     "asm", "delete", "operator", "decltype", "this",
 
-    # Operators (string forms only, not tokens like PLUS)
-    "+", "-", "*", "/", "%", "=", "...", "+=", "-=", "*=", "/=", "%=",
-    "<<=", ">>=", "&=", "|=", "^=",
-    "<", ">", "<=", ">=", "==", "!=", "&&", "||", "!", "&", "|", "~", "^",
-    "<<", ">>", "++", "--", "->", "->*", ".*", "?", "::", ":", "new[]",
-    "delete[]", "()", "[]", "sizeof", "alignof",
-
     # Punctuation
     "(", ")", "{", "}", "[", "]", ";", ",", ".",
 
@@ -60,3 +54,13 @@ keywords = {
     "#", "include", "define", "##",
     "<:", ":>", "<%", "%>", "%:", "%:%:"
 }
+
+operators = {
+    # Operators (string forms only, not tokens like PLUS)
+    "+", "-", "*", "/", "%", "=", "...", "+=", "-=", "*=", "/=", "%=",
+    "<<=", ">>=", "&=", "|=", "^=",
+    "<", ">", "<=", ">=", "==", "!=", "&&", "||", "!", "&", "|", "~", "^",
+    "<<", ">>", "++", "--", "->", "->*", ".*", "?", "::", ":", "new[]",
+    "delete[]", "()", "[]", "sizeof", "alignof",
+}
+
