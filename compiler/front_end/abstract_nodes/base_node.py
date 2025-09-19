@@ -9,6 +9,8 @@ from compiler.utils.enum_types import *
 from compiler.utils.valid_sets import FundamentalTypes
 # ASTNode Type Template (Dynamic Typing)
 NodeT = TypeVar("NodeT", bound="ASTNode")
+MemberT = TypeVar("MemberT", bool, int, str, float)
+
 
 class Statement(ASTNode):
     def __init__(self, statement_type: str = "statement"):
@@ -451,4 +453,32 @@ class Operator(ASTNode):
 
 ########################################################################################################################
 
+class NormalizedType(ASTNode):
+    def __init__(self):
+        super().__init__(node_name="normalized_type: ")
+        self.core = None
+        self.cv   = None
+        self.ref  = None
+        self.ptrs = None
+        self.arrays = None
+        self.func = None
+        self.attrs = None
+########################################################################################################################
 
+class ListNode(ASTNode, Generic[MemberT]):
+    def __init__(self, list_name:str, members:list[MemberT] | None=None):
+        super().__init__(node_name=
+                         f"{list_name}_list: {', '.join(str(i) for i in members)}")
+
+        self.member_list = members or []  # List of members, may be empty
+        self.ansi_color = colors.purple
+        # self.init_children()
+
+    # def add_member(self, member:MemberT):
+    #     self.member_list.append(member) # Update Member_List
+    #     self.children.append(member)    # Update Children
+
+    # # Adds Members as Children for Pretty Printing
+    # def init_children(self):
+    #     for member in self.member_list:
+    #         self.children.append(member)

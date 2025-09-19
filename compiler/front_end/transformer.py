@@ -76,9 +76,9 @@ class CSTtoAST(Transformer):
 
     # ####################################################################################################################
     # type_specifier_seq:
-    def type_specifier_seq(self, children):
-        if len(children) == 1:
-            return children[0]
+    # def type_specifier_seq(self, children):
+    #     if len(children) == 1:
+    #         return children[0]
     # ####################################################################################################################
     # type_specifier:
 
