@@ -69,18 +69,18 @@ class VariableDeclaration(BoundDeclaration):
 class FunctionDeclaration(BoundDeclaration):
     def __init__(self, specs: DeclSpec, identifier: str):
         super().__init__(decl_specs=specs, identifier_name=identifier, decl_type="")
-        return_type
-        storage_class
-        name
-        parameters
-        body
+        # return_type
+        # storage_class
+        # name
+        # parameters
+        # body
 
 
 class NamespaceDeclaration(BoundDeclaration):
     def __init__(self, specs: DeclSpec, identifier: str):
         super().__init__(decl_specs=specs, identifier_name=identifier, decl_type="")
-        name
-        body  # list of declarations
+        # name
+        # body  # list of declarations
 
 
 

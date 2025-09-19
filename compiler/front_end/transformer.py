@@ -75,6 +75,20 @@ class CSTtoAST(Transformer):
         return children[0]
 
     # ####################################################################################################################
+    # type_specifier_seq:
+    def type_specifier_seq(self, children):
+        if len(children) == 1:
+            return children[0]
+    # ####################################################################################################################
+    # type_specifier:
+
+
+    # ####################################################################################################################
+    #type_id: type_specifier_seq abstract_declarator?
+    # def type_id(self, children):
+
+
+    # ####################################################################################################################
     # # TRANSLATION UNIT
     # def translation_unit(self, children):
     #     return abstract_nodes.TranslationUnit(children)

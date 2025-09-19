@@ -825,8 +825,9 @@ trailing_type_specifier: simple_type_specifier
                        | typename_specifier
                        | cv_qualifier
 
-type_specifier_seq: type_specifier attribute_specifier?
-                  | type_specifier type_specifier_seq
+#ISO: type_specifier_seq: type_specifier attribute_specifier?
+#                       | type_specifier type_specifier_seq
+type_specifier_seq: (type_specifier attribute_specifier?)+ # <- Eliminated Right-Recursion
 
 trailing_type_specifier_seq: trailing_type_specifier attribute_specifier?
                            | trailing_type_specifier trailing_type_specifier_seq
@@ -910,9 +911,8 @@ suffix: parameters_and_qualifiers                                     # function
 #                     | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
 #                     | _LPAREN ptr_declarator _RPAREN
 
-parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq?
-                         | ref_qualifier? exception_specification? # <- Remove Nullability ε
-#ISO:                    | ref_qualifier? exception_specification? # Fixing this will cause a parser error
+parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq? \
+                           ref_qualifier? exception_specification?
 
 trailing_return_type: ARROW trailing_type_specifier_seq abstract_declarator?
 
@@ -939,7 +939,7 @@ type_id: type_specifier_seq abstract_declarator?
 #ISO abstract_declarator: ptr_abstract_declarator                                                   # <- Redefined
 #                       | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type # <- Redefined
 #                       | ELLIPSIS                                                                  # => Non-ambiguous Branch
-abstract_declarator: declarator_prefix declarator_suffix            # <- Unambiguous 
+abstract_declarator: declarator_prefix declarator_suffix?            # <- Unambiguous 
                    | parameters_and_qualifiers trailing_return_type # <- Unambiguous
                    | declarator_prefix _LPAREN abstract_declarator _RPAREN declarator_suffix # <- Nested empty declarators 
                    | ELLIPSIS # => Original
