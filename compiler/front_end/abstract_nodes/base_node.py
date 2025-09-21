@@ -3,7 +3,7 @@ from compiler.front_end.abstract_nodes.ast_node import ASTNode
 from compiler.front_end.abstract_nodes.misc_nodes import *
 
 from compiler.utils.colors import colors
-from typing import Generic, TypeVar, Union
+from typing import Generic, TypeVar, Union, Self
 
 from compiler.utils.enum_types import *
 from compiler.utils.valid_sets import FundamentalTypes
@@ -455,30 +455,99 @@ class Operator(ASTNode):
 
 class NormalizedType(ASTNode):
     def __init__(self):
-        super().__init__(node_name="normalized_type: ")
-        self.core = None
-        self.cv   = None
-        self.ref  = None
-        self.ptrs = None
-        self.arrays = None
-        self.func = None
-        self.attrs = None
+        super().__init__(node_name="normalized_type")
+
+        self.core: TypeCore | None = None # everything else is wrapped around this
+
+        self.cv  : ListNode[str] | None = None
+        self.ref : ListNode[str] | None = None
+        self.ptrs: ListNode[str] | None = None
+
+        self.arrays  = None
+        self.func    = None
+        self.attrs   = None
+
+    def synthesize_from_child(self, child:Self):
+
+        # Extend Core
+        # if self.core and child.core:
+            # self.core.type_string.extend_list(child.core.type_string)
+
+        # Extend Modifiers Lists
+        if self.cv and child.cv:
+            self.cv.extend_list(child.cv)
+        if self.ref and child.ref:
+            self.ref.extend_list(child.ref)
+        if self.ptrs and child.ptrs:
+            self.ptrs.extend_list(child.ptrs)
+
+        # Extend Suffixes
+
+
 ########################################################################################################################
 
 class ListNode(ASTNode, Generic[MemberT]):
+    """ Generic list templated with any any built-in type. """
     def __init__(self, list_name:str, members:list[MemberT] | None=None):
         super().__init__(node_name=
                          f"{list_name}_list: {', '.join(str(i) for i in members)}")
 
         self.member_list = members or []  # List of members, may be empty
         self.ansi_color = colors.purple
-        # self.init_children()
 
-    # def add_member(self, member:MemberT):
-    #     self.member_list.append(member) # Update Member_List
-    #     self.children.append(member)    # Update Children
+    def add_member(self, new_member:MemberT):
+        self.member_list.append(new_member)
+    def extend_list(self, new_list:list[MemberT] | ListNode[MemberT]):
+        if isinstance(new_list, list):
+            self.member_list.extend(new_list)
+        elif isinstance(new_list, ListNode):
+            self.member_list.extend(new_list.member_list)
+########################################################################################################################
+# CORE
+class TypeCore(ASTNode):
+    """ Abstract base for NormalizedType cores. These are all abstracted derivations of type_specifier_seq. """
+    def __init__(self, node_name:str):
+        super().__init__(node_name=node_name)
+        pass
+########################################################################################################################
+# CORE_TYPES
 
-    # # Adds Members as Children for Pretty Printing
+# BuiltInType   # int;                  <- simple_type_specifier
+class BuiltInType(TypeCore):
+    def __init__(self,
+                 base_type:FundamentalTypes,
+                 size:int,
+                 signed:bool=True):
+
+        super().__init__(node_name="builtin_type")
+        self.base_type   = base_type    # str:  base_type name
+        self.size        = size         # int:  # of bits
+        self.signed      = signed       # Bool: can represent negatives
+
+        # Used for upwards synthesize
+        # self.type_string: ListNode[str] = ListNode[str]("type_string")
+
+        # Add Color for Pretty-Printing
+        self.ansi_color = colors.green
+
+    #     # Add Children for Pretty-Printing
+    #     self.init_children()
+    #
     # def init_children(self):
-    #     for member in self.member_list:
-    #         self.children.append(member)
+    #     self.children.append(ASTNode(colors.teal(self.type_name.name.lower())))
+    #     self.children.append(ASTNode(colors.teal(str(self.size))))
+    #     self.children.append(ASTNode(colors.teal("is signed" if self.signed
+    #                                              else "not signed")))
+    #
+
+
+
+# QualifiedID   # A::B foo;             <- qualified_id <- nested_name_specifier
+# TemplateID    # Box<int> Shape;       <- simple_template_id
+# DeclType      # decltype(x) y;        <- decltype_specifier
+# DeclTypeAuto  # decltype(auto) y = 3; <- decltype_specifier
+# Auto          # auto x = 5;           <- decltype_specifier
+# DependentName # typename T::iterator; <- typename_specifier
+
+# ElaboratedType
+#

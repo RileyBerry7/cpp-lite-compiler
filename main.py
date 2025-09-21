@@ -49,8 +49,8 @@ def main():
 
     print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
     transformer = CSTtoAST()
+    cst = transformer.disambiguate(cst)
     ast = transformer.transform(cst)
-    ast = transformer.disambiguate(ast, context)
     print(ast.pretty())
 
     ####################################################################################################################

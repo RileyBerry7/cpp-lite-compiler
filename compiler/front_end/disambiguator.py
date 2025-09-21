@@ -1,32 +1,39 @@
 from compiler.front_end.abstract_nodes.ast_node import ASTNode
 from compiler.front_end import abstract_nodes
 from compiler.front_end.decorator import Decorator
+from lark import Transformer, Token, Tree
 from compiler.utils.colors import colors
 
-class Disambiguator(Decorator):
+class Disambiguator(Transformer):
 
-    def identifier(self, node:abstract_nodes.Identifier, children: list[ASTNode]):
-        if node.id_name in keywords or node.id_name in operators:
-            node.name = "DeadBranch"
-            node.ansi_color = colors.red
-            children.clear()
+    def __default_token__(self, token: Token):
+        if token.type == "IDENTIFIER":
+            if token.value in keywords or token.value in operators:
+                dead_node = ASTNode("DeadBranch")
+                dead_node.ansi_color = colors.red
+                return dead_node
+        return token
 
-    def __default__(self, node:ASTNode, children: list[ASTNode]):
+    def __default__(self, data, children, meta):
+        # Dead Node Travels Up Branch
         for child in children:
-            if child.name == "DeadBranch":
-                node.name = "DeadBranch"
-                node.ansi_color = colors.red
-                children.clear()
+            if isinstance(child, ASTNode):
+                return child
+        return Tree(data, children)
 
-    def Ambiguity(self, node:ASTNode, children: list[ASTNode]):
-        for index, ambig_branch in enumerate(children):
-            if ambig_branch.name == "DeadBranch":
-                children.pop(index)
-            if len(children) == 1:
-                # print("Ambiguous Branch Resolved!!")
-                node.name = children[0].name
-                children[:] = children[0].children
-                node.ansi_color = colors.green.underline
+    def _ambig(self, children):
+        healthy = []
+        # Cut Dead Branches
+        for index, branch in enumerate(children):
+            if not isinstance(branch, ASTNode):
+                healthy.append(children[index])
+
+        # # Ambiguity Resolved
+        # if len(healthy) == 1:
+        #     return healthy[0]
+        # Ambiguity Remains
+        else:
+            return Tree("_ambig", healthy)
 
 keywords = {
     # Control-flow

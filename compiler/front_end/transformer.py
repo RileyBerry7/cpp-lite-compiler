@@ -18,12 +18,22 @@ class CSTtoAST(Transformer):
     """
     A Transformer that converts a CST to an AST.
     """
-    def disambiguate(self, ast_root: ASTNode, context: CompilerContext) -> ASTNode:
+    # PASS 1
+    def disambiguate(self, cst_root):
         from compiler.front_end.disambiguator import Disambiguator
-        ambiguity_resolution_pass = Disambiguator(ast_root, context)
-        ambiguity_resolution_pass.walk()
-        return ast_root
+        disambiguator = Disambiguator()
+        new_root = disambiguator.transform(cst_root)
+        return new_root
 
+    # PASS 3
+    # def secondary_transform(self, ast_root: ASTNode, context: CompilerContext) -> ASTNode:
+    #     from compiler.front_end.secondary_transform import SecondaryTransform
+    #     transformation_pass = SecondaryTransform(ast_root, context)
+    #     transformation_pass.walk()
+    #     return ast_root
+
+
+    # PASS 2
     ####################################################################################################################
     def __default__(self, data, children, meta):
         return ASTNode(data, children)
@@ -44,6 +54,14 @@ class CSTtoAST(Transformer):
     # Ambiguous Nodes
     def _ambig(self, possible_trees):
         from compiler.utils.colors import colors
+        if len(possible_trees) == 1:
+            true_branch = possible_trees[0]
+            if isinstance(true_branch, ASTNode):
+                true_branch.ansi_color = colors.green
+                return true_branch
+            else:
+                return abstract_nodes.Error("Ambiguity resolved into none.")
+
         branches = []
         for path in possible_trees:
             if isinstance(path, abstract_nodes.ASTNode):
@@ -58,10 +76,6 @@ class CSTtoAST(Transformer):
         kind = get_kind(children[0].name)
         value = children[0].children[0].name
         return abstract_nodes.Literal(kind, value)
-
-    ####################################################################################################################
-    # def IDENTIFIER(self, children):
-    #     return abstract_nodes.Identifier(children)
 
     ####################################################################################################################
 
@@ -79,9 +93,23 @@ class CSTtoAST(Transformer):
     # def type_specifier_seq(self, children):
     #     if len(children) == 1:
     #         return children[0]
-    # ####################################################################################################################
-    # type_specifier:
 
+
+    #####################################################################################################################
+    # trailing_type_specifier:
+    # def trailing_type_specifier(self, children):
+    #     for child in children:
+    #         if isinstance(child, abstract_nodes.Keyword):
+    #             return child
+    #     return ASTNode("trailing_type_specifier", children)
+    #
+    # #####################################################################################################################
+    # # # simple_type_specifier:
+    # def simple_type_specifier(self, children):
+    #     for child in children:
+    #         if isinstance(child, abstract_nodes.Keyword):
+    #             return child
+    #     return ASTNode("simple_type_specifier", children)
 
     # ####################################################################################################################
     #type_id: type_specifier_seq abstract_declarator?

@@ -1,9 +1,9 @@
 # resolve_simple_type.py
-from compiler.front_end.abstract_nodes import SimpleType, Error
+from compiler.front_end.abstract_nodes import BuiltInType, Error
 from compiler.utils.scalar_size import scalar_size
 from compiler.utils.valid_sets import *
 
-def resolve_simple_type(type_seq: list[str]) -> SimpleType | Error:
+def resolve_simple_type(type_seq: list[str]) -> BuiltInType | Error:
 
         # Compute Fundamental Type
         prev_type    = None
@@ -53,7 +53,7 @@ def resolve_simple_type(type_seq: list[str]) -> SimpleType | Error:
             size = scalar_size(modifiers, base_type, "LLP64")
 
             # Construct / Return Simple Type Node
-            return SimpleType(base_type, size, is_signed)
+            return BuiltInType(base_type, size, is_signed)
 
         # ERROR: Found Type Not in Valid Set
         else:
