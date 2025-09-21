@@ -93,10 +93,17 @@ class CSTtoAST(Transformer):
 
     # ####################################################################################################################
     # type_specifier_seq:
-    # def type_specifier_seq(self, children):
-    #     if len(children) == 1:
-    #         return children[0]
+    def type_specifier_seq(self, children):
+        # TYPE CORE DEDUCTION
 
+        # BuiltInType Core
+        if children and all(isinstance(c, abstract_nodes.Keyword) for c in children):
+            keywords = [c.lexeme for c in children]
+            return resolve_simple_type(keywords)
+
+        # Other Core
+        else:
+            return ASTNode("type_specifier_seq", children)
 
     #####################################################################################################################
     # type_specifier: trailing_type_specifier  # also wraps simple_type_specifier
