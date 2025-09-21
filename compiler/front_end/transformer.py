@@ -54,6 +54,8 @@ class CSTtoAST(Transformer):
     # Ambiguous Nodes
     def _ambig(self, possible_trees):
         from compiler.utils.colors import colors
+
+        # Ambiguity Resolved
         if len(possible_trees) == 1:
             true_branch = possible_trees[0]
             if isinstance(true_branch, ASTNode):
@@ -62,6 +64,7 @@ class CSTtoAST(Transformer):
             else:
                 return abstract_nodes.Error("Ambiguity resolved into none.")
 
+        # Ambiguity Unresolved
         branches = []
         for path in possible_trees:
             if isinstance(path, abstract_nodes.ASTNode):
@@ -96,25 +99,32 @@ class CSTtoAST(Transformer):
 
 
     #####################################################################################################################
-    # trailing_type_specifier:
-    # def trailing_type_specifier(self, children):
-    #     for child in children:
-    #         if isinstance(child, abstract_nodes.Keyword):
-    #             return child
-    #     return ASTNode("trailing_type_specifier", children)
+    # type_specifier: trailing_type_specifier  # also wraps simple_type_specifier
+    #               | class_specifier
+    #               | enum_specifier
+    def type_specifier(self, children):
+        # Collapse on Only-Child
+        for child in children:
+            if isinstance(child, abstract_nodes.Keyword):
+                return child
+        return ASTNode("type_specifier", children)
+
+    #####################################################################################################################
+    def trailing_type_specifier(self, children):
+        for child in children:
+            if isinstance(child, abstract_nodes.Keyword):
+                return child
+        return ASTNode("trailing_type_specifier", children)
     #
     # #####################################################################################################################
-    # # # simple_type_specifier:
-    # def simple_type_specifier(self, children):
-    #     for child in children:
-    #         if isinstance(child, abstract_nodes.Keyword):
-    #             return child
-    #     return ASTNode("simple_type_specifier", children)
+    # # simple_type_specifier:
+    def simple_type_specifier(self, children):
+        for child in children:
+            if isinstance(child, abstract_nodes.Keyword):
+                return child
+        return ASTNode("simple_type_specifier", children)
 
     # ####################################################################################################################
-    #type_id: type_specifier_seq abstract_declarator?
-    # def type_id(self, children):
-
 
     # ####################################################################################################################
     # # TRANSLATION UNIT
