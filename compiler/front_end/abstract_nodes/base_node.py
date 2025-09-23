@@ -421,7 +421,7 @@ class AccessSpecifier(ASTNode):
 ########################################################################################################################
 class Literal(ASTNode):
     def __init__(self, kind: LiteralKind, value):
-        super().__init__(node_name=kind.lower()+"_literal")
+        super().__init__(node_name=kind.lower()+"_literal: "+str(value))
         self.literal_kind  = kind
         self.literal_value = value
 
@@ -457,32 +457,12 @@ class NormalizedType(ASTNode):
     def __init__(self):
         super().__init__(node_name="normalized_type")
 
-        self.core: TypeCore | None = None # everything else is wrapped around this
+        self.core: TypeCore | None = None                     # Represents Type's Core
+        self.modifiers  : Body[Modifiers] = Body[Modifiers]() # List of Core Modifiers (Prefix, Suffix, Suffix...)
 
-        self.cv  : ListNode[str] | None = None
-        self.ref : ListNode[str] | None = None
-        self.ptrs: ListNode[str] | None = None
+        self.attrs   = None # will implement later maybe
 
-        self.arrays  = None
-        self.func    = None
-        self.attrs   = None
-
-    def synthesize_from_child(self, child:Self):
-
-        # Extend Core
-        # if self.core and child.core:
-            # self.core.type_string.extend_list(child.core.type_string)
-
-        # Extend Modifiers Lists
-        if self.cv and child.cv:
-            self.cv.extend_list(child.cv)
-        if self.ref and child.ref:
-            self.ref.extend_list(child.ref)
-        if self.ptrs and child.ptrs:
-            self.ptrs.extend_list(child.ptrs)
-
-        # Extend Suffixes
-
+    # def synthesize_from_child(self, child:Self):
 
 ########################################################################################################################
 
@@ -551,3 +531,16 @@ class BuiltInType(TypeCore):
 
 # ElaboratedType
 #
+########################################################################################################################
+class Modifiers(ASTNode):
+    pass
+
+class PrefixChain(Modifiers, Body[ASTNode]):
+    def __init__(self):
+        super().__init__(body_type="prefix_chain")
+        
+
+
+########################################################################################################################
+
+########################################################################################################################

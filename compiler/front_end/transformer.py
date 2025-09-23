@@ -75,6 +75,27 @@ class CSTtoAST(Transformer):
         return ambig_node
 
     ####################################################################################################################
+    # ptr_operator: STAR attribute_specifier? cv_qualifier_seq?
+    #             | BIT_AND attribute_specifier?
+    #             | AND attribute_specifier?
+    #             | SCOPE? nested_name_specifier STAR attribute_specifier? cv_qualifier_seq?
+    # def ptr_operator(self, children):
+    #     check_for_cv = False
+    #     for c in children:
+    #         if isinstance(c, abstract_nodes.Operator):
+    #             if c.op_string == "&" or c.op_string == "&&":
+    #                 return c
+    #             if c.op_string == "*":
+    #                 if len(children) == 1:
+    #                     return c
+    #                 else:
+    #                     check_for_cv = True
+    #
+    #         if check_for_cv and c.name == "cv_qualifier_seq":
+    #             for k in c.children:
+    #                 c.children.append(k)
+
+    ####################################################################################################################
     def literal(self, children):
         kind = get_kind(children[0].name)
         value = children[0].children[0].name

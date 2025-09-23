@@ -939,20 +939,20 @@ type_id: type_specifier_seq abstract_declarator?
 #ISO abstract_declarator: ptr_abstract_declarator                                                   # <- Redefined
 #                       | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type # <- Redefined
 #                       | ELLIPSIS                                                                  # => Non-ambiguous Branch
-abstract_declarator: declarator_prefix declarator_suffix?            # <- Unambiguous 
+abstract_declarator: declarator_prefix declarator_suffix?           # <- Unambiguous 
                    | parameters_and_qualifiers trailing_return_type # <- Unambiguous
                    | declarator_prefix _LPAREN abstract_declarator _RPAREN declarator_suffix # <- Nested empty declarators 
                    | ELLIPSIS # => Original
 
 
 # Binds prefix *, &, &&
-ptr_abstract_declarator: noptr_abstract_declarator
-                       | ptr_operator ptr_abstract_declarator?
-
-# Binds suffix [], (), [][]
-noptr_abstract_declarator: noptr_abstract_declarator? parameters_and_qualifiers
-                         | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
-                         | _LPAREN ptr_abstract_declarator _RPAREN
+#ptr_abstract_declarator: noptr_abstract_declarator
+#                       | ptr_operator ptr_abstract_declarator?
+#
+## Binds suffix [], (), [][]
+#noptr_abstract_declarator: noptr_abstract_declarator? parameters_and_qualifiers
+#                         | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
+#                         | _LPAREN ptr_abstract_declarator _RPAREN
 
 parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
                             | parameter_declaration_list _COMMA ELLIPSIS
