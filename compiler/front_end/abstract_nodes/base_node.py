@@ -7,6 +7,7 @@ from typing import Generic, TypeVar, Union, Self
 
 from compiler.utils.enum_types import *
 from compiler.utils.valid_sets import FundamentalTypes
+
 # ASTNode Type Template (Dynamic Typing)
 NodeT = TypeVar("NodeT", bound="ASTNode")
 MemberT = TypeVar("MemberT", bool, int, str, float)
@@ -43,12 +44,6 @@ class Body(ASTNode, Generic[NodeT]):
             self.children.append(member)
 ########################################################################################################################
 
-class Expr(ASTNode):
-    def __init__(self, expr_type:str="Expr"):
-        super().__init__(node_name=f"\x1b[38;2;255;179;71m{expr_type}\x1b[0m")  # default: orange
-
-        self.expr_type = expr_type
-        self.value_cat = None      # Assigned at semantic analysis / decoration
 
 
 ########################################################################################################################
@@ -302,25 +297,7 @@ class Parameter(ASTNode):
         # default_arg: EQUAL initializer
         # initializer = list[Expr | Initializer]
 
-########################################################################################################################
-# ARRAY SUFFIX
 
-class BaseSuffix(ASTNode):
-    def __init__(self, suffix_type:str="base_suffix"):
-        super().__init__(node_name=suffix_type)
-
-class ArraySuffix(BaseSuffix):
-    def __init__(self, fixed_size:"ConstantExpr"=None):
-        super().__init__(suffix_type="array_suffix")
-        self.size = fixed_size
-
-class FuncSuffix(BaseSuffix):
-    def __init__(self, parameter_list:list[Parameter] | None = None):
-        super().__init__(suffix_type="func_suffix")
-        self.param_list = parameter_list or []
-
-########################################################################################################################
-# FUNCTION SUFFIX
 
 
 
@@ -404,7 +381,6 @@ class EnumBody(Body["Enumerator"]):
 # class FunctionBody(Body[])
 
 ########################################################################################################################
-from compiler.front_end.abstract_nodes.expression_nodes import ConstantExpr
 class Enumerator(ASTNode):
     def __init__(self, identifier_name: str, initial_expr: ConstantExpr | None=None):
         super().__init__(node_name=colors.pink("self.identifier"))
@@ -535,12 +511,180 @@ class BuiltInType(TypeCore):
 class Modifiers(ASTNode):
     pass
 
-class PrefixChain(Modifiers, Body[ASTNode]):
-    def __init__(self):
-        super().__init__(body_type="prefix_chain")
-        
+class Suffix(ASTNode):
+    def __init__(self, suffix_type:str):
+        super().__init__(node_name=suffix_type+"_suffix")
 
+########################################################################################################################
+# ARRAY SUFFIX
+
+class ArraySuffix(Suffix, Modifiers):
+    def __init__(self, bound: ConstantExpr | None = None):
+        super().__init__(suffix_type="array")
+        self.array_bound: bound
+
+########################################################################################################################
+# FUNCTION SUFFIX
+
+class FunctionSuffix(Suffix, Modifiers):
+    def __init__(self, bound: ConstantExpr | None = None):
+        super().__init__(suffix_type="function")
+        pass
 
 ########################################################################################################################
 
 ########################################################################################################################
+
+########################################################################################################################
+# EXPRESSIONS
+
+########################################################################################################################
+# BASE EXPRESSION
+
+class Expr(ASTNode):
+    def __init__(self, expr_type:str):
+        super().__init__(node_name=expr_type+"_expression")  # default: orange
+        self.expr_type = expr_type
+########################################################################################################################
+
+
+class ConstantExpr(Expr):
+    """ MUST BE CONSTANT - will be checked at semantic analysis """
+    def __init__(self, expression: Expr):
+        super().__init__(expr_type="constant")
+        self.expr = expression
+
+########################################################################################################################
+# PRIMARY EXPRESSIONS
+
+# class Literal():
+# class Identifier():
+
+########################################################################################################################
+# UNARY
+
+class UnaryExpr(Expr):
+    def __init__(self, operand: ASTNode, operator: Operator):
+        """ Contains:
+                Postfix Expressions
+                Prefix Expressions
+        """
+        super().__init__(expr_type="unary")
+        self.operand  = operand
+        self.operator = operator
+
+        # Add Children For Pretty Printing
+        operator.ansi_color = colors.yellow
+        self.children.append(operator)
+        self.children.append(operand)
+
+########################################################################################################################
+# CAST
+
+class CastExpr(Expr):
+    def __init__(self, cast_type: ASTNode, subject: ASTNode):
+        """ Contains:
+                C Style Cast   <- ambiguous_cast
+                C++ Style Cast
+        """
+        super().__init__(expr_type="cast")
+        self.cast_type = cast_type
+        self.subject = subject
+
+        # Add Children For Pretty Printing
+        cast_type.ansi_color = colors.yellow
+        self.children.append(cast_type)
+        self.children.append(subject)
+
+########################################################################################################################
+# MEMBER ACCESS
+
+class MemberAccess(Expr):
+    def __init__(self, access_type: Operator, target: ASTNode):
+        """ Contains:
+                pm_expression
+        """
+        super().__init__(expr_type="member_access")
+        self.operand = access_type
+        self.operator = target
+
+        # Add Children For Pretty Printing
+        access_type.ansi_color = colors.yellow
+        self.children.append(access_type)
+        self.children.append(target)
+
+########################################################################################################################
+
+class BinaryExpr(Expr):
+    """ Represents:
+            Arithmetic Expression (multiplicative, additive)
+            Comparative Expressions (relational, equality)
+            Bitwise Expressions (shift, relational, equality)
+    """
+    def __init__(self, left: ASTNode, operator: Operator , right: ASTNode):
+        super().__init__(expr_type="binary")
+        self.left_operand  = left
+        self.right_operand = right
+        self.operator      = operator   # "+", "-", "*", "/" ...
+
+        # Add Children For Pretty Printing
+        self.children.append(left)
+        operator.ansi_color = colors.yellow
+        self.children.append(operator)
+        self.children.append(right)
+
+########################################################################################################################
+# LOGICAL EXPRESSION
+
+class LogicExpr(Expr):
+    def __init__(self, left: ASTNode, operator: Operator , right: ASTNode):
+        """ Contains:
+                Logical And Expressions (&&)
+                Logical Or Expressions (||)
+        """
+        super().__init__(expr_type="logic")
+        self.left_operand = left
+        self.right_operand = right
+        self.operator = operator  # "+", "-", "*", "/" ...
+
+        # Add Children For Pretty Printing
+        self.children.append(left)
+        operator.ansi_color = colors.yellow
+        self.children.append(operator)
+        self.children.append(right)
+
+########################################################################################################################
+# CONDITIONAL EXPRESSION
+
+class ConditionalExpr(Expr):
+    def __init__(self, if_cond: ASTNode, then_case: ASTNode , else_case: ASTNode):
+        """ Contains:
+                conditional_expressions ( if ? then : else ;)
+        """
+        super().__init__(expr_type="conditional")
+        self.if_cond   = if_cond
+        self.then_case = then_case
+        self.else_case = else_case  # "+", "-", "*", "/" ...
+
+        # Add Children For Pretty Printing
+        self.children.append(if_cond)
+        if_cond.ansi_color = colors.yellow
+        self.children.append(if_cond)
+        self.children.append(else_case)
+
+########################################################################################################################
+# Assignment Expressions
+class AssignExpr(Expr):
+    def __init__(self, left: ASTNode, right: ASTNode, operator: Operator):
+        super().__init__(expr_type="assign")
+        self.left_operand  = left
+        self.right_operand = right
+        self.operator      = operator   # "=", "+=", "-=", "*=", "/=" ...
+
+        # Add Children For Pretty Printing
+        self.children.append(left)
+        operator.ansi_color = colors.yellow
+        self.children.append(operator)
+        self.children.append(right)
+########################################################################################################################
+

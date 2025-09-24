@@ -159,6 +159,9 @@ class CSTtoAST(Transformer):
         return ASTNode("simple_type_specifier", children)
 
     # ####################################################################################################################
+    # DECLARATOR SUFFIXES
+    # def array_suffix(self, children):
+    #     return abstract_nodes.ArraySuffix(children[0])
 
     # ####################################################################################################################
     # # TRANSLATION UNIT
