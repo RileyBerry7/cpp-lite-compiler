@@ -397,6 +397,13 @@ class Identifier(ASTNode):
         self.ansi_color = colors.grey
         self.intention = intent
 
+        # Pretty Printing
+        self.children.append(ASTNode(self.intention.name, None, colors.grey))
+
+    def update_intent(self, new_intent: IdentifierIntention):
+        self.intention = new_intent
+        self.children[0].name = new_intent.name
+
 ########################################################################################################################
 # AMBIGUOUS IDENTIFIER
 
@@ -406,19 +413,12 @@ class AmbigIdentifer(Identifier):
         resolution condition is met, then this ambiguous branch will become the true branch, else it
         will be marked 'dead_branch' and pruned"""
 
-    def __init__(self, identifer: Identifier, res_cond: IdentifierIntention | None = IdentifierIntention.UNRESOLVED):
-        super().__init__(identifer.id_name)
-        self.name = "ambiguous_id: " + identifer.id_name
-        self.resolution_condition = res_cond
+    def __init__(self, identifer: Identifier):
+        super().__init__(identifer.id_name, identifer.intention)
+        self.name = "ambig_identifier: " + identifer.id_name
+        # INTENT <- Resolution Condition
 
-        # Pretty Printing
-        self.ansi_color = colors.red
-        self.children.append(ASTNode(self.resolution_condition.name, None, colors.red.italic))
-
-    def update_resolution_cond(self, new_cond: IdentifierIntention):
-        self.resolution_condition = new_cond
-        self.children[0].name = new_cond.name
-
+        self.ansi_color = colors.red # Pretty Printing
 
 ########################################################################################################################
 

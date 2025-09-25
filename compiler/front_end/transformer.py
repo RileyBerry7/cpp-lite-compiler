@@ -168,13 +168,26 @@ class CSTtoAST(Transformer):
     def type_name(self, children):
         # Collapse on Only-Child
         if len(children) == 1:
-            if isinstance(children[0], abstract_nodes.AmbigIdentifer):
-                children[0].update_resolution_cond(IdentifierIntention.TYPE_NAME)
-            elif isinstance(chilren[0], abstract_nodes.IdentifierIntention):
-                children[0].intent = IdentifierIntention.TYPE_NAME
-            return children[0]
+            # Link Identifier Intention (Decoration)
+            first_child = children[0]
+            if isinstance(first_child, abstract_nodes.Identifier):
+                first_child.update_intent(IdentifierIntention.TYPE_NAME)
+            return first_child
         else:
-            return abstract_nodes.Error("simple_type_specifier")
+            return abstract_nodes.Error("type_name")
+
+    ######################################################################################################################
+    # DECLARATOR_NAME
+    def declarator_name(self, children):
+        # Collapse on Only-Child
+        if len(children) == 1:
+            # Link Identifier Intention (Decoration)
+            first_child = children[0]
+            if isinstance(first_child, abstract_nodes.Identifier):
+                first_child.update_intent(IdentifierIntention.DECLARATOR_NAME)
+            return first_child
+        else:
+            return abstract_nodes.Error("declarator_name")
 
     # ####################################################################################################################
     # DECLARATOR SUFFIXES
