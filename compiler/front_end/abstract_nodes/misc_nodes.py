@@ -10,7 +10,7 @@ class Error(ASTNode):
     def __init__(self, error_type):
         super().__init__(node_name="ERROR: " + error_type)
         self.message = ""
-        self.ansi_color = colors.purple
+        self.ansi_color = colors.red.underline.bold
 ########################################################################################################################
 #
 

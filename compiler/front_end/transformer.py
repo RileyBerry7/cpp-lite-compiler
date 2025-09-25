@@ -68,10 +68,10 @@ class CSTtoAST(Transformer):
         branches = []
         for path in possible_trees:
             if isinstance(path, abstract_nodes.ASTNode):
-                path.ansi_color = colors.orange
+                path.ansi_color = colors.red.italic
                 branches.append(path)
         ambig_node = abstract_nodes.ASTNode("Ambiguity", branches)
-        ambig_node.ansi_color = colors.red.underline
+        ambig_node.ansi_color = colors.red.underline.italic
         return ambig_node
 
     ####################################################################################################################
@@ -491,11 +491,18 @@ class CSTtoAST(Transformer):
     #
 
     #####################################################################################################################
-    # PRIMARY EXPRESSIONS
+    # IDENTIFIER WRAPPERS
+
+    def qualified_id(self, children):
+        # Fully Collapse
+        return children[0]
 
     def unqualified_id(self, children):
         # Fully Collapse
         return children[0]
+
+    #####################################################################################################################
+    # PRIMARY EXPRESSIONS
 
     def id_expression(self, children):
         # Fully Collapse
@@ -707,3 +714,12 @@ class CSTtoAST(Transformer):
         else:
             return abstract_nodes.Error("assignment_expression")
 
+    #####################################################################################################################
+    # EXPRESSION WRAPPERS (No Precedence)
+    def expression(self, children):
+        # Fully Collapse
+        return children[0]
+
+    def constant_expression(self, children):
+        # Fully Collapse
+        return abstract_nodes.ConstantExpr(children[0])

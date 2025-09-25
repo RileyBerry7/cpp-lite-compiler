@@ -551,9 +551,11 @@ class Expr(ASTNode):
 
 class ConstantExpr(Expr):
     """ MUST BE CONSTANT - will be checked at semantic analysis """
-    def __init__(self, expression: Expr):
+    def __init__(self, expression: ASTNode):
         super().__init__(expr_type="constant")
         self.expr = expression
+
+        self.children.append(expression)
 
 ########################################################################################################################
 # PRIMARY EXPRESSIONS
