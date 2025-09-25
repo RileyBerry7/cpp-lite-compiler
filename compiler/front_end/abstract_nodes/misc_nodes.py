@@ -7,8 +7,8 @@ from compiler.utils.colors import colors
 # ERRORS
 
 class Error(ASTNode):
-    def __init__(self, error_type):
-        super().__init__(node_name="ERROR: " + error_type)
+    def __init__(self, error_type, child_list: list[ASTNode] | None = None):
+        super().__init__(node_name="ERROR: " + error_type, children=child_list)
         self.message = ""
         self.ansi_color = colors.red.underline.bold
 ########################################################################################################################

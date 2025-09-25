@@ -161,7 +161,7 @@ class CSTtoAST(Transformer):
         if len(children) == 1:
             return children[0]
         else:
-            return abstract_nodes.Error("simple_type_specifier")
+            return abstract_nodes.Error("simple_type_specifier", children)
 
     ######################################################################################################################
     # TYPE_NAME
@@ -230,6 +230,7 @@ class CSTtoAST(Transformer):
 
         return abstract_nodes.Error("parameter_declaration_clause")
 
+    #####################################################################################################################
 
     #
     #
