@@ -1,0 +1,37 @@
+#pragma once
+
+// Forward-declare C printf so we don’t need <cstdio>
+extern "C" int printf(const char*, ...);
+
+//namespace std {
+//
+//    struct ostream {
+//        // Print C-strings
+//        ostream& operator<<(const char* s) {
+//            printf("%s", s);
+//            return *this;
+//        }
+//
+//        // Print single characters
+//        ostream& operator<<(char c) {
+//            printf("%c", c);
+//            return *this;
+//        }
+//
+//        // Print integers
+//        ostream& operator<<(int n) {
+//            printf("%d", n);
+//            return *this;
+//        }
+//
+//        // Print floating-point numbers
+//        ostream& operator<<(double d) {
+//            printf("%f", d);
+//            return *this;
+//        }
+//    };
+//
+//    inline ostream cout;  // Global instance like the real iostream
+//
+//}
+//

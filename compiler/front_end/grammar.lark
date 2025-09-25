@@ -372,11 +372,11 @@ lambda_declarator: _LPAREN parameter_declaration_clause _RPAREN attribute_specif
                  | exception_specification? trailing_return_type?
 
 postfix_expression: primary_expression
-                  | postfix_expression _LBRACKET expression _RBRACKET
-                  | postfix_expression _LBRACKET braced_init_list _RBRACKET
-                  | postfix_expression _LPAREN expression_list? _RPAREN
-                  | simple_type_specifier _LPAREN expression_list? _RPAREN
-                  | typename_specifier _LPAREN expression_list? _RPAREN
+                  | postfix_expression _LBRACKET expression _RBRACKET       
+                  | postfix_expression _LBRACKET braced_init_list _RBRACKET -> array_or_dereference
+                  | postfix_expression _LPAREN expression_list? _RPAREN     -> func_or_funcptr_call
+                  | simple_type_specifier _LPAREN expression_list? _RPAREN  -> c_cast_or_dir_init_simple
+                  | typename_specifier _LPAREN expression_list? _RPAREN     -> dir_init_class_or_ctor_call
                   | simple_type_specifier braced_init_list
                   | typename_specifier braced_init_list
                   | postfix_expression _DOT TEMPLATE? id_expression

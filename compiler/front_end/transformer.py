@@ -269,13 +269,13 @@ class CSTtoAST(Transformer):
     #####################################################################################################################
     # UNARY EXPRESSION
 
-    def postfix_expression(self, children):
-
-        # Resolve Expression Precedence
-        if len(children) == 1 and isinstance(children[0], ASTNode):
-            return children[0]
-        else:
-            return abstract_nodes.Error("postfix_expression")
+    # def postfix_expression(self, children):
+    #
+    #     # Resolve Expression Precedence
+    #     if len(children) == 1 and isinstance(children[0], ASTNode):
+    #         return children[0]
+    #     else:
+    #         return abstract_nodes.Error("postfix_expression", children)
 
     def unary_expression(self, children):
 
