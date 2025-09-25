@@ -12,6 +12,8 @@ from compiler.utils.token_to_literal_kind import *
 from compiler.utils.lexeme_to_number import lexeme_to_number
 from compiler.utils.resolve_simple_type import resolve_simple_type
 from compiler.utils.colors import colors
+from compiler.utils.valid_sets import IdentifierIntention
+
 
 ########################################################################################################################
 class CSTtoAST(Transformer):
@@ -138,25 +140,41 @@ class CSTtoAST(Transformer):
     #               | enum_specifier
     def type_specifier(self, children):
         # Collapse on Only-Child
-        for child in children:
-            if isinstance(child, abstract_nodes.Keyword):
-                return child
-        return ASTNode("type_specifier", children)
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("type_specifier")
 
     #####################################################################################################################
     def trailing_type_specifier(self, children):
-        for child in children:
-            if isinstance(child, abstract_nodes.Keyword):
-                return child
-        return ASTNode("trailing_type_specifier", children)
-    #
-    # #####################################################################################################################
-    # # simple_type_specifier:
+        # Collapse on Only-Child
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("trailing_type_specifier")
+
+    ######################################################################################################################
+    # SIMPLE_TYPE_SPECIFIER
+
     def simple_type_specifier(self, children):
-        for child in children:
-            if isinstance(child, abstract_nodes.Keyword):
-                return child
-        return ASTNode("simple_type_specifier", children)
+        # Collapse on Only-Child
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("simple_type_specifier")
+
+    ######################################################################################################################
+    # TYPE_NAME
+    def type_name(self, children):
+        # Collapse on Only-Child
+        if len(children) == 1:
+            if isinstance(children[0], abstract_nodes.AmbigIdentifer):
+                children[0].update_resolution_cond(IdentifierIntention.TYPE_NAME)
+            elif isinstance(chilren[0], abstract_nodes.IdentifierIntention):
+                children[0].intent = IdentifierIntention.TYPE_NAME
+            return children[0]
+        else:
+            return abstract_nodes.Error("simple_type_specifier")
 
     # ####################################################################################################################
     # DECLARATOR SUFFIXES
@@ -199,335 +217,19 @@ class CSTtoAST(Transformer):
 
         return abstract_nodes.Error("parameter_declaration_clause")
 
-            # ####################################################################################################################
-    # # TRANSLATION UNIT
-    # def translation_unit(self, children):
-    #     return abstract_nodes.TranslationUnit(children)
-    #
-    # def declaration_seq(self, children):
-    #     for child in children:
-    #         if isinstance(child, abstract_nodes.ASTNode):
-    #             from compiler.utils.colors import colors
-    #             child.ansi_color = colors.green
-    #     return abstract_nodes.ASTNode("declaration_seq", children)
-    # ####################################################################################################################
-    # # EXTERNAL DECLARATION
-    #
-    # def external_declaration(self, children):
-    #     # if children and isinstance(children[0], abstract_nodes.NormalDeclaration):
-    #     #     return children[0]
-    #     #
-    #     # return abstract_nodes.Error("Invalid external declaration")
-    #      return children[0]
-    #
-    #
-    # ####################################################################################################################
-    # def class_type(self, children):
-    #
-    #     kind = ElaboratedTypeKind.CLASS
-    #     identifier = "ERROR: id not-found"
-    #     body = None
-    #
-    #     # Loop through Children, Build Elaborate Type
-    #     for child in children:
-    #
-    #         # Check if Union
-    #         if child.name == "union":
-    #             kind = ElaboratedTypeKind.UNION
-    #
-    #         # Check for Scope Qualifier
-    #         elif child.name == "scope_qualifier":
-    #             pass
-    #
-    #         # Check for Body
-    #         if isinstance(child, abstract_nodes.ClassBody):
-    #             body = child
-    #
-    #         # Else is Identifier
-    #         else:
-    #             identifier = child.name
-    #
-    #     return abstract_nodes.ElaborateType(kind, identifier, body)
-    #
-    # def enumerator(self, children):
-    #
-    #     id_name = children[0].name
-    #
-    #     if len(children) == 1:
-    #         return abstract_nodes.Enumerator(children[0].name)
-    #     elif len(children) == 3:
-    #         return abstract_nodes.Enumerator(children[0].name, children[2])
-    #     else:
-    #         return Error("Invalid enumerator")
-    #
-    # ################################################################################################################
-    #
-    # def enum_type(self, children):
-    #
-    #     kind       = ElaboratedTypeKind.ENUM
-    #     identifier = "ERROR: id not-found"
-    #     is_scoped  = None
-    #     enum_base  = resolve_simple_type(['int'])
-    #     body       = None
-    #
-    #     # Loop through Children, Build Elaborate Type
-    #     for child in children:
-    #
-    #         # Check if Scoped
-    #         if child.name == "class" or child.name == "struct":
-    #             is_scoped = True
-    #
-    #         # Check for Scope Qualifier
-    #         elif child.name == "scope_qualifier":
-    #             pass
-    #
-    #         # Check for Enum Base
-    #         elif child.name == "enum_base":
-    #             specifier_seq = []
-    #             if isinstance(child.children[1], compiler.front_end.abstract_nodes.ast_node.ASTNode):
-    #                 for specifier in child.children[1].children:
-    #                     specifier_seq.append(specifier.name)
-    #             enum_base = resolve_simple_type(specifier_seq)
-    #
-    #         # Check for Body
-    #         if isinstance(child, abstract_nodes.EnumBody):
-    #             body = child
-    #
-    #         # Else is Identifier
-    #         else:
-    #             identifier = child.name
-    #
-    #     return abstract_nodes.ElaborateType(kind, identifier, body, enum_base, is_scoped)
-    #
-    # def enumerator(self, children):
-    #
-    #     id_name = children[0].name
-    #
-    #     if len(children) == 1:
-    #         return abstract_nodes.Enumerator(children[0].name)
-    #     elif len(children) == 3:
-    #         return abstract_nodes.Enumerator(children[0].name, children[2])
-    #     else:
-    #         return abstract_nodes.Error("Invalid enumerator")
-    #
-    #
-    # ####################################################################################################################
-    # def decl_specifier_seq(self, children):
-    #
-    #     # Initialize Empty Specs
-    #     simple_type_list    = []
-    #     qualifiers          = []
-    #     function_specifiers = []
-    #     storage_class       = None
-    #     simple_type         = None
-    #     elaborate_type      = None
-    #
-    #     # Initialize Specifier Flags
-    #     is_constexpr:   bool = False
-    #     is_consteval:   bool = False
-    #     is_constinit:   bool = False
-    #     is_typedef:     bool = False
-    #     is_using_alias: bool = False
-    #     is_friend:      bool = False
-    #
-    #     ################################################################################################################
-    #
-    #     # Determine Children
-    #     if children:
-    #         for child in children:
-    #             if isinstance(child, compiler.front_end.abstract_nodes.ast_node.ASTNode):
-    #
-    #                 # FOUND: Simple Type Specifier
-    #                 if child.name == "simple_type_specifier":
-    #                     simple_type_list.append(child.children[0].name)
-    #
-    #                 # FOUND: Elaborate Type Specifier
-    #                 elif isinstance(child, abstract_nodes.ElaborateType):
-    #                     elaborate_type = child
-    #
-    #                 # FOUND: Type Qualifier
-    #                 elif child.name == "type_qualifier":
-    #                     qualifiers.append(child.children[0].name)
-    #
-    #                 # Found: Storage Class Specifier
-    #                 elif child.name == "storage_class_specifier":
-    #                     # SEMANTIC ERROR: multiple storage class specifiers
-    #                     if storage_class is not None:
-    #                         return abstract_nodes.Error("Multiple storage class specifiers found")
-    #                     storage_class = child.children[0].name
-    #
-    #                 # Found: Function Specifier
-    #                 elif child.name == "function_specifier":
-    #                     function_specifiers.append(child.children[0].name)
-    #
-    #                 ####################################################################################################
-    #                 # FLAG CHECKING
-    #
-    #                 # Found: Constexpr Flag
-    #                 elif child.name == "constexpr":
-    #                     is_constexpr = True
-    #
-    #                 # Found: Consteval Flag
-    #                 elif child.name == "consteval":
-    #                     is_consteval = True
-    #
-    #                 # Found: Constinit Flag
-    #                 elif child.name == "constinit":
-    #                     is_constinit = True
-    #
-    #                 # Found: Typedef Flag
-    #                 elif child.name == "typedef":
-    #                     is_typedef = True
-    #
-    #                 # Found: Using Flag
-    #                 elif child.name == "using":
-    #                     is_using_alias = True
-    #
-    #                 # Found: Friend Flag
-    #                 elif child.name == "friend":
-    #                     is_friend = True
-    #
-    #     # END - Determine Children
-    #     ################################################################################################################
-    #
-    #
-    #     # Resolve Simple Type
-    #     if not simple_type_list:
-    #         simple_type = None
-    #     else:
-    #         simple_type = resolve_simple_type(simple_type_list)
-    #
-    #     # CHECK: Mutual-Exclusivity Between Simple & Elaborate Type
-    #     if elaborate_type and simple_type:
-    #         return abstract_nodes.Error("'Elaborate' and 'Simple' types are mutually exclusive.")
-    #
-    #     elif elaborate_type:
-    #         resolved_type = elaborate_type
-    #
-    #     elif simple_type:
-    #         resolved_type = simple_type
-    #
-    #     else:
-    #         return abstract_nodes.Error("Neither 'Elaborate' nor 'Simple' type was found.")
-    #
-    #     # CONSTRUCT: Declaration Specifier Node
-    #     specifier_node = abstract_nodes.DeclSpec(resolved_type, qualifiers, storage_class, function_specifiers)
-    #
-    #     # ASSIGN: Flag Specifiers
-    #     specifier_node.is_constexpr   = is_constexpr
-    #     specifier_node.is_consteval   = is_consteval
-    #     specifier_node.is_constinit   = is_constinit
-    #     specifier_node.is_typedef     = is_typedef
-    #     specifier_node.is_using_alias = is_using_alias
-    #     specifier_node.is_friend      = is_friend
-    #
-    #     # RETURN: Declaration Specifier Node
-    #     return specifier_node
-    #
-    # ####################################################################################################################
-    # # PARAMETER
-    # def parameter(self, children):
-    #
-    #     param_declaration = children[0]
-    #     default_args = None
-    #
-    #
-    #
-    #
-    #     return abstract_nodes.Parameter(param_declaration, default_args)
-    #
-    # def default_arg(self, children):
-    #     if len(children) >= 1 and isinstance(children[1], abstract_nodes.Initializer):
-    #         return children[1]
-    #     else:
-    #         return abstract_nodes.Error("No Initializer Found for Default Argument")
-    #
-    #
-    # def initializer(self, children):
-    #     for child in children:
-    #         if isinstance(child, compiler.front_end.abstract_nodes.ast_node.ASTNode):
-    #             if isinstance(child, compiler.front_end.abstract_nodes.base_node.Expr):
-    #                 return abstract_nodes.Initializer(child)
-    #
-    #             if isinstance(child, abstract_nodes.Initializer):
-    #                 return child
-    #
-    # ####################################################################################################################
-    # # DECLARATOR
-    # def declarator(self, children):
-    #     normalized_declarator = abstract_nodes.NormalDeclarator()
-    #     for child in children:
-    #         if isinstance(child, compiler.front_end.abstract_nodes.ast_node.ASTNode) and child.name == "ptr_list":
-    #             for ptr_lvl in child.children:
-    #                 if isinstance(ptr_lvl, abstract_nodes.PtrLevel):
-    #                     normalized_declarator.ptr_chain.append(ptr_lvl) # Might be backwards!!!
-    #
-    #         if isinstance(child,
-    #                       compiler.front_end.abstract_nodes.ast_node.ASTNode) and child.name == "reference_operator":
-    #             if children.children and child.children[0].name == "AND":
-    #                 normalized_declarator.reference = "lvalue"
-    #             else:
-    #                 normalized_declarator.reference = "rvalue"
-    #
-    #         if isinstance(child, abstract_nodes.Initializer):
-    #             normalized_declarator.initializer = child
-    #
-    #         if isinstance(child, abstract_nodes.NormalDeclarator):
-    #             normalized_declarator.synthesize_from_child(child)
-    #
-    #     return normalized_declarator
-    #
-    #
-    # def init_declarator(self, children):
-    #     if len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         initialized_declarator = abstract_nodes.NormalDeclarator()
-    #         for child in children:
-    #             if isinstance(child, abstract_nodes.NormalDeclarator):
-    #                 initialized_declarator.synthesize_from_child(child)
-    #
-    #             elif isinstance(child, abstract_nodes.Initializer):
-    #                 initialized_declarator.initializer = child
-    #
-    #     return initialized_declarator
-    #
-    # ####################################################################################################################
-    # # DIRECT DECLARATOR
-    # def direct_declarator(self, children):
-    #     normal_declarator = abstract_nodes.NormalDeclarator(children)
-    #     for child in children:
-    #         if isinstance(child, compiler.front_end.abstract_nodes.ast_node.ASTNode):
-    #             if child.children and child.children[0].name == "IDENTIFIER":
-    #                 normal_declarator.name = child.name
-    #
-    #     return normal_declarator
-    #
-    # ####################################################################################################################
-    # # DECLARATION
-    # def simple_declaration(self, children):
-    #     decl_specs = None
-    #     declarator_list = []
-    #     errors = []
-    #     for child in children:
-    #         if isinstance(child, abstract_nodes.DeclSpec):
-    #             decl_specs = child
-    #         elif isinstance(child, abstract_nodes.NormalDeclarator):
-    #             declarator_list.append(child)
-    #
-    #         # Error Checking
-    #         elif isinstance(child, abstract_nodes.Error):
-    #             errors.append(child)
-    #
-    #     normal_declaration = abstract_nodes.NormalDeclaration(decl_specs, declarator_list)
-    #     for error in errors:
-    #         normal_declaration.children.append(error)
-    #     return normal_declaration
+
     #
     #
 
     #####################################################################################################################
     # IDENTIFIER WRAPPERS
+
+    def ambiguous_identifier(self, children):
+        return abstract_nodes.AmbigIdentifer(children[0])
+
+    def declarator_id(self, children):
+        # Fully Collapse
+        return children[0]
 
     def qualified_id(self, children):
         # Fully Collapse

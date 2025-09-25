@@ -2,6 +2,11 @@
 
 from enum import Enum, auto
 
+class IdentifierIntention(Enum):
+    TYPE_NAME     = auto()
+    DECLARATOR_ID = auto()
+    UNRESOLVED    = auto()
+
 class FundamentalTypes(Enum):
     VOID      = auto() # Void
     BOOL      = auto() # Bool

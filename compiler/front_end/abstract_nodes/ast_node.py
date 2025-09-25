@@ -7,7 +7,7 @@ from compiler.utils.data_classes import SourceLocation
 class ASTNode:
     """ Represents a node in the Abstract Syntax Tree (AST)."""
 
-    def __init__(self, node_name=None, children:list[ASTNode] | None=None):
+    def __init__(self, node_name=None, children:list[ASTNode] | None=None, init_color: colors=None):
 
         # Abstract Node Details
         self.name     = node_name
@@ -15,7 +15,10 @@ class ASTNode:
         self.loc      = SourceLocation
 
         # Pretty Printing Details
-        self.ansi_color: colors = colors.white
+        if not init_color:
+            init_color = colors.white
+
+        self.ansi_color: colors = init_color
 
     #################################################################################################################
     def pretty(self):

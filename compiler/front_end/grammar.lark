@@ -594,7 +594,7 @@ declaration: block_declaration
            | attribute_declaration
            | empty_declaration
 
-block_declaration: simple_declaration  # needs expanding
+block_declaration: simple_declaration
                  | asm_definition
                  | namespace_alias_definition
                  | using_declaration
@@ -876,7 +876,7 @@ init_declarator: declarator initializer?
 
 #ISO: declarator: ptr_declarator # <- Fully Redefined
 #               | noptr_declarator parameters_and_qualifiers trailing_return_type
-declarator: declarator_prefix declarator_name declarator_suffix?
+declarator: declarator_prefix? declarator_name declarator_suffix? # Identifier Bound
           | declarator_name parameters_and_qualifiers trailing_return_type
 
 ########################################################################################################################
@@ -889,7 +889,7 @@ declarator: declarator_prefix declarator_name declarator_suffix?
 #################################################################################################
 # START - Original Grammar; (Non-ISO)
 
-declarator_prefix: ptr_operator*
+declarator_prefix: ptr_operator+ # <- Eliminated Nullable List
 
 declarator_name: declarator_id attribute_specifier?
                | _LPAREN declarator _RPAREN # handles nested (identifier)
@@ -940,8 +940,9 @@ type_id: type_specifier_seq abstract_declarator?
 #ISO abstract_declarator: ptr_abstract_declarator                                                   # <- Redefined
 #                       | noptr_abstract_declarator? parameters_and_qualifiers trailing_return_type # <- Redefined
 #                       | ELLIPSIS                                                                  # => Non-ambiguous Branch
-abstract_declarator: declarator_prefix declarator_suffix?           # <- Unambiguous 
-                   | parameters_and_qualifiers trailing_return_type # <- Unambiguous
+abstract_declarator: declarator_prefix declarator_suffix?           # <- Prefix-Bound
+                   | declarator_suffix                              # <- Suffix-Bound 
+                   | parameters_and_qualifiers trailing_return_type # <- Suffix-Bound
                    | declarator_prefix _LPAREN abstract_declarator _RPAREN declarator_suffix # <- Nested empty declarators 
                    | ELLIPSIS # => Original
 
