@@ -30,4 +30,5 @@ int * const * main()
     foo;
     1 + 2 * 3 / 4 - 5 % 6;
     (int long* const* &[1](int a, ...))42;
+    assign_var = 1 + 1;
 }

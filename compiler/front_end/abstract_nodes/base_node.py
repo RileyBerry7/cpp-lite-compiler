@@ -545,6 +545,7 @@ class Expr(ASTNode):
     def __init__(self, expr_type:str):
         super().__init__(node_name=expr_type+"_expression")  # default: orange
         self.expr_type = expr_type
+        self.ansi_color = colors.orange
 ########################################################################################################################
 
 
@@ -600,15 +601,17 @@ class CastExpr(Expr):
 # MEMBER ACCESS
 
 class MemberAccess(Expr):
-    def __init__(self, access_type: Operator, target: ASTNode):
+    def __init__(self, source: ASTNode, access_type: Operator, target: ASTNode):
         """ Contains:
                 pm_expression
         """
         super().__init__(expr_type="member_access")
-        self.operand = access_type
-        self.operator = target
+        self.source   = source
+        self.operator = access_type
+        self.target   = target
 
         # Add Children For Pretty Printing
+        self.children.append(source)
         access_type.ansi_color = colors.yellow
         self.children.append(access_type)
         self.children.append(target)

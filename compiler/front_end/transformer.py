@@ -489,281 +489,221 @@ class CSTtoAST(Transformer):
     #     return normal_declaration
     #
     #
-    #
-    # ####################################################################################################################
-    # # SUFFIXES
-    #
-    # def init_suffix(self, children):
-    #     return children[1]
-    #
-    # def array_suffix(self, children):
-    #     return abstract_nodes.ArraySuffix(children[0])
-    #
-    # def function_suffix(self, children):
-    #     parameter_list = []
-    #     if children and children[0].name == "parameter_list":
-    #         for parameter in children[0].children:
-    #             if isinstance(parameter, abstract_nodes.Parameter):
-    #                 parameter_list.append(parameter)
-    #
-    #     return abstract_nodes.FuncSuffix(parameter_list)
-    #
-    # ####################################################################################################################
-    # # Expression Precedence Abstraction
-    # def primary(self, children):
-    #     if children and len(children) == 1:
-    #         if isinstance(children[0], ASTNode) and children[0].name == "literal":
-    #             literal_type  = token_to_literal_kind(children[0].children[0].children[0].name)
-    #             literal_value =  lexeme_to_number(children[0].children[0].name)
-    #             return abstract_nodes.LiteralExpr(literal_type, literal_value)
-    #
-    #         # elif isinstance(children[0], ASTNode) and children[0].name == "identifier":
-    #         return abstract_nodes.IdentifierExpr(children[0].children[0].name)
-    #
-    #         # else:
-    #         #     return ASTNode("primary", children)
-    #
-    def unary_expression(self, children):
-        # Remove Redundant Precedence
-        if len(children) == 1:
+
+    #####################################################################################################################
+    # PRIMARY EXPRESSIONS
+
+    def unqualified_id(self, children):
+        # Fully Collapse
+        return children[0]
+
+    def id_expression(self, children):
+        # Fully Collapse
+        return children[0]
+
+    def primary_expression(self, children):
+        if len(children) == 1 and isinstance(children[0], ASTNode):
             return children[0]
         else:
-            return ASTNode("unary_expression", children)
-    #         return abstract_nodes.UnaryExpr(children[0], children[1].name)
+            return abstract_nodes.Error("primary_expression")
+
+    #####################################################################################################################
+    # UNARY EXPRESSION
 
     def postfix_expression(self, children):
-        if len(children) == 1:
+
+        # Resolve Expression Precedence
+        if len(children) == 1 and isinstance(children[0], ASTNode):
             return children[0]
         else:
-            return ASTNode("postfix_expression", children)
-    #         return compiler.front_end.abstract_nodes.ast_node.ASTNode("postfix", children)
-    #
-    # def product(self, children):
-    #     if len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.BinaryExpr(children[0], children[2], children[1].name)
-    #
-    #
-    # def sum(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.BinaryExpr(children[0], children[2], children[1].name)
-    #
-    # def relational(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.ComparisonExpr(children[0], children[2], children[1].name)
-    #
-    # def equality(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.ComparisonExpr(children[0], children[2], children[1].name)
-    #
-    #
-    # def logic_and(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.LogicExpr(children[0], children[2], children[1].name)
-    # def logic_or(self, children):
-    #     if children and len(children) == 1:
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.LogicExpr(children[0], children[2], children[1].name)
+            return abstract_nodes.Error("postfix_expression")
+
+    def unary_expression(self, children):
+
+        # Resolve Expression Precedence
+        if len(children) == 1 and isinstance(children[0], ASTNode):
+            return children[0]
+        else:
+            return abstract_nodes.Error("primary_expression")
 
 
+    #####################################################################################################################
+    # CAST EXPRESSION
 
-
-
+    # cast_expression: unary_expression
+    #            | _LPAREN type_id _RPAREN cast_expression # C Style Cast   (int)var;
+    #                                                      # C++ Style Cast int(var); <- includes: static, constant, dynamic, reinterpret
     def cast_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 2:
+            return abstract_nodes.CastExpr(children[0], children[1])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("cast_expression", children)
+            return abstract_nodes.Error("cast_expression")
+
+    #####################################################################################################################
+    #  MEMBER ACCESS EXPRESSION
+
+    # pm_expression: cast_expression
+    #              | pm_expression DOT_STAR   cast_expression
+    #              | pm_expression ARROW_STAR cast_expression
     def pm_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.MemberAccess(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("pm_expression", children)
+            return abstract_nodes.Error("pm_expression")
+
+    #####################################################################################################################
+    # BINARY EXPRESSIONS
+
+    # multiplicative_expression: pm_expression
+    #                          | multiplicative_expression STAR pm_expression
+    #                          | multiplicative_expression SLASH pm_expression
+    #                          | multiplicative_expression PERCENT pm_expression
     def multiplicative_expression(self, children):
-        if len(children) == 1:
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("multiplicative_expression", children)
+            return abstract_nodes.Error("multiplicative_expression")
+
+    # additive_expression: multiplicative_expression
+    #                    | additive_expression PLUS multiplicative_expression
+    #                    | additive_expression MINUS multiplicative_expression
     def additive_expression(self, children):
-        if len(children) == 1:
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("additive_expression", children)
+            return abstract_nodes.Error("additive_expression")
+
+    # shift_expression: additive_expression
+    #                 | shift_expression SHL additive_expression
+    #                 | shift_expression SHR additive_expression
     def shift_expression(self, children):
-        if len(children) == 1:
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("shift_expression", children)
+            return abstract_nodes.Error("shift_expression")
+
+    # relational_expression: shift_expression
+    #                      | relational_expression LT shift_expression
+    #                      | relational_expression GT shift_expression
+    #                      | relational_expression LE shift_expression
+    #                      | relational_expression GE shift_expression
     def relational_expression(self, children):
-        if len(children) == 1:
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("relational_expression", children)
+            return abstract_nodes.Error("relational_expression")
+
+    # equality_expression: relational_expression
+    #                    | equality_expression EQ relational_expression
+    #                    | equality_expression NEQ relational_expression
     def equality_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("equality_expression", children)
+            return abstract_nodes.Error("equality_expression")
+
+    # and_expression: equality_expression
+    #               | and_expression BIT_AND equality_expression
     def and_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("and_expression", children)
+            return abstract_nodes.Error("and_expression")
+
+    # exclusive_or_expression: and_expression
+    #                        | exclusive_or_expression BIT_XOR and_expression
+    #
     def exclusive_or_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("exclusive_or_expression", children)
+            return abstract_nodes.Error("exclusive_or_expression")
+
+    # inclusive_or_expression: exclusive_or_expression
+    #                        | inclusive_or_expression BIT_OR exclusive_or_expression
     def inclusive_or_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.BinaryExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("inclusive_or_expression", children)
+            return abstract_nodes.Error("inclusive_or_expression")
+
+    #####################################################################################################################
+    # LOGIC EXPRESSIONS
+
+# logical_and_expression: inclusive_or_expression
+#                       | logical_and_expression AND inclusive_or_expression
     def logical_and_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.LogicExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("logical_and_expression", children)
+            return abstract_nodes.Error("logical_and_expression")
+
+    # logical_or_expression: logical_and_expression
+    #                  | logical_or_expression OR logical_and_expression
     def logical_or_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.LogicExpr(children[0], children[1], children[2])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("logical_or_expression", children)
+            return abstract_nodes.Error("logical_or_expression")
+
+    #####################################################################################################################
+    # CONDITIONAL EXPRESSIONS
+
+# conditional_expression: logical_or_expression
+#                       | logical_or_expression TERNARY expression COLON assignment_expression
     def conditional_expression(self, children):
-        if len(children) == 1:
+
+        if len(children) == 4:
+            return abstract_nodes.ConditionalExpr(children[0], children[2], children[3])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("conditional_expression", children)
-            # return compiler.front_end.abstract_nodes.ast_node.ASTNode("conditional_expression", children)
+            return abstract_nodes.Error("conditional_expression")
 
+    #####################################################################################################################
+    # ASSIGNMENT EXPRESSIONS
+
+# assignment_expression: conditional_expression
+#                      | logical_or_expression assignment_operator initializer_clause
+#                      | throw_expression
     def assignment_expression(self, children):
-        if children and len(children) == 1:
+
+        if len(children) == 3:
+            return abstract_nodes.AssignExpr(children[0], children[2], children[1])
+        elif len(children) == 1:
             return children[0]
         else:
-            return ASTNode("assignment_expression", children)
-            # return abstract_nodes.AssignExpr(children[0], children[2], children[1].name)
+            return abstract_nodes.Error("assignment_expression")
 
-    #
-    # ####################################################################################################################
-    # # STATEMENTS
-    # def expression_statement(self, children):
-    #     if children and len(children) == 1 and isinstance(children[0], compiler.front_end.abstract_nodes.base_node.Expr):
-    #         return abstract_nodes.ExprStatement(children[0])
-    #     else:
-    #         return abstract_nodes.Error("Invalid expression statement")
-    #
-    # def return_statement(self, children):
-    #     if len(children) == 2 and isinstance(children[1], compiler.front_end.abstract_nodes.base_node.Expr):
-    #         return abstract_nodes.ReturnStatement(children[1])
-    #     else:
-    #         return abstract_nodes.Error("Invalid return statement")
-    #
-    # def compound_statement(self, children):
-    #     statement_list = []
-    #     for child in children:
-    #         if isinstance(child, abstract_nodes.Statement):
-    #             statement_list.append(child)
-    #         elif isinstance(child, abstract_nodes.NormalDeclaration):
-    #             statement_list.append(abstract_nodes.DeclarationStatement(child))
-    #
-    #         else:
-    #             return abstract_nodes.Error("Non-statement in compound statement:" + str(child.name))
-    #
-    #     return abstract_nodes.CompoundBody(statement_list)
-    #
-    # def selection_statement(self, children):
-    #     if len(children) == 1 and isinstance(children[0], abstract_nodes.Statement):
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.Error("Invalid selection statement")
-    #
-    # def if_statement(self, children):
-    #     if_condition   = children[0]
-    #     then_statement = children[1]
-    #     else_statement = children[2] if len(children) > 2 else None
-    #
-    #     return abstract_nodes.IfStatement(if_condition, then_statement, else_statement)
-    #
-    #
-    # ####################################################################################################################
-    # # ENUM / CLASS BODY
-    #
-    # def class_body(self, children):
-    #     member_list = abstract_nodes.ClassBody()
-    #     for child in children:
-    #         # Found: Statement
-    #         if isinstance(child, abstract_nodes.Statement):
-    #             member_list.add_member(child)
-    #         # Found: Access Specifier
-    #
-    #     return member_list
-    #
-    #
-    # def enum_body(self, children):
-    #     member_list = abstract_nodes.EnumBody()
-    #
-    #     # Has only-child enumerator_list
-    #     if children:
-    #         for enumerator in children[0].children:
-    #             member_list.add_member(enumerator)
-    #
-    #     return member_list
-    #
-    #
-    # ####################################################################################################################
-    # # FUNCTION DEFINITION
-    # def function_definition(self, children):
-    #     decl_specs = children[0]
-    #     declarator = children[1]
-    #     compound_statement = children[2]
-    #     function_definition = abstract_nodes.NormalDeclaration(decl_specs,
-    #                                             [declarator],
-    #                                             compound_statement,
-    #                                             "function_definition")
-    #     return function_definition
-    #
-    # ####################################################################################################################
-    # # PTR -> POINTER LEVEL
-    # def ptr(self, children):
-    #
-    #     # Initialize Empty Lists
-    #     scope_path      = []
-    #     type_qualifiers = []
-    #
-    #     # Early Return: only child = plain '*'
-    #     if len(children) == 1:
-    #         return abstract_nodes.PtrLevel()
-    #
-    #     # Check For: Scope_Qualifier Child
-    #     elif isinstance(children[0],
-    #                     compiler.front_end.abstract_nodes.ast_node.ASTNode) and children[0].name == "scope_qualifier":
-    #         for grandchild in children[0].children:
-    #             if grandchild != "::":
-    #                 scope_path.append(grandchild.name)
-    #
-    #     # Check For: Type_Qualifier Children @ [1]
-    #     if len(children) >= 2 and isinstance(children[1], compiler.front_end.abstract_nodes.ast_node.ASTNode) and children[1].name == "type_qualifier_list":
-    #         for grandchild in children[1].children:
-    #             type_qualifiers.append(grandchild.name)
-    #
-    #     # Check For: Type_Qualifier Children @ [3]
-    #     elif len(children) >= 4 and isinstance(children[3], compiler.front_end.abstract_nodes.ast_node.ASTNode) and children[3].name == "type_qualifier_list":
-    #         for grandchild in children[3].children:
-    #             type_qualifiers.append(grandchild.name)
-    #
-    #     # Declare and Return PtrLevel Object
-    #     return abstract_nodes.PtrLevel(scope_path, type_qualifiers)
-    #
-
-
-    ####################################################################################################################
