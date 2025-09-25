@@ -160,8 +160,17 @@ class CSTtoAST(Transformer):
 
     # ####################################################################################################################
     # DECLARATOR SUFFIXES
-    # def array_suffix(self, children):
-    #     return abstract_nodes.ArraySuffix(children[0])
+
+    # def declarator_suffix(self, children):
+    #     # FUlly Collapse
+    #     return children[0]
+
+    def array_suffix(self, children):
+
+        if len(children) == 1:
+            return abstract_nodes.ArraySuffix(children[0])
+        else:
+            return abstract_nodes.ArraySuffix()
 
     # ####################################################################################################################
     # # TRANSLATION UNIT

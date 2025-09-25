@@ -240,22 +240,6 @@ class NormalDeclarator(ASTNode):
         self.suffixes    = suffix_list or []
         self.initializer = initializer  # Optional
 
-        # Add Children For Pretty Printing
-    #     self.init_children()
-    #
-    # def init_children(self):
-    # if self.ptr_chain:
-    #     self.children.append(ASTNode("ptr_chain", self.ptr_chain))
-    # if self.reference:
-    #     self.children.append(ASTNode(self.reference))
-    # if self.decl_name:
-    #     self.children.append(ASTNode(self.decl_name))
-    # if self.suffixes:
-    #     self.children.append(ASTNode("suffix_list", self.suffixes))
-    # if  self.initializer:
-    #     self.children.append( self.initializer)
-
-
     def synthesize_from_child(self, child:Self):
 
         # Extend Current Lists
@@ -276,15 +260,6 @@ class NormalDeclarator(ASTNode):
             else:
                 self.decl_name = child.decl_name
 
-        # Reinitialize Children Every Merge
-        # self.init_children()
-
-
-#
-
-
-
-
 ########################################################################################################################
 # PARAMETER
 
@@ -297,18 +272,9 @@ class Parameter(ASTNode):
         # default_arg: EQUAL initializer
         # initializer = list[Expr | Initializer]
 
-
-
-
-
 # misc_nodes.py
 
-
-
 # STATEMENTS
-
-
-
 
 # Inheritor Statements
 class ExprStatement(Statement):
@@ -394,6 +360,8 @@ class AccessSpecifier(ASTNode):
         super().__init__(node_name="access_specifier")
         self.type = access_type
 
+
+# v ISO C++ COMPLIANT v
 ########################################################################################################################
 class Literal(ASTNode):
     def __init__(self, kind: LiteralKind, value):
@@ -514,6 +482,7 @@ class Modifiers(ASTNode):
 class Suffix(ASTNode):
     def __init__(self, suffix_type:str):
         super().__init__(node_name=suffix_type+"_suffix")
+        self.ansi_color = colors.purple
 
 ########################################################################################################################
 # ARRAY SUFFIX
@@ -522,6 +491,9 @@ class ArraySuffix(Suffix, Modifiers):
     def __init__(self, bound: ConstantExpr | None = None):
         super().__init__(suffix_type="array")
         self.array_bound: bound
+
+        if bound is not None:
+            self.children.append(bound)
 
 ########################################################################################################################
 # FUNCTION SUFFIX
