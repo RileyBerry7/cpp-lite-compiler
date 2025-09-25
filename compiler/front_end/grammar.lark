@@ -912,7 +912,7 @@ suffix: parameters_and_qualifiers -> function_suffix
 #                     | noptr_declarator _LBRACKET constant_expression? _RBRACKET attribute_specifier?
 #                     | _LPAREN ptr_declarator _RPAREN
 
-parameters_and_qualifiers: _LPAREN parameter_declaration_clause? _RPAREN attribute_specifier? cv_qualifier_seq? \
+parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq? \
                            ref_qualifier? exception_specification?
 
 trailing_return_type: ARROW trailing_type_specifier_seq abstract_declarator?
@@ -955,7 +955,7 @@ abstract_declarator: declarator_prefix declarator_suffix?           # <- Unambig
 #                         | noptr_abstract_declarator? _LBRACKET constant_expression _RBRACKET attribute_specifier?
 #                         | _LPAREN ptr_abstract_declarator _RPAREN
 
-parameter_declaration_clause: parameter_declaration_list ELLIPSIS? # <- Removed Nullable Branch
+parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
                             | parameter_declaration_list _COMMA ELLIPSIS
 
 #ISO: parameter_declaration_list: parameter_declaration

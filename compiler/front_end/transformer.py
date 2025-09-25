@@ -172,7 +172,34 @@ class CSTtoAST(Transformer):
         else:
             return abstract_nodes.ArraySuffix()
 
-    # ####################################################################################################################
+    # function_suffix: parameters_and_qualifiers
+
+    # parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq? \
+    #                        ref_qualifier? excieption_specification?
+
+    #     parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
+    #                                 | parameter_declaration_list _COMMA ELLIPSIS
+
+    # parameter_declaration_list: parameter_declaration (_COMMA parameter_declaration)* # <- Right-Recursion Eliminated
+    def function_suffix(self, children):
+        # Fully Collapse
+        return children[0]
+
+    def parameters_and_qualifiers(self, children):
+        if children[0] and isinstance(children[0], ASTNode)  and children[0].name == "parameter_list":
+            return abstract_nodes.FunctionSuffix(children[0])
+        else:
+            return abstract_nodes.FunctionSuffix()
+
+    def parameter_declaration_clause(self, children):
+        for c in children:
+            if isinstance(c, ASTNode):
+                if c.name == "parameter_declaration_list":
+                    return abstract_nodes.Body[ASTNode]("parameter_list", c.children)
+
+        return abstract_nodes.Error("parameter_declaration_clause")
+
+            # ####################################################################################################################
     # # TRANSLATION UNIT
     # def translation_unit(self, children):
     #     return abstract_nodes.TranslationUnit(children)

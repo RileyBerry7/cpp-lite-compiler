@@ -499,9 +499,13 @@ class ArraySuffix(Suffix, Modifiers):
 # FUNCTION SUFFIX
 
 class FunctionSuffix(Suffix, Modifiers):
-    def __init__(self, bound: ConstantExpr | None = None):
+    def __init__(self, parameter_list:Body[ASTNode] | None = None):
         super().__init__(suffix_type="function")
-        pass
+        self.parameters = parameter_list
+        self.cv_list    = None
+
+        if parameter_list:
+            self.children.append(parameter_list)
 
 ########################################################################################################################
 
