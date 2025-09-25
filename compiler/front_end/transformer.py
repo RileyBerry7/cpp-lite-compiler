@@ -475,3 +475,18 @@ class CSTtoAST(Transformer):
     def constant_expression(self, children):
         # Fully Collapse
         return abstract_nodes.ConstantExpr(children[0])
+
+    #####################################################################################################################
+
+    def statement(self, children):
+        # Fully Collapse
+        return children[0]
+
+    #####################################################################################################################
+
+    def compound_statement(self, children):
+        # Fully Collapse
+        return children[0]
+    #####################################################################################################################
+
+

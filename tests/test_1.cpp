@@ -16,7 +16,7 @@
 //using myType = int; // alias_declaration       <- block_declaration
 //enum colors;        // opaque_enum_declaration <- block_declaration
 
-int * const * main()
+int main()
 {
     int *var1[];
     int ** A::B::C::* const * const volatile * &var1[10][20];

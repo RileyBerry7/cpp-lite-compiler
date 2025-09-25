@@ -12,7 +12,23 @@ from compiler.context import CompilerContext
 ####################
 
 GRAMMAR_PATH     = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
-SOURCE_CODE_PATH = Path(__file__).parent / "tests" / "test_1.cpp"
+SOURCE_CODE_PATH = Path(__file__).parent / "tests" / "test_3.cpp"
+
+
+import subprocess
+
+def preprocess_source(source: str) -> str:
+    """
+    Run clang -E on a string of C++ source code.
+    Returns the preprocessed source as a string.
+    """
+    result = subprocess.run(
+        ["clang", "-E", "-P","-"], # "-" means "read from stdin"
+        input=source,              # text to preprocess
+        text=True,                 # handle as str (not bytes)
+        capture_output=True,
+        check=True)
+    return result.stdout
 
 ########################################################################################################################
 def main():
@@ -34,42 +50,43 @@ def main():
     # Load Source Code File
     with open(SOURCE_CODE_PATH, "r") as f:
         code = f.read()
-    print(code)
-
-    ####################################################################################################################
-    # Parse -> CST
-    print("\033[32;51m[Parsing...]\n[Displaying CST]\033[0m")
-    # parser = Lark(grammar, start='start', parser='lalr', lexer='contextual', debug=True, strict=True)
-    parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
-    cst = parser.parse(code)
-    # print(cst.pretty())
-
-    ####################################################################################################################
-    # Transform -> AST
-
-    print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
-    transformer = CSTtoAST()
-    cst = transformer.disambiguate(cst)
-    ast = transformer.transform(cst)
-    print(ast.pretty())
-
-    ####################################################################################################################
-    # Decorate -> D-AST
-
-    # print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
-    # decorator = ASTtoDAST(ast, context)
-    # decorator.decorate()
+    code = preprocess_source(code)
+    print(code)    #
+    # ####################################################################################################################
+    # # Parse -> CST
+    # print("\033[32;51m[Parsing...]\n[Displaying CST]\033[0m")
+    # # parser = Lark(grammar, start='start', parser='lalr', lexer='contextual', debug=True, strict=True)
+    # parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
+    # cst = parser.parse(code)
+    # # print(cst.pretty())
+    #
+    # ####################################################################################################################
+    # # Transform -> AST
+    #
+    # print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
+    # transformer = CSTtoAST()
+    # cst = transformer.disambiguate(cst)
+    # ast = transformer.transform(cst)
     # print(ast.pretty())
+    #
+    # ####################################################################################################################
+    # # Decorate -> D-AST
+    #
+    # # print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
+    # # decorator = ASTtoDAST(ast, context)
+    # # decorator.decorate()
+    # # print(ast.pretty())
+    #
+    #
+    #
+    # ####################################################################################################################
+    # # Generate -> LLVM IR
+    # print("\033[34;51m[Generating...]\n[Displaying LLVM IR]\033[0m")
+    # ir_generator = LLVMGenerator(ast, context)
+    # ir_generator.generate()
+    # llvm_ir = ir_generator.module
+    # print(llvm_ir)
 
-
-
-    ####################################################################################################################
-    # Generate -> LLVM IR
-    print("\033[34;51m[Generating...]\n[Displaying LLVM IR]\033[0m")
-    ir_generator = LLVMGenerator(ast, context)
-    ir_generator.generate()
-    llvm_ir = ir_generator.module
-    print(llvm_ir)
 
 
 
