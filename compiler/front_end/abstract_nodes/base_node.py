@@ -564,19 +564,19 @@ class ConstantExpr(Expr):
 # UNARY
 
 class UnaryExpr(Expr):
-    def __init__(self, operand: ASTNode, operator: Operator):
+    def __init__(self, subject: ASTNode, operation: ASTNode):
         """ Contains:
                 Postfix Expressions
                 Prefix Expressions
         """
         super().__init__(expr_type="unary")
-        self.operand  = operand
-        self.operator = operator
+        self.subject   = subject
+        self.operation = operation
 
         # Add Children For Pretty Printing
-        operator.ansi_color = colors.yellow
-        self.children.append(operator)
-        self.children.append(operand)
+        subject.ansi_color = colors.yellow
+        self.children.append(subject)
+        self.children.append(operation)
 
 ########################################################################################################################
 # CAST

@@ -70,7 +70,7 @@ class CSTtoAST(Transformer):
         branches = []
         for path in possible_trees:
             if isinstance(path, abstract_nodes.ASTNode):
-                path.ansi_color = colors.red.italic
+                # path.ansi_color = colors.red.italic
                 branches.append(path)
         ambig_node = abstract_nodes.ASTNode("Ambiguity", branches)
         ambig_node.ansi_color = colors.red.underline.italic
@@ -114,17 +114,33 @@ class CSTtoAST(Transformer):
         return abstract_nodes.Literal(kind, value)
 
     ####################################################################################################################
+    # DECLARATIONS
 
     def block_declaration(self, children):
         return children[0]
 
     def declaration(self, children):
-        return children[0]
+        if children[0] and isinstance(children[0], ASTNode):
+            return ASTNode(children[0].name, children[0].children, colors.cyan)
+        else:
+            return abstract_nodes.Error("declaration")
+
+    #####################################################################################################################
+    # DECLARATOR
 
     def declaration_seq(self, children):
         return children[0]
 
-    # ####################################################################################################################
+    def decl_specifier_seq(self, children):
+        return ASTNode("decl_specifier_seq", children, colors.teal)
+
+    def declarator(self, children):
+        return ASTNode("declarator", children, colors.teal)
+
+    def declarator_suffix(self, children):
+        return ASTNode("suffix_list", children, colors.dark_green)
+
+    #####################################################################################################################
     # type_specifier_seq:
     def type_specifier_seq(self, children):
         # TYPE CORE DEDUCTION
@@ -137,6 +153,11 @@ class CSTtoAST(Transformer):
         # Other Core
         else:
             return ASTNode("type_specifier_seq", children)
+
+
+    #####################################################################################################################
+    def decl_specifier(self, children):
+        return ASTNode("decl_specifier", children, colors.dark_green)
 
     #####################################################################################################################
     # type_specifier: trailing_type_specifier  # also wraps simple_type_specifier
@@ -196,36 +217,28 @@ class CSTtoAST(Transformer):
     # ####################################################################################################################
     # DECLARATOR SUFFIXES
 
-    # def declarator_suffix(self, children):
-    #     # FUlly Collapse
-    #     return children[0]
-
     def array_suffix(self, children):
-
         if len(children) == 1:
             return abstract_nodes.ArraySuffix(children[0])
         else:
             return abstract_nodes.ArraySuffix()
 
     # function_suffix: parameters_and_qualifiers
-
-    # parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq? \
-    #                        ref_qualifier? excieption_specification?
-
-    #     parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
-    #                                 | parameter_declaration_list _COMMA ELLIPSIS
-
     # parameter_declaration_list: parameter_declaration (_COMMA parameter_declaration)* # <- Right-Recursion Eliminated
     def function_suffix(self, children):
         # Fully Collapse
         return children[0]
 
+    # parameters_and_qualifiers: _LPAREN parameter_declaration_clause _RPAREN attribute_specifier? cv_qualifier_seq? \
+    #                        ref_qualifier? excieption_specification?
     def parameters_and_qualifiers(self, children):
         if children[0] and isinstance(children[0], ASTNode)  and children[0].name == "parameter_list":
             return abstract_nodes.FunctionSuffix(children[0])
         else:
             return abstract_nodes.FunctionSuffix()
 
+    #     parameter_declaration_clause: parameter_declaration_list? ELLIPSIS?
+    #                                 | parameter_declaration_list _COMMA ELLIPSIS
     def parameter_declaration_clause(self, children):
         for c in children:
             if isinstance(c, ASTNode):
@@ -239,16 +252,14 @@ class CSTtoAST(Transformer):
     def function_body(self, children):
         if children:
             first_child = children[0]
-            if len(children) == 1 and isinstance(first_child, abstract_nodes.Body):
+            if len(children) == 1 and isinstance(first_child, ASTNode):
                 first_child.name = "function_body"
                 return first_child
         return abstract_nodes.Error("function_body")
 
     ######################################################################################################################
 
-    def statement(self, children):
-        # Fully Collapse
-        return children[0]
+
 
     ####################################################################################################################
 
@@ -257,10 +268,12 @@ class CSTtoAST(Transformer):
         return children[0]
 
     def statement_seq(self, children):
-        stmt_seq = abstract_nodes.Body[ASTNode]("statement_sequence")
-        for child in children:
-            stmt_seq.add_member(child)
-        return stmt_seq
+        return ASTNode("statement_seq", children, colors.purple)
+
+    def statement(self, children):
+        # Fully Collapse
+        return ASTNode(children[0].name, children[0].children, colors.pink)
+
     #####################################################################################################################
     #
 
@@ -298,13 +311,13 @@ class CSTtoAST(Transformer):
     #####################################################################################################################
     # UNARY EXPRESSION
 
-    # def postfix_expression(self, children):
-    #
-    #     # Resolve Expression Precedence
-    #     if len(children) == 1 and isinstance(children[0], ASTNode):
-    #         return children[0]
-    #     else:
-    #         return abstract_nodes.Error("postfix_expression", children)
+    def postfix_expression(self, children):
+
+        # Resolve Expression Precedence
+        if len(children) == 1 and isinstance(children[0], ASTNode):
+            return children[0]
+        else:
+            return ASTNode("postfix_expression:", children, colors.orange)
 
     def unary_expression(self, children):
 
@@ -505,6 +518,23 @@ class CSTtoAST(Transformer):
         # Fully Collapse
         return abstract_nodes.ConstantExpr(children[0])
 
+    #####################################################################################################################
 
+    def expression_list(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("expression_list")
 
+    def initializer_list(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("initializer_list")
+
+    def initializer_clause(self, children):
+        if len(children) == 1:
+            return children[0]
+        else:
+            return abstract_nodes.Error("initializer_clause")
 
