@@ -14,13 +14,9 @@ MemberT = TypeVar("MemberT", bool, int, str, float)
 
 class Statement(ASTNode):
     def __init__(self, statement_type: str = "statement"):
-        super().__init__(node_name=f"\x1b[38;2;255;107;107m{statement_type}\x1b[0m")
-        # Default: red
-
+        super().__init__(node_name=statement_type)
         self.statement_type = statement_type
-        # Metadata For Semantic Information
-        # ...
-
+        self.ansi_color = colors.red
 
 ########################################################################################################################
 

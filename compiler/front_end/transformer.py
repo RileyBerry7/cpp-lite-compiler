@@ -77,6 +77,10 @@ class CSTtoAST(Transformer):
         return ambig_node
 
     ####################################################################################################################
+    def translation_unit(self, children):
+        return ASTNode("translation_unit", children, colors.blue.underline)
+
+    ####################################################################################################################
     # ptr_operator: STAR attribute_specifier? cv_qualifier_seq?
     #             | BIT_AND attribute_specifier?
     #             | AND attribute_specifier?
@@ -231,8 +235,33 @@ class CSTtoAST(Transformer):
         return abstract_nodes.Error("parameter_declaration_clause")
 
     #####################################################################################################################
+    # BODIES
+    def function_body(self, children):
+        if children:
+            first_child = children[0]
+            if len(children) == 1 and isinstance(first_child, abstract_nodes.Body):
+                first_child.name = "function_body"
+                return first_child
+        return abstract_nodes.Error("function_body")
 
-    #
+    ######################################################################################################################
+
+    def statement(self, children):
+        # Fully Collapse
+        return children[0]
+
+    ####################################################################################################################
+
+    def compound_statement(self, children):
+        # Fully Collapse
+        return children[0]
+
+    def statement_seq(self, children):
+        stmt_seq = abstract_nodes.Body[ASTNode]("statement_sequence")
+        for child in children:
+            stmt_seq.add_member(child)
+        return stmt_seq
+    #####################################################################################################################
     #
 
     #####################################################################################################################
@@ -476,17 +505,6 @@ class CSTtoAST(Transformer):
         # Fully Collapse
         return abstract_nodes.ConstantExpr(children[0])
 
-    #####################################################################################################################
 
-    def statement(self, children):
-        # Fully Collapse
-        return children[0]
-
-    #####################################################################################################################
-
-    def compound_statement(self, children):
-        # Fully Collapse
-        return children[0]
-    #####################################################################################################################
 
 
