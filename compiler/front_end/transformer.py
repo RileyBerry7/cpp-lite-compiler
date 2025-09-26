@@ -243,7 +243,7 @@ class CSTtoAST(Transformer):
         for c in children:
             if isinstance(c, ASTNode):
                 if c.name == "parameter_declaration_list":
-                    return abstract_nodes.Body[ASTNode]("parameter_list", c.children)
+                    return ASTNode("parameter_list", c.children, colors.yellow)
 
         return abstract_nodes.Error("parameter_declaration_clause")
 

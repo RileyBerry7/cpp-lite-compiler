@@ -520,10 +520,11 @@ class ArraySuffix(Suffix, Modifiers):
 # FUNCTION SUFFIX
 
 class FunctionSuffix(Suffix, Modifiers):
-    def __init__(self, parameter_list:Body[ASTNode] | None = None):
+    def __init__(self, parameter_list:ASTNode | None = None):
         super().__init__(suffix_type="function")
         self.parameters = parameter_list
         self.cv_list    = None
+        self.ansi_color = colors.green
 
         if parameter_list:
             self.children.append(parameter_list)
