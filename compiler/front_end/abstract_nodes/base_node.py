@@ -561,14 +561,32 @@ class ConstantExpr(Expr):
 # class Literal():
 # class Identifier():
 
+# class PostOp
+
+########################################################################################################################
+# POSTFIx
+
+class PostfixExpr(Expr):
+    def __init__(self, base: ASTNode, op_list: list[ASTNode]):
+        """ Contains:
+                Postfix Expressions
+        """
+        super().__init__(expr_type="unary")
+        self.subject   = subject
+        self.operation = operation
+
+        # Add Children For Pretty Printing
+        subject.ansi_color = colors.yellow
+        self.children.append(subject)
+        self.children.append(operation)
+
 ########################################################################################################################
 # UNARY
 
 class UnaryExpr(Expr):
     def __init__(self, subject: ASTNode, operation: ASTNode):
         """ Contains:
-                Postfix Expressions
-                Prefix Expressions
+                Unary Expressions
         """
         super().__init__(expr_type="unary")
         self.subject   = subject

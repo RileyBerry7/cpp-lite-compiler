@@ -372,7 +372,7 @@ lambda_declarator: _LPAREN parameter_declaration_clause _RPAREN attribute_specif
                  | exception_specification? trailing_return_type?
 
 postfix_expression: primary_expression
-                  | postfix_expression _LBRACKET expression _RBRACKET       
+                  | postfix_expression _LBRACKET expression _RBRACKET       -> array_subscript
                   | postfix_expression _LBRACKET braced_init_list _RBRACKET -> array_or_dereference
                   | postfix_expression _LPAREN expression_list? _RPAREN     -> func_or_funcptr_call
                   | simple_type_specifier _LPAREN expression_list? _RPAREN  -> c_cast_or_dir_init_simple
@@ -383,7 +383,7 @@ postfix_expression: primary_expression
                   | postfix_expression ARROW TEMPLATE? id_expression
                   | postfix_expression _DOT pseudo_destructor_name
                   | postfix_expression ARROW pseudo_destructor_name
-                  | postfix_expression INCREMENT
+                  | postfix_expression INCREMENT                          
                   | postfix_expression DECREMENT
                   | DYNAMIC_CAST LT type_id GT _LPAREN expression _RPAREN
                   | STATIC_CAST LT type_id GT _LPAREN expression _RPAREN
