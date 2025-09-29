@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from operator import index
+
 from compiler.front_end.abstract_nodes.ast_node import ASTNode
 from compiler.front_end.abstract_nodes.misc_nodes import *
 from compiler.utils.colors import colors
@@ -564,21 +567,58 @@ class ConstantExpr(Expr):
 # class PostOp
 
 ########################################################################################################################
-# POSTFIx
+# POSTFIX Expression
 
 class PostfixExpr(Expr):
-    def __init__(self, base: ASTNode, op_list: list[ASTNode]):
+    def __init__(self, base: ASTNode, op_list: list[UnaryOp]):
         """ Contains:
                 Postfix Expressions
         """
         super().__init__(expr_type="unary")
-        self.subject   = subject
-        self.operation = operation
+        self.base    = base
+        self.op_list = op_list
 
-        # Add Children For Pretty Printing
-        subject.ansi_color = colors.yellow
-        self.children.append(subject)
-        self.children.append(operation)
+        self.children.append(base)
+        self.children.append(ASTNode("ops_list",
+                                     self.op_list,
+                                     colors.yellow))
+
+#########################################################################################################
+# Unary Expression OPERATIONS
+class UnaryOp(ASTNode):
+    """ Unary Operation, to be performed on some base.
+        use-case: Postfix Expressions, Prefix/Unary Expressions
+    """
+    def __init__(self, op_name:str = "Unresolved"):
+        super().__init__(node_name="unary_op: "+op_name)
+
+class Index(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="index")
+
+class Member(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="member")
+
+class Call(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="call")
+
+class CallOrConstruct(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="call_or_construct")
+
+class PsuedoDtor(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="psuedo_destructor")
+
+class PostInc(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="post_increment")
+
+class PostDec(UnaryOp):
+    def __init__(self):
+        super().__init__(op_name="post_decrement")
 
 ########################################################################################################################
 # UNARY
