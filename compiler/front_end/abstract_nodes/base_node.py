@@ -570,7 +570,7 @@ class ConstantExpr(Expr):
 # POSTFIX Expression
 
 class PostfixExpr(Expr):
-    def __init__(self, base: ASTNode, op_list: list[UnaryOp]):
+    def __init__(self, base: ASTNode, op_list: list[ExprOp]):
         """ Contains:
                 Postfix Expressions
         """
@@ -582,41 +582,46 @@ class PostfixExpr(Expr):
         self.children.append(ASTNode("ops_list",
                                      self.op_list,
                                      colors.yellow))
+    def add_op(self, new_op:ExprOp):
+        self.op_list.append(new_op)
+        self.children.append(new_op)
 
 #########################################################################################################
-# Unary Expression OPERATIONS
-class UnaryOp(ASTNode):
+# EXPRESSION OPERATIONS
+
+class ExprOp(ASTNode):
     """ Unary Operation, to be performed on some base.
         use-case: Postfix Expressions, Prefix/Unary Expressions
     """
     def __init__(self, op_name:str = "Unresolved"):
-        super().__init__(node_name="unary_op: "+op_name)
+        super().__init__(node_name="expr_op: "+op_name)
 
-class Index(UnaryOp):
+class Index(ExprOp):
     def __init__(self):
         super().__init__(op_name="index")
 
-class Member(UnaryOp):
+class Member(ExprOp):
     def __init__(self):
         super().__init__(op_name="member")
 
-class Call(UnaryOp):
-    def __init__(self):
-        super().__init__(op_name="call")
+class Call(ExprOp):
+    def __init__(self, args: list[ASTNode]):
+        super().__init__(op_name="call") # [Function Call] or [Function Ptr Call]
+        self.args = args
 
-class CallOrConstruct(UnaryOp):
+class CallOrConstruct(ExprOp):
     def __init__(self):
         super().__init__(op_name="call_or_construct")
 
-class PsuedoDtor(UnaryOp):
+class PsuedoDtor(ExprOp):
     def __init__(self):
         super().__init__(op_name="psuedo_destructor")
 
-class PostInc(UnaryOp):
+class PostInc(ExprOp):
     def __init__(self):
         super().__init__(op_name="post_increment")
 
-class PostDec(UnaryOp):
+class PostDec(ExprOp):
     def __init__(self):
         super().__init__(op_name="post_decrement")
 
