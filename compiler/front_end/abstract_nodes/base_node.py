@@ -549,7 +549,6 @@ class Expr(ASTNode):
         self.ansi_color = colors.orange
 ########################################################################################################################
 
-
 class ConstantExpr(Expr):
     """ MUST BE CONSTANT - will be checked at semantic analysis """
     def __init__(self, expression: ASTNode):
@@ -610,6 +609,7 @@ class Call(ExprOp):
     def __init__(self, args: list[ASTNode]):
         super().__init__(op_name="call") # [Function Call] or [Function Ptr Call]
         self.args = args
+        self.children = self.args
 
 class CallOrConstruct(ExprOp):
     def __init__(self):

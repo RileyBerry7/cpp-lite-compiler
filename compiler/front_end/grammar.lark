@@ -375,7 +375,7 @@ postfix_expression: primary_expression
                   | postfix_expression _LBRACKET expression _RBRACKET       -> array_subscript
                   | postfix_expression _LBRACKET braced_init_list _RBRACKET -> array_or_dereference
                   | postfix_expression _LPAREN expression_list? _RPAREN     -> call 
-                  | simple_type_specifier _LPAREN expression_list? _RPAREN  -> c_cast_or_dir_init_simple
+#                  | simple_type_specifier _LPAREN expression_list? _RPAREN  -> c_cast_or_dir_init_simple
                   | typename_specifier _LPAREN expression_list? _RPAREN     -> dir_init_class_or_ctor_call
   
                   | simple_type_specifier braced_init_list

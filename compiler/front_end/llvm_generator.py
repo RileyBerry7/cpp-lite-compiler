@@ -3,6 +3,7 @@
 from llvmlite import ir, binding as llvm
 from compiler.context import CompilerContext
 from compiler.front_end.abstract_nodes.ast_node import ASTNode
+from compiler.front_end import abstract_nodes
 
 # LLVM Setup
 llvm.initialize()
@@ -71,13 +72,28 @@ class LoweringPass(Decorator):
         print()
 
     ####################################################################################################################
+# function_definition: attribute_specifier? decl_specifier_seq? declarator function_body
+#                    | ...
     def emit_function(self, curr_node: ASTNode):
         # Create / Emit IR Constructs
-        return_type = ir.DoubleType()
+
+        # Grab Return Type from DeclSpecs
+        return_type = ir.VoidType()
+        for c in curr_node.children:
+            if c.name == "decl_specifier_seq":
+                if c.children[0].children[0].lexeme == "int":
+                    return_type = ir.IntType(32)
+
         arguments = (ir.DoubleType(), ir.DoubleType())
         is_variadic = False  # Can accept more more arguments than specified
         function_type = ir.FunctionType(return_type, arguments, is_variadic)
-        function_name = curr_node = "function_name"
+
+        # Grab Name Bound to Declarator
+        function_name = "NULL"
+        for c in curr_node.children:
+            if c.name == "declarator":
+                function_name = c.children[0].id_name
+
         function = ir.Function(self.module, function_type, function_name)
 
         # Allow Builder to 'Enter' New Block

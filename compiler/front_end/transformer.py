@@ -327,7 +327,7 @@ class CSTtoAST(Transformer):
             # Create Postfix Expression Node
             else:
                 pf_expr = abstract_nodes.PostfixExpr(base)
-                pf_expr.add_op(abstract_nodes.Call(children[1]))
+                pf_expr.add_op(abstract_nodes.Call(expr.children[1:]))
                 return pf_expr
 
     # def postfix_expression(self, children):
