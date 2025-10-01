@@ -577,14 +577,15 @@ class PostfixExpr(Expr):
         super().__init__(expr_type="postfix")
         self.base    = base
         self.op_list = op_list or []
-
-        self.children.append(base)
-        self.children.append(ASTNode("ops_list",
+        self.op_list_node = ASTNode("ops_list",
                                      self.op_list,
-                                     colors.yellow))
+                                     colors.yellow)
+        self.children.append(base)
+        self.children.append(self.op_list_node)
+
     def add_op(self, new_op:ExprOp):
         self.op_list.append(new_op)
-        self.children.append(new_op)
+        self.op_list_node.children.append(new_op)
 
 #########################################################################################################
 # EXPRESSION OPERATIONS
@@ -595,6 +596,7 @@ class ExprOp(ASTNode):
     """
     def __init__(self, op_name:str = "Unresolved"):
         super().__init__(node_name="expr_op: "+op_name)
+        self.ansi_color = colors.gold
 
 class Index(ExprOp):
     def __init__(self):
