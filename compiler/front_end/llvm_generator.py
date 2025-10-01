@@ -55,6 +55,8 @@ class LoweringPass(Decorator):
     def function_definition_pre(self, node: ASTNode, children: list[ASTNode]):
         self.emit_function(node)
 
+    def postfix_expression_pre(self, node: abstract_nodes.PostfixExpr, children: list[ASTNode]):
+        pass
     ####################################################################################################################
     #  EMIT METHODS  #
     ##################
@@ -83,8 +85,8 @@ class LoweringPass(Decorator):
             if c.name == "decl_specifier_seq":
                 if c.children[0].children[0].lexeme == "int":
                     return_type = ir.IntType(32)
-
-        arguments = (ir.DoubleType(), ir.DoubleType())
+        # Grab Arguments from Suffix
+        arguments = () # Tuple?
         is_variadic = False  # Can accept more more arguments than specified
         function_type = ir.FunctionType(return_type, arguments, is_variadic)
 
@@ -100,9 +102,10 @@ class LoweringPass(Decorator):
         block = function.append_basic_block(name="entry")
         self.builder = ir.IRBuilder(block)  # update builder
 
-        a, b = function.args                         # parameters_and_qualifiers
-        result = self.builder.fadd(a, b, name="res") # emit_expression
-        self.builder.ret(result)                     # return_statement
+        # a, b = function.args                         # parameters_and_qualifiers
+        # result = self.builder.fadd(a, b, name="res") # emit_expression
+        result = ir.Constant(ir.IntType(32), 0)
+        self.builder.ret(result)                    # return_statement
 ########################################################################################################################
 
 
