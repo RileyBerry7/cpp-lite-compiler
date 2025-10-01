@@ -570,13 +570,13 @@ class ConstantExpr(Expr):
 # POSTFIX Expression
 
 class PostfixExpr(Expr):
-    def __init__(self, base: ASTNode, op_list: list[ExprOp]):
+    def __init__(self, base: ASTNode, op_list: list[ExprOp] | None = None):
         """ Contains:
                 Postfix Expressions
         """
-        super().__init__(expr_type="unary")
+        super().__init__(expr_type="postfix")
         self.base    = base
-        self.op_list = op_list
+        self.op_list = op_list or []
 
         self.children.append(base)
         self.children.append(ASTNode("ops_list",
