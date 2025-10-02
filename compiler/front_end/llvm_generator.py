@@ -56,10 +56,38 @@ class LoweringPass(Decorator):
         self.emit_function(node)
 
     def postfix_expression_pre(self, node: abstract_nodes.PostfixExpr, children: list[ASTNode]):
-        pass
+        for op in node.op_list:
+            self.emit_expr_op(node.base, op)
+
+    def jump_statement_pre(self, node: ASTNode, children: list[ASTNode]):
+        zero = ir.Constant(ir.IntType(32), 0)
+        self.builder.ret(zero)  # return_statement
     ####################################################################################################################
     #  EMIT METHODS  #
     ##################
+
+    def emit_expr_op(self, base: ASTNode, op:abstract_nodes.ExprOp):
+        # IR: Declare Printf
+        printf_ty = ir.FunctionType(ir.IntType(32), [ir.IntType(8).as_pointer()], var_arg=True)
+        printf = ir.Function(self.module, printf_ty, name="printf")
+
+        def str_to_ir(input:str):
+            c_msg = ir.Constant(ir.ArrayType(ir.IntType(8), len(input)),
+                                bytearray(input.encode("utf8")))
+            gvar = ir.GlobalVariable(self.module, c_msg.type, name="str")
+            gvar.global_constant = True
+            gvar.linkage = "internal"
+            gvar.initializer = c_msg
+            msg_ptr = self.builder.bitcast(gvar, ir.IntType(8).as_pointer())
+            return msg_ptr
+
+        if isinstance(op, abstract_nodes.Call):
+            # Emit Call
+            if op.args:
+                arg1 = str_to_ir(op.args[0].literal_value+"\00")
+            else:
+                arg1 = str_to_ir("NULL"+"\00")
+            result = self.builder.call(printf, [arg1])
 
     def emit_module(self, curr_node: ASTNode):
         if self.module is not None:
@@ -104,8 +132,7 @@ class LoweringPass(Decorator):
 
         # a, b = function.args                         # parameters_and_qualifiers
         # result = self.builder.fadd(a, b, name="res") # emit_expression
-        result = ir.Constant(ir.IntType(32), 0)
-        self.builder.ret(result)                    # return_statement
+
 ########################################################################################################################
 
 

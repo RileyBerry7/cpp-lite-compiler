@@ -312,16 +312,17 @@ class CSTtoAST(Transformer):
     # UNARY EXPRESSION
     def call(self, children):
 
-        if len(children) == 1:
-            expr = self
-        elif len(children) > 1:
-            expr = children[0]
-        else:
-            return abstract_nodes.Error("call")
+        # if len(children) > 1:
+        #     expr = self
+        # elif len(children) == 1:
+        #     expr = children[0]
+        #     return expr
+        # else:
+        #     return abstract_nodes.Error("call")
 
-        base = expr.children[0] # Grab Base
+        base = children[0] # Grab Base
         pf_expr = abstract_nodes.PostfixExpr(base) # Create Postfix Expr Node
-        pf_expr.add_op(abstract_nodes.Call(expr.children[1:]))
+        pf_expr.add_op(abstract_nodes.Call(children[1:]))
         return pf_expr
 
     def postfix_expression(self, children):

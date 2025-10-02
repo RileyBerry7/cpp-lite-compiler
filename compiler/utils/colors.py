@@ -33,6 +33,22 @@ class AnsiColor:
         return self._with_style("\033[2m")
 
     @property
+    def boxed(self):
+        def wrapper(text: str) -> str:
+            lines = text.splitlines() or [""]
+            width = max(len(line) for line in lines)
+
+            top = "┌" + "─" * width + "┐"
+            middle = ["│" + line.ljust(width) + "│" for line in lines]
+            bottom = "└" + "─" * width + "┘"
+
+            # apply this AnsiColor to each line
+            boxed_text = "\n".join([top] + middle + [bottom])
+            return self(boxed_text)
+
+        return wrapper
+
+    @property
     def blink(self):
         return self._with_style("\033[5m")
 

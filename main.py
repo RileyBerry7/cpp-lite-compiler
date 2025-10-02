@@ -14,6 +14,8 @@ from compiler.context import CompilerContext
 GRAMMAR_PATH      = Path(__file__).parent / "compiler" / "front_end" / "grammar.lark"
 SOURCE_CODE_PATH  = Path(__file__).parent / "tests" / "test_3.cpp"
 INCLUDE_FILE_PATH = Path(__file__).parent / "include"
+OUTPUT_PATH       = Path(__file__).parent / "output"
+
 
 import subprocess
 def preprocess_source(source: str) -> str:
@@ -90,10 +92,49 @@ def main():
     llvm_ir = ir_generator.module
     print(llvm_ir)
 
+    ####################################################################################################################
+    # ASSEMBLE & LINK WITH CLANG
 
+    ####################################################################################################################
+    # LLVM JIT EXECUTION
+    from compiler.utils.colors import colors
 
+    # print( colors.yellow.boxed("[Interpreting]\n[Executing With MCJIT Engine\n"))
+
+    from llvmlite import binding as llvm
+    import ctypes
+
+    llvm.initialize()
+    llvm.initialize_native_target()
+    llvm.initialize_native_asmprinter()
+
+    llvm_ir = str(llvm_ir)   # your IR string
+
+    # Parse IR
+    mod = llvm.parse_assembly(llvm_ir)
+    mod.verify()
+
+    # Create engine
+    target = llvm.Target.from_default_triple()
+    target_machine = target.create_target_machine()
+    backing_mod = llvm.parse_assembly("")
+    engine = llvm.create_mcjit_compiler(backing_mod, target_machine)
+
+    engine.add_module(mod)
+    engine.finalize_object()
+
+    # Run main
+    func_ptr = engine.get_function_address("main")
+    cfunc = ctypes.CFUNCTYPE(ctypes.c_int)(func_ptr)
+    res = cfunc()
+    print("main returned:", res)
+
+    # print("\n\n\n")
 
 ########################################################################################################################
 
 if __name__ == '__main__':
     main()
+
+    from compiler.utils.colors import colors
+    print( colors.yellow.boxed("[Interpreting]\n[Executing With MCJIT Engine\n"))
