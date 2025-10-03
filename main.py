@@ -6,6 +6,9 @@ from compiler.front_end.transformer import CSTtoAST
 from compiler.front_end.decorator import ASTtoDAST
 from compiler.front_end.llvm_generator import LLVMGenerator
 from compiler.context import CompilerContext
+from compiler.utils.colors import colors
+from llvmlite import binding as llvm
+import ctypes
 
 ####################
 # GlOBAL CONSTANTS #
@@ -51,7 +54,7 @@ def main():
         grammar = f.read()
 
     ####################################################################################################################
-
+    print(colors.cyan.boxed("Path: "+ str(SOURCE_CODE_PATH) +"\n[Printing Source Code]"))
     # Load Source Code File
     with open(SOURCE_CODE_PATH, "r") as f:
         code = f.read()
@@ -59,7 +62,8 @@ def main():
     print(code)    #
     ####################################################################################################################
     # Parse -> CST
-    print("\033[32;51m[Parsing...]\n[Displaying CST]\033[0m")
+    print(colors.green.boxed("[Parsing...]\n[Displaying CST]"))
+    print("\n...\n")
     # parser = Lark(grammar, start='start', parser='lalr', lexer='contextual', debug=True, strict=True)
     parser = Lark(grammar, start="start", parser="earley", ambiguity="explicit")
     cst = parser.parse(code)
@@ -68,7 +72,7 @@ def main():
     ####################################################################################################################
     # Transform -> AST
 
-    print("\033[91;51m[Transforming...]\n[Displaying AST]\033[0m")
+    print(colors.red.boxed("[Transforming...]\n[Displaying AST]"))
     transformer = CSTtoAST()
     cst = transformer.disambiguate(cst)
     ast = transformer.transform(cst)
@@ -77,7 +81,8 @@ def main():
     ####################################################################################################################
     # Decorate -> D-AST
 
-    # print("\033[35;51m[Decorating...]\n[Displaying Decorated-AST] \033[0m")
+    print(colors.pink.boxed("[Decorating...]\n[Displaying Decorated-AST]"))
+    print("\n...\n")
     # decorator = ASTtoDAST(ast, context)
     # decorator.decorate()
     # print(ast.pretty())
@@ -86,7 +91,7 @@ def main():
 
     ####################################################################################################################
     # Generate -> LLVM IR
-    print("\033[34;51m[Generating...]\n[Displaying LLVM IR]\033[0m")
+    print(colors.blue.boxed("[Generating...]\n[Displaying LLVM IR]"))
     ir_generator = LLVMGenerator(ast, context)
     ir_generator.generate()
     llvm_ir = ir_generator.module
@@ -97,12 +102,8 @@ def main():
 
     ####################################################################################################################
     # LLVM JIT EXECUTION
-    from compiler.utils.colors import colors
 
     # print( colors.yellow.boxed("[Interpreting]\n[Executing With MCJIT Engine\n"))
-
-    from llvmlite import binding as llvm
-    import ctypes
 
     llvm.initialize()
     llvm.initialize_native_target()
@@ -137,4 +138,5 @@ if __name__ == '__main__':
     main()
 
     from compiler.utils.colors import colors
+    print()
     print( colors.yellow.boxed("[Interpreting]\n[Executing With MCJIT Engine\n"))

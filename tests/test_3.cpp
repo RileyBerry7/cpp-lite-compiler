@@ -1,5 +1,6 @@
 
 int main() {
-    printf("hullo there x3");
+    int a;
+    printf("Hello world ^^");
     return 0;
 }
