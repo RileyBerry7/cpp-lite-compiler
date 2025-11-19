@@ -33,7 +33,22 @@ Using **Lark** and **LLVM** bridges compiler theory with practical implementatio
 ---
 
 ## Screenshots
-(WIP)
+
+### Ambig Branch Elimination (Via Propogation)
+![ambiguity_propagation](screenshots/ambiguity_propagation.png)
+![ambiguity_propagation_2](screenshots/ambiguity_propagation_2.png)
+![ambiguity_propagation_3](screenshots/ambiguity_propagation_3.png)
+
+### Parameter Declaration Ambiguity
+![parameter_ambiguity](screenshots/parameter_ambiguity.png)
+![post_transformation_tree](screenshots/post_transformation_tree.png)
+
+### Isolated Steps
+![test_case_3_display_1](screenshots/test_case_3_display_1.png)
+![test_case_3_llvm_ir_1](screenshots/test_case_3_llvm_ir_1.png)
+![test_case_3_mcjit_engine](screenshots/test_case_3_mcjit_engine.png)
+![test_case_3_parse_tree_1](screenshots/test_case_3_parse_tree_1.png)
+
 
 ---
 
